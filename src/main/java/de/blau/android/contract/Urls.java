@@ -12,9 +12,9 @@ public final class Urls {
         // empty
     }
 
-    public static final String DEFAULT_API               = "https://api.openstreetmap.org/api/0.6/";
+    public static final String DEFAULT_API               = "https://agro.brisklyminds.com/api/0.6/";
     public static final String DEFAULT_API_NAME          = "OpenStreetMap";
-    public static final String DEFAULT_API_NO_HTTPS      = "http://api.openstreetmap.org/api/0.6/";
+    public static final String DEFAULT_API_NO_HTTPS      = "http://185.20.123.169:31337/api/0.6/";
     public static final String DEFAULT_API_NO_HTTPS_NAME = "OpenStreetMap no https";
     public static final String DEFAULT_SANDBOX_API       = "https://master.apis.dev.openstreetmap.org/api/0.6/";
     public static final String DEFAULT_SANDBOX_API_NAME  = "OpenStreetMap sandbox";

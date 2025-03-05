@@ -2193,4 +2193,12 @@ public class Preferences {
             advancedPrefs.close();
         }
     }
+
+    public void setCgiToken(String token) {
+        prefs.edit().putString("accessToken", token).commit();
+    }
+
+    public String getCgiToken() {
+        return prefs.getString("accessToken", null);
+    }
 }

@@ -293,4 +293,8 @@
         android:id="@+id/menu_debug"
         android:title="@string/config_debugbutton_title"
         app:showAsAction="never" />
+    <item
+        android:id="@+id/logout"
+        android:title="Выход"
+        app:showAsAction="never"/>
 </menu>

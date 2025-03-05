@@ -64,7 +64,7 @@
             android:name=".Splash"
             android:exported="true"
             android:theme="@style/SplashTheme" 
-            android:alwaysRetainTaskState="true">"
+            android:alwaysRetainTaskState="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -250,6 +250,11 @@
         </activity>
         <activity
             android:name="Authorize"
+            android:configChanges="orientation|screenSize|keyboardHidden|density|screenLayout|uiMode|fontScale"
+            android:launchMode="singleInstance"
+            android:theme="@style/Theme.AppCompat" />
+        <activity
+            android:name="LoginActivity"
             android:configChanges="orientation|screenSize|keyboardHidden|density|screenLayout|uiMode|fontScale"
             android:launchMode="singleInstance"
             android:theme="@style/Theme.AppCompat" />

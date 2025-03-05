@@ -609,6 +609,13 @@ public class Main extends FullScreenAppCompatActivity
         haveCamera = checkForCamera(); // we recall this in onResume just to be
 
         getOnBackPressedDispatcher().addCallback(this, onBackPressedCallback);
+        String token = prefs.getCgiToken();
+
+        if (token == null) {
+            Intent intent = new Intent(Main.this, LoginActivity.class);
+            startActivity(intent);
+            finish();
+        }
     }
 
     /**
@@ -2591,6 +2598,11 @@ public class Main extends FullScreenAppCompatActivity
             return true;
         case R.id.menu_authors:
             startActivity(new Intent(this, LicenseViewer.class));
+            return true;
+        case R.id.logout:
+            prefs.setCgiToken(null);
+            startActivity(new Intent(this, LoginActivity.class));
+            finish();
             return true;
         case R.id.menu_privacy:
             HelpViewer.start(this, R.string.help_privacy);
