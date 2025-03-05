@@ -364,6 +364,11 @@ public class App extends Application implements android.app.Application.Activity
         }
     }
 
+    @NonNull
+    public static String getCgiToken() {
+        return getPreferences(currentInstance).getCgiToken();
+    }
+
     /**
      * Get the current Preferences object held by Logic or create a new one
      * 

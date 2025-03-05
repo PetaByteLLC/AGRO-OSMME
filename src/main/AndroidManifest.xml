@@ -125,6 +125,11 @@
             </intent-filter>
         </activity>
         <activity
+            android:name=".AgroMain"
+            android:configChanges="orientation|screenSize|keyboardHidden|density|screenLayout|uiMode|fontScale"
+            android:label="AgroMain"
+            android:theme="@style/Theme.AppCompatPrefs" />
+        <activity
             android:name=".prefs.PrefEditor"
             android:configChanges="orientation|screenSize|keyboardHidden|density|screenLayout|uiMode|fontScale"
             android:label="@string/menu_config"

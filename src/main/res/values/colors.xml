@@ -33,4 +33,8 @@
 	<color name="osm_green">#ff9fd385</color>
     <!-- splitter -->
     <color name="splitter_dragging">#88FFFFFF</color>
+
+	<color name="edittext_background">#FFFFFF</color>
+	<color name="link_color">#454B60</color>
+	<color name="green">#00A76F</color>
 </resources>

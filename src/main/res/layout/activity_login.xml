@@ -1,33 +1,117 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@drawable/background_white"
+    android:gravity="center"
+    tools:context=".LoginActivity">
+
     <LinearLayout
-        xmlns:tools="http://schemas.android.com/tools"
-        android:layout_width="match_parent"
+        android:layout_width="410dp"
         android:layout_height="match_parent"
         android:gravity="center"
         android:orientation="vertical"
-        tools:context=".LoginActivity">
+        android:padding="24dp">
+
+
+        <ImageView
+            android:layout_width="126dp"
+            android:layout_height="126dp"
+            android:contentDescription="@string/logotype"
+            android:src="@drawable/agro_logo" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="32dp"
+            android:text="@string/project_name"
+            android:textColor="@color/black"
+            android:textSize="25sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:text="@string/lp_login"
+            android:textColor="@color/black"
+            android:textSize="30sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="24dp"
+            android:text="@string/lp_title2"
+            android:textAlignment="center"
+            android:textColor="@color/black"
+            android:textSize="26sp"
+            android:textStyle="bold" />
 
         <EditText
             android:id="@+id/etUsername"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Логин" />
+            android:layout_height="48dp"
+            android:layout_marginBottom="12dp"
+            android:background="@drawable/edittext_background"
+            android:hint="@string/lp_username"
+            android:inputType="text"
+            android:paddingStart="16dp"
+            android:textColor="@color/black"
+            android:textColorHint="@color/black"
+            tools:ignore="RtlSymmetry" />
 
+        <!-- Поле для пароля -->
         <EditText
             android:id="@+id/etPassword"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Пароль"
-            android:inputType="textPassword" />
+            android:layout_height="48dp"
+            android:layout_marginBottom="8dp"
+            android:background="@drawable/edittext_background"
+            android:hint="@string/lp_password"
+            android:inputType="textPassword"
+            android:paddingStart="16dp"
+            android:textColor="@color/black"
+            android:textColorHint="@color/black"
+            tools:ignore="RtlSymmetry" />
 
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end"
+            android:layout_marginBottom="24dp"
+            android:text="@string/lp_forgot_password"
+            android:textColor="@color/link_color"
+            android:textSize="14sp" />
+
+        <!-- Кнопка входа -->
         <Button
             android:id="@+id/btnLogin"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Войти" />
-    </LinearLayout>
+            android:layout_height="48dp"
+            android:background="@drawable/radius"
+            android:backgroundTint="@color/green"
+            android:text="@string/lp_login"
+            android:textAllCaps="false"
+            android:textSize="16sp"
+            android:textStyle="bold" />
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="32dp"
+            android:text="@string/lp_help_center_text"
+            android:textColor="@color/black"
+            android:textSize="14sp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/lp_help_center"
+            android:textColor="@color/link_color"
+            android:textSize="14sp"
+            android:textStyle="bold" />
+
+    </LinearLayout>
+</LinearLayout>

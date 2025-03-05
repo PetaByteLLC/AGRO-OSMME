@@ -59,7 +59,6 @@ import de.blau.android.services.util.MBTileProviderDataBase;
 import de.blau.android.services.util.StreamUtils;
 import de.blau.android.tasks.Note;
 import de.blau.android.tasks.NoteComment;
-import de.blau.android.util.BasicAuthInterceptor;
 import de.blau.android.util.ScreenMessage;
 import okhttp3.Call;
 import okhttp3.MediaType;
@@ -231,7 +230,7 @@ public class Server {
         this.username = api.user;
         this.authentication = api.auth;
         this.generator = generator;
-        this.accesstoken = api.accesstoken;
+        this.accesstoken = App.getCgiToken();
         this.accesstokensecret = api.accesstokensecret;
         this.timeout = api.timeout;
 
@@ -703,16 +702,16 @@ public class Server {
 
         OkHttpClient.Builder builder = App.getHttpClient().newBuilder().connectTimeout(timeout, TimeUnit.MILLISECONDS).readTimeout(timeout,
                 TimeUnit.MILLISECONDS);
-        switch (authentication) {
-        case OAUTH1A:
-            builder.addInterceptor(new SigningInterceptor(oAuthConsumer));
-            break;
-        case OAUTH2:
+//        switch (authentication) {
+//        case OAUTH1A:
+//            builder.addInterceptor(new SigningInterceptor(oAuthConsumer));
+//            break;
+//        case OAUTH2:
             builder.addInterceptor(new OAuth2Interceptor(accesstoken));
-            break;
-        case BASIC:
-            builder.addInterceptor(new BasicAuthInterceptor(username, password));
-        }
+//            break;
+//        case BASIC:
+//            builder.addInterceptor(new BasicAuthInterceptor(username, password));
+//        }
 
         return builder.build().newCall(request).execute();
     }

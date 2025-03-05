@@ -3230,9 +3230,9 @@ public class Main extends FullScreenAppCompatActivity
     public void confirmUpload(@Nullable List<OsmElement> elements) {
         final Server server = prefs.getServer();
         if (App.getLogic().hasChanges()) {
-            if (Server.checkOsmAuthentication(this, server, () -> ReviewAndUpload.showDialog(Main.this, elements))) {
+//            if (Server.checkOsmAuthentication(this, server, () -> ReviewAndUpload.showDialog(Main.this, elements))) {
                 ReviewAndUpload.showDialog(this, elements);
-            }
+//            }
         } else {
             ScreenMessage.barInfo(this, R.string.toast_no_changes);
         }
