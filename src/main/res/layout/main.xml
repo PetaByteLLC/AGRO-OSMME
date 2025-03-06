@@ -23,7 +23,8 @@
         spl:handleBackground="?attr/SplitterHandleH"
         spl:handleDraggingBackground="@drawable/splitter_handle_dragging_h"
         spl:splitterPosition="100%"
-        spl:splitterSize="5dip"
+        spl:splitterSize="0dp"
+        app:splitterMovable="false"
         android:layout_weight="99999">
         <RelativeLayout
             android:id="@+id/mainMap"
