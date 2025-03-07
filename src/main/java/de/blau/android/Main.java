@@ -750,7 +750,7 @@ public class Main extends FullScreenAppCompatActivity
             }
             map.setPrefs(Main.this, prefs); // set again as ViewBox may have
                                             // changed
-            setupLockButton();
+//            setupLockButton();
             if (logic.getFilter() != null) {
                 logic.getFilter().addControls(mapLayout, () -> {
                     map.invalidate();
@@ -1750,9 +1750,12 @@ public class Main extends FullScreenAppCompatActivity
      * Unlock the main display
      */
     public void unlock() {
-        if (App.getLogic().isLocked()) {
-            getLock().performClick();
-        }
+//        if (App.getLogic().isLocked()) {
+//            getLock().performClick();
+//        }
+        App.getLogic().setLocked(false);
+        updateActionbarEditMode();
+        map.invalidate();
     }
 
     /**
@@ -1773,21 +1776,22 @@ public class Main extends FullScreenAppCompatActivity
      * @return Button to display checked/unchecked states.
      */
     private FloatingActionButton setLock(Mode mode) {
-        FloatingActionButton lock = getLock();
-        if (lock == null) {
-            Log.d(DEBUG_TAG, "couldn't find lock button");
-            return null;
-        }
+//        FloatingActionButton lock = getLock();
+//        if (lock == null) {
+//            Log.d(DEBUG_TAG, "couldn't find lock button");
+//            return null;
+//        }
         Logic logic = App.getLogic();
-        if (logic.isLocked()) {
-            lock.setImageState(new int[] { 0 }, false);
-            disableSimpleActionsButton();
-        } else {
-            lock.setImageState(new int[] { android.R.attr.state_pressed }, false);
-            enableSimpleActionsButton();
-        }
+//        if (logic.isLocked()) {
+//            lock.setImageState(new int[] { 0 }, false);
+//            disableSimpleActionsButton();
+//        } else {
+//            lock.setImageState(new int[] { android.R.attr.state_pressed }, false);
+//            enableSimpleActionsButton();
+//        }
         logic.setMode(this, mode);
-        return lock; // for convenience
+//        return lock; // for convenience
+        return null;
     }
 
     /**
@@ -3271,6 +3275,7 @@ public class Main extends FullScreenAppCompatActivity
         ActionMenuView bottomToolbar = getBottomBar();
         if (bottomToolbar != null) {
             bottomToolbar.setVisibility(View.VISIBLE);
+            lock();
         }
     }
 
@@ -3365,15 +3370,15 @@ public class Main extends FullScreenAppCompatActivity
      * @param stateList the ColorStateList
      */
     private void changeSimpleActionsButtonState(boolean enabled, @NonNull ColorStateList stateList) {
-        simpleActionsButton.setEnabled(enabled);
-        simpleActionsButton.setBackgroundTintList(stateList);
-        simpleActionsButton.setCompatElevation(LARGE_FAB_ELEVATION);
-        ViewGroup.LayoutParams lp = simpleActionsButton.getLayoutParams();
-        if (enabled) {
-            ((RelativeLayout.LayoutParams) lp).setMargins(0, 0, 0, 0);
-        } else {
-            ((RelativeLayout.LayoutParams) lp).setMargins((int) LARGE_FAB_ELEVATION, 0, (int) LARGE_FAB_ELEVATION, (int) LARGE_FAB_ELEVATION);
-        }
+//        simpleActionsButton.setEnabled(enabled);
+//        simpleActionsButton.setBackgroundTintList(stateList);
+//        simpleActionsButton.setCompatElevation(LARGE_FAB_ELEVATION);
+//        ViewGroup.LayoutParams lp = simpleActionsButton.getLayoutParams();
+//        if (enabled) {
+//            ((RelativeLayout.LayoutParams) lp).setMargins(0, 0, 0, 0);
+//        } else {
+//            ((RelativeLayout.LayoutParams) lp).setMargins((int) LARGE_FAB_ELEVATION, 0, (int) LARGE_FAB_ELEVATION, (int) LARGE_FAB_ELEVATION);
+//        }
     }
 
     /**
@@ -4772,10 +4777,12 @@ public class Main extends FullScreenAppCompatActivity
         public void onClick(View v) {
             Logic logic = App.getLogic();
             if (logic == null) return;
-            unlock();
             if (!logic.isInEditZoomRange()) {
                 ScreenMessage.toastTopInfo(Main.this, R.string.toast_not_in_edit_range);
             } else {
+                App.getLogic().setLocked(false);
+                updateActionbarEditMode();
+                map.invalidate();
                 startSupportActionMode(new SimpleActionModeCallback(getEasyEditManager(), SimpleActionModeCallback.SimpleAction.WAY));
             }
         }

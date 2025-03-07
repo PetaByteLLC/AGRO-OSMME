@@ -7,6 +7,8 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import android.graphics.drawable.Drawable;
 import android.util.Log;
 import android.view.Menu;
+import android.view.MenuItem;
+
 import androidx.annotation.NonNull;
 import androidx.appcompat.view.ActionMode;
 import de.blau.android.R;
@@ -41,11 +43,15 @@ public class RotationActionModeCallback extends AbortableActionModeCallback {
         logic.createCheckpoint(main, R.string.undo_action_rotate);
         logic.setRotationMode(true);
         logic.showCrosshairsForCentroid();
-
-        FloatingActionButton button = main.getSimpleActionsButton();
-        button.setOnClickListener(v -> manager.startElementSelectionMode());
-        savedButton = button.getDrawable();
-        button.setImageResource(R.drawable.ic_done_white_36dp);
+        MenuItem menuItem = menu.add("Ok").setIcon(R.drawable.ic_done_black_36dp);
+        menuItem.setOnMenuItemClickListener(v -> {
+            manager.startElementSelectionMode();
+            return true;
+        });
+//        FloatingActionButton button = main.getSimpleActionsButton();
+//        button.setOnClickListener(v -> manager.startElementSelectionMode());
+//        savedButton = button.getDrawable();
+//        button.setImageResource(R.drawable.ic_done_white_36dp);
         mode.setTitle(R.string.actionmode_rotate);
         mode.setSubtitle(null);
         return true;
@@ -54,10 +60,10 @@ public class RotationActionModeCallback extends AbortableActionModeCallback {
     @Override
     public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
         super.onPrepareActionMode(mode, menu);
-        main.enableSimpleActionsButton();
-        if (!prefs.areSimpleActionsEnabled()) {
-            main.showSimpleActionsButton();
-        }
+//        main.enableSimpleActionsButton();
+//        if (!prefs.areSimpleActionsEnabled()) {
+//            main.showSimpleActionsButton();
+//        }
         return true;
     }
 
@@ -65,12 +71,12 @@ public class RotationActionModeCallback extends AbortableActionModeCallback {
     public void onDestroyActionMode(ActionMode mode) {
         logic.setRotationMode(false);
         logic.hideCrosshairs();
-        FloatingActionButton button = main.getSimpleActionsButton();
-        button.setImageDrawable(savedButton);
-        main.setSimpleActionsButtonListener();
-        if (!prefs.areSimpleActionsEnabled()) {
-            main.hideSimpleActionsButton();
-        }
+//        FloatingActionButton button = main.getSimpleActionsButton();
+//        button.setImageDrawable(savedButton);
+//        main.setSimpleActionsButtonListener();
+//        if (!prefs.areSimpleActionsEnabled()) {
+//            main.hideSimpleActionsButton();
+//        }
         super.onDestroyActionMode(mode);
     }
 }
