@@ -36,6 +36,7 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.content.res.Configuration;
+import android.graphics.drawable.LayerDrawable;
 import android.graphics.drawable.StateListDrawable;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
@@ -180,6 +181,7 @@ import de.blau.android.tasks.TodoFragment;
 import de.blau.android.tasks.TransferTasks;
 import de.blau.android.util.ACRAHelper;
 import de.blau.android.util.ActivityResultHandler;
+import de.blau.android.util.BadgeDrawable;
 import de.blau.android.util.ContentResolverUtil;
 import de.blau.android.util.DateFormatter;
 import de.blau.android.util.DownloadActivity;
@@ -1864,7 +1866,6 @@ public class Main extends FullScreenAppCompatActivity
         }
 
         MenuItem fieldsItem = menu.findItem(R.id.fields);
-//        fieldsItem.setOnMenuItemClickListener(new AddNewFieldListener());
         fieldsItem.setActionView(R.layout.agro_button_fields);
 
         MenuItem addNewFieldItem = menu.findItem(R.id.add_new_field);
@@ -1872,7 +1873,6 @@ public class Main extends FullScreenAppCompatActivity
         addNewFieldItem.getActionView().setOnClickListener(new AddNewFieldListener());
 
         MenuItem profileItem = menu.findItem(R.id.profile);
-//        fieldsItem.setOnMenuItemClickListener(new AddNewFieldListener());
         profileItem.setActionView(R.layout.agro_button_profile);
 //        addNewFieldItem.setShowAsActionFlags(SHOW_AS_ACTION_IF_ROOM);
 //        setShowAsAction(menu.findItem(R.id.fields), R.id.fields);
@@ -1881,7 +1881,7 @@ public class Main extends FullScreenAppCompatActivity
 //        menu.findItem(R.id.menu_gps_show).setEnabled(locationProviderEnabled).setChecked(showGPS);
 //        menu.findItem(R.id.menu_gps_follow).setEnabled(locationProviderEnabled).setChecked(followGPS);
 //        menu.findItem(R.id.menu_gps_goto).setEnabled(locationProviderEnabled);
-//        final boolean haveTracker = getTracker() != null;
+        final boolean haveTracker = getTracker() != null;
 //        MenuItem startGPX = menu.findItem(R.id.menu_gps_start).setEnabled(haveTracker && !getTracker().isTracking() && gpsProviderEnabled);
 //        if (haveTracker) {
 //            startGPX.setTitle(getString(getTracker().hasTrackPoints() ? R.string.menu_gps_resume : R.string.menu_gps_start));
@@ -1891,8 +1891,8 @@ public class Main extends FullScreenAppCompatActivity
 //                .setChecked(prefs.getAutoDownload());
 //        menu.findItem(R.id.menu_enable_pan_and_zoom_auto_download).setEnabled(networkConnected || hasMapSplitSource)
 //                .setChecked(prefs.getPanAndZoomAutoDownload());
-//        menu.findItem(R.id.menu_transfer_bugs_autodownload).setEnabled(haveTracker && locationProviderEnabled && networkConnected)
-//                .setChecked(prefs.getBugAutoDownload());
+        menu.findItem(R.id.menu_transfer_bugs_autodownload).setEnabled(haveTracker && locationProviderEnabled && networkConnected)
+                .setChecked(prefs.getBugAutoDownload());
 //
 //        menu.findItem(R.id.menu_gps_clear).setEnabled(haveTracker && (getTracker().hasTrackPoints() || getTracker().hasWayPoints()));
 //
@@ -1908,39 +1908,39 @@ public class Main extends FullScreenAppCompatActivity
 //        menu.findItem(R.id.menu_gps_add_bookmark).setEnabled(map.getViewBox().isValid());
 //        menu.findItem(R.id.menu_gps_show_bookmarks).setEnabled(true);
 //
-//        LayerDrawable transfer = (LayerDrawable) menu.findItem(R.id.menu_transfer).getIcon();
-//        final StorageDelegator delegator = App.getDelegator();
-//        BadgeDrawable.setBadgeWithCount(this, transfer, delegator.getApiElementCount(), prefs.getUploadOkLimit(), prefs.getUploadWarnLimit());
+        LayerDrawable transfer = (LayerDrawable) menu.findItem(R.id.menu_transfer).getIcon();
+        final StorageDelegator delegator = App.getDelegator();
+        BadgeDrawable.setBadgeWithCount(this, transfer, delegator.getApiElementCount(), prefs.getUploadOkLimit(), prefs.getUploadWarnLimit());
 //
-//        menu.findItem(R.id.menu_transfer_close_changeset).setVisible(server.hasOpenChangeset());
+        menu.findItem(R.id.menu_transfer_close_changeset).setVisible(server.hasOpenChangeset());
 //
-//        if (hasMapSplitSource) {
-//            menu.findItem(R.id.menu_transfer_download_current).setEnabled(true).setTitle(R.string.menu_transfer_load_current);
-//            menu.findItem(R.id.menu_transfer_download_replace).setEnabled(true).setTitle(R.string.menu_transfer_load_replace);
-//        } else {
-//            menu.findItem(R.id.menu_transfer_download_current).setEnabled(networkConnected).setTitle(R.string.menu_transfer_download_current);
-//            menu.findItem(R.id.menu_transfer_download_replace).setEnabled(networkConnected).setTitle(R.string.menu_transfer_download_replace);
-//        }
+        if (hasMapSplitSource) {
+            menu.findItem(R.id.menu_transfer_download_current).setEnabled(true).setTitle(R.string.menu_transfer_load_current);
+            menu.findItem(R.id.menu_transfer_download_replace).setEnabled(true).setTitle(R.string.menu_transfer_load_replace);
+        } else {
+            menu.findItem(R.id.menu_transfer_download_current).setEnabled(networkConnected).setTitle(R.string.menu_transfer_download_current);
+            menu.findItem(R.id.menu_transfer_download_replace).setEnabled(networkConnected).setTitle(R.string.menu_transfer_download_replace);
+        }
 //        // note: isDirty is not a good indicator of if if there is really
 //        // something to upload
-//        final boolean hasChanges = !delegator.getApiStorage().isEmpty();
-//        menu.findItem(R.id.menu_transfer_upload).setEnabled(networkConnected && hasChanges);
-//        menu.findItem(R.id.menu_transfer_review).setEnabled(hasChanges);
-//        final boolean hasData = !delegator.getCurrentStorage().isEmpty();
-//        menu.findItem(R.id.menu_transfer_update).setEnabled(networkConnected && !hasMapSplitSource && hasData);
-//        menu.findItem(R.id.menu_transfer_data_clear).setEnabled(hasData);
-//
-//        menu.findItem(R.id.menu_transfer_bugs_download_current).setEnabled(networkConnected);
-//        menu.findItem(R.id.menu_transfer_bugs_upload).setEnabled(networkConnected && App.getTaskStorage().hasChanges());
-//
-//        // the following depends on us having permission to write to "external"
-//        // storage
-//        boolean storagePermissionGranted = isStoragePermissionGranted();
-//        menu.findItem(R.id.menu_transfer_export).setEnabled(storagePermissionGranted);
-//        menu.findItem(R.id.menu_transfer_save_file).setEnabled(storagePermissionGranted);
-//        menu.findItem(R.id.menu_transfer_save_notes_all).setEnabled(storagePermissionGranted);
-//        menu.findItem(R.id.menu_transfer_save_notes_new_and_changed).setEnabled(storagePermissionGranted);
-//
+        final boolean hasChanges = !delegator.getApiStorage().isEmpty();
+        menu.findItem(R.id.menu_transfer_upload).setEnabled(networkConnected && hasChanges);
+        menu.findItem(R.id.menu_transfer_review).setEnabled(hasChanges);
+        final boolean hasData = !delegator.getCurrentStorage().isEmpty();
+        menu.findItem(R.id.menu_transfer_update).setEnabled(networkConnected && !hasMapSplitSource && hasData);
+        menu.findItem(R.id.menu_transfer_data_clear).setEnabled(hasData);
+
+        menu.findItem(R.id.menu_transfer_bugs_download_current).setEnabled(networkConnected);
+        menu.findItem(R.id.menu_transfer_bugs_upload).setEnabled(networkConnected && App.getTaskStorage().hasChanges());
+
+        // the following depends on us having permission to write to "external"
+        // storage
+        boolean storagePermissionGranted = isStoragePermissionGranted();
+        menu.findItem(R.id.menu_transfer_export).setEnabled(storagePermissionGranted);
+        menu.findItem(R.id.menu_transfer_save_file).setEnabled(storagePermissionGranted);
+        menu.findItem(R.id.menu_transfer_save_notes_all).setEnabled(storagePermissionGranted);
+        menu.findItem(R.id.menu_transfer_save_notes_new_and_changed).setEnabled(storagePermissionGranted);
+
 //        // main menu items
 //        menu.findItem(R.id.menu_search_objects).setEnabled(!logic.isLocked());
 //
