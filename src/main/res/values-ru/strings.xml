@@ -1538,4 +1538,11 @@
   <string name="lp_password">Пароль</string>
   <string name="lp_username">Логин</string>
   <string name="lp_title2">Введите имя пользователя и пароль</string>
+  <string name="logout">Выход</string>
+  <string name="fields">Поля</string>
+  <string name="add_field">Добавить поле</string>
+  <string name="profile">Профиль</string>
+  <string name="adding_field">Добавления поле</string>
+  <string name="put_first_point">Поставьте первую точку</string>
+  <string name="add_next_point">Добавьте следующую точку</string>
 </resources>

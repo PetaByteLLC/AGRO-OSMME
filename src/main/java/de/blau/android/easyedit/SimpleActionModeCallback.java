@@ -81,7 +81,7 @@ public class SimpleActionModeCallback extends EasyEditActionModeCallback impleme
         /**
          * Add a way starting the normal path creation mode
          */
-        WAY(R.string.menu_add_way, R.string.menu_add_way, R.string.add_way_start_instruction,
+        WAY(R.string.adding_field, R.string.adding_field, R.string.put_first_point,
                 (main, manager, x, y) -> main.startSupportActionMode(new PathCreationActionModeCallback(manager, x, y))) {
             @Override
             public boolean isEnabled() {
@@ -90,9 +90,9 @@ public class SimpleActionModeCallback extends EasyEditActionModeCallback impleme
 
             @Override
             public void addMenuItems(EasyEditManager manager, Context ctx, Menu menu) {
-                boolean snap = App.getLogic().getPrefs().isWaySnapEnabled();
-                PathCreationActionModeCallback.addSnapCheckBox(ctx, menu, snap,
-                        (CompoundButton buttonView, boolean isChecked) -> App.getLogic().getPrefs().enableWaySnap(isChecked));
+//                boolean snap = App.getLogic().getPrefs().isWaySnapEnabled();
+//                PathCreationActionModeCallback.addSnapCheckBox(ctx, menu, snap,
+//                        (CompoundButton buttonView, boolean isChecked) -> App.getLogic().getPrefs().enableWaySnap(isChecked));
             }
         },
         /**
@@ -307,9 +307,9 @@ public class SimpleActionModeCallback extends EasyEditActionModeCallback impleme
         super.onPrepareActionMode(mode, menu);
         menu.clear();
         menuUtil.reset();
-        simpleAction.addMenuItems(manager, main, menu);
-        menu.add(GROUP_BASE, MENUITEM_HELP, Menu.CATEGORY_SYSTEM | 10, R.string.menu_help).setIcon(ThemeUtils.getResIdFromAttribute(main, R.attr.menu_help));
-        arrangeMenu(menu);
+//        simpleAction.addMenuItems(manager, main, menu);
+//        menu.add(GROUP_BASE, MENUITEM_HELP, Menu.CATEGORY_SYSTEM | 10, R.string.menu_help).setIcon(ThemeUtils.getResIdFromAttribute(main, R.attr.menu_help));
+//        arrangeMenu(menu);
         return true;
     }
 

@@ -37,4 +37,5 @@
 	<color name="edittext_background">#FFFFFF</color>
 	<color name="link_color">#454B60</color>
 	<color name="green">#00A76F</color>
+	<color name="ag_text_color">#636366</color>
 </resources>

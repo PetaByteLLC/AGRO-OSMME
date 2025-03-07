@@ -36,7 +36,6 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.content.res.Configuration;
-import android.graphics.drawable.LayerDrawable;
 import android.graphics.drawable.StateListDrawable;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
@@ -129,9 +128,11 @@ import de.blau.android.filter.PresetFilter;
 import de.blau.android.filter.TagFilter;
 import de.blau.android.geocode.GeocodeInput;
 import de.blau.android.geocode.Search.SearchResult;
+import de.blau.android.geocode.SearchItemSelectedCallback;
 import de.blau.android.gpx.TrackPoint;
 import de.blau.android.imageryoffset.ImageryAlignmentActionModeCallback;
 import de.blau.android.imageryoffset.ImageryOffsetUtils;
+import de.blau.android.javascript.Utils;
 import de.blau.android.layer.ClickableInterface;
 import de.blau.android.layer.ClickedObject;
 import de.blau.android.layer.DownloadInterface;
@@ -179,7 +180,6 @@ import de.blau.android.tasks.TodoFragment;
 import de.blau.android.tasks.TransferTasks;
 import de.blau.android.util.ACRAHelper;
 import de.blau.android.util.ActivityResultHandler;
-import de.blau.android.util.BadgeDrawable;
 import de.blau.android.util.ContentResolverUtil;
 import de.blau.android.util.DateFormatter;
 import de.blau.android.util.DownloadActivity;
@@ -214,7 +214,7 @@ import de.blau.android.views.ZoomControls;
  * @author Simon Poole
  */
 public class Main extends FullScreenAppCompatActivity
-        implements ServiceConnection, TrackerLocationListener, UpdateViewListener, de.blau.android.geocode.SearchItemSelectedCallback, ActivityResultHandler {
+        implements ServiceConnection, TrackerLocationListener, UpdateViewListener, SearchItemSelectedCallback, ActivityResultHandler {
 
     /**
      * Tag used for Android-logging.
@@ -469,15 +469,15 @@ public class Main extends FullScreenAppCompatActivity
         updatePrefs(new Preferences(this));
 
         int layout = R.layout.main;
-        if (useFullScreen(prefs) && !statusBarHidden()) {
-            Log.d(DEBUG_TAG, "using full screen layout");
-            layout = R.layout.main_fullscreen;
-        }
-        if (prefs.lightThemeEnabled()) {
-            setTheme(statusBarHidden() ? R.style.Theme_customMain_Light_FullScreen : R.style.Theme_customMain_Light);
-        } else if (statusBarHidden()) {
-            setTheme(R.style.Theme_customMain_FullScreen);
-        }
+//        if (useFullScreen(prefs) && !statusBarHidden()) {
+//            Log.d(DEBUG_TAG, "using full screen layout");
+//            layout = R.layout.main_fullscreen;
+//        }
+//        if (prefs.lightThemeEnabled()) {
+//            setTheme(statusBarHidden() ? R.style.Theme_customMain_Light_FullScreen : R.style.Theme_customMain_Light);
+//        } else if (statusBarHidden()) {
+            setTheme(R.style.Theme_customMain_Light_FullScreen);
+//        }
 
         super.onCreate(savedInstanceState);
 
@@ -533,8 +533,8 @@ public class Main extends FullScreenAppCompatActivity
         });
 
         // simple actions mode button
-        simpleActionsButton = (FloatingActionButton) getLayoutInflater().inflate(R.layout.simple_button, null);
-        simpleActionsButton.setAlpha(Main.FABALPHA);
+//        simpleActionsButton = (FloatingActionButton) getLayoutInflater().inflate(R.layout.simple_button, null);
+//        simpleActionsButton.setAlpha(Main.FABALPHA);
         RelativeLayout.LayoutParams rlp = new RelativeLayout.LayoutParams(android.view.ViewGroup.LayoutParams.WRAP_CONTENT,
                 android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
         rlp.addRule(RelativeLayout.ABOVE, R.id.zoom_controls);
@@ -545,7 +545,7 @@ public class Main extends FullScreenAppCompatActivity
         } else {
             hideSimpleActionsButton();
         }
-        mapLayout.addView(simpleActionsButton, rlp);
+//        mapLayout.addView(simpleActionsButton, rlp);
         setSimpleActionsButtonListener();
 
         // layers button setup
@@ -1607,19 +1607,19 @@ public class Main extends FullScreenAppCompatActivity
         if (followButton != null) {
             List<String> locationProviders = getEnabledLocationProviders();
             if (!locationProviders.isEmpty()) {
-                RelativeLayout.LayoutParams params = (LayoutParams) followButton.getLayoutParams();
-                String followGPSbuttonPosition = prefs.followGPSbuttonPosition();
+                LayoutParams params = (LayoutParams) followButton.getLayoutParams();
+//                String followGPSbuttonPosition = prefs.followGPSbuttonPosition();
                 boolean isVisible = true;
-                if (getString(R.string.follow_GPS_left).equals(followGPSbuttonPosition)) {
-                    params.addRule(RelativeLayout.ALIGN_PARENT_RIGHT, 0);
-                    params.addRule(RelativeLayout.ALIGN_PARENT_LEFT, RelativeLayout.TRUE);
-                } else if (getString(R.string.follow_GPS_right).equals(followGPSbuttonPosition)) {
+//                if (getString(R.string.follow_GPS_left).equals(followGPSbuttonPosition)) {
+//                    params.addRule(RelativeLayout.ALIGN_PARENT_RIGHT, 0);
+//                    params.addRule(RelativeLayout.ALIGN_PARENT_LEFT, RelativeLayout.TRUE);
+//                } else if (getString(R.string.follow_GPS_right).equals(followGPSbuttonPosition)) {
                     params.addRule(RelativeLayout.ALIGN_PARENT_LEFT, 0);
                     params.addRule(RelativeLayout.ALIGN_PARENT_RIGHT, RelativeLayout.TRUE);
-                } else if (getString(R.string.follow_GPS_none).equals(followGPSbuttonPosition)) {
-                    followButton.hide();
-                    isVisible = false;
-                }
+//                } else if (getString(R.string.follow_GPS_none).equals(followGPSbuttonPosition)) {
+//                    followButton.hide();
+//                    isVisible = false;
+//                }
                 followButton.setLayoutParams(params);
                 // only show GPS symbol if we only have GPS
                 setFollowImage(locationProviders.size() == 1 && LocationManager.GPS_PROVIDER.equals(locationProviders.get(0)), isVisible);
@@ -1834,11 +1834,11 @@ public class Main extends FullScreenAppCompatActivity
         if (menu.size() == 0) {
             menu.clear();
             final MenuInflater inflater = getMenuInflater();
-            if (noSubMenus) {
-                inflater.inflate(R.menu.main_menu_nosubmenus, menu);
-            } else {
+//            if (noSubMenus) {
+//                inflater.inflate(R.menu.main_menu_nosubmenus, menu);
+//            } else {
                 inflater.inflate(R.menu.main_menu, menu);
-            }
+//            }
         }
         MenuCompat.setGroupDividerEnabled(menu, true);
 
@@ -1858,125 +1858,141 @@ public class Main extends FullScreenAppCompatActivity
         } else {
             hideFollowButton();
         }
-        menu.findItem(R.id.menu_gps_show).setEnabled(locationProviderEnabled).setChecked(showGPS);
-        menu.findItem(R.id.menu_gps_follow).setEnabled(locationProviderEnabled).setChecked(followGPS);
-        menu.findItem(R.id.menu_gps_goto).setEnabled(locationProviderEnabled);
-        final boolean haveTracker = getTracker() != null;
-        MenuItem startGPX = menu.findItem(R.id.menu_gps_start).setEnabled(haveTracker && !getTracker().isTracking() && gpsProviderEnabled);
-        if (haveTracker) {
-            startGPX.setTitle(getString(getTracker().hasTrackPoints() ? R.string.menu_gps_resume : R.string.menu_gps_start));
-        }
-        menu.findItem(R.id.menu_gps_pause).setEnabled(haveTracker && getTracker().isTracking() && gpsProviderEnabled);
-        menu.findItem(R.id.menu_enable_gps_autodownload).setEnabled(haveTracker && locationProviderEnabled && (networkConnected || hasMapSplitSource))
-                .setChecked(prefs.getAutoDownload());
-        menu.findItem(R.id.menu_enable_pan_and_zoom_auto_download).setEnabled(networkConnected || hasMapSplitSource)
-                .setChecked(prefs.getPanAndZoomAutoDownload());
-        menu.findItem(R.id.menu_transfer_bugs_autodownload).setEnabled(haveTracker && locationProviderEnabled && networkConnected)
-                .setChecked(prefs.getBugAutoDownload());
 
-        menu.findItem(R.id.menu_gps_clear).setEnabled(haveTracker && (getTracker().hasTrackPoints() || getTracker().hasWayPoints()));
+        MenuItem fieldsItem = menu.findItem(R.id.fields);
+//        fieldsItem.setOnMenuItemClickListener(new AddNewFieldListener());
+        fieldsItem.setActionView(R.layout.agro_button_fields);
 
-        final Logic logic = App.getLogic();
-        MenuItem undo = menu.findItem(R.id.menu_undo);
-        UndoStorage undoStorage = logic.getUndo();
-        undo.setVisible(!logic.isLocked() && (undoStorage.canUndo() || undoStorage.canRedo()));
-        View undoView = undo.getActionView();
-        undoView.setOnClickListener(undoListener);
-        undoView.setOnLongClickListener(undoListener);
+        MenuItem addNewFieldItem = menu.findItem(R.id.add_new_field);
+        addNewFieldItem.setActionView(R.layout.agro_button_add_field);
+        addNewFieldItem.getActionView().setOnClickListener(new AddNewFieldListener());
 
-        menu.findItem(R.id.menu_gps_goto_last_edit).setEnabled(undoStorage.canUndo());
-        menu.findItem(R.id.menu_gps_add_bookmark).setEnabled(map.getViewBox().isValid());
-        menu.findItem(R.id.menu_gps_show_bookmarks).setEnabled(true);
-
-        LayerDrawable transfer = (LayerDrawable) menu.findItem(R.id.menu_transfer).getIcon();
-        final StorageDelegator delegator = App.getDelegator();
-        BadgeDrawable.setBadgeWithCount(this, transfer, delegator.getApiElementCount(), prefs.getUploadOkLimit(), prefs.getUploadWarnLimit());
-
-        menu.findItem(R.id.menu_transfer_close_changeset).setVisible(server.hasOpenChangeset());
-
-        if (hasMapSplitSource) {
-            menu.findItem(R.id.menu_transfer_download_current).setEnabled(true).setTitle(R.string.menu_transfer_load_current);
-            menu.findItem(R.id.menu_transfer_download_replace).setEnabled(true).setTitle(R.string.menu_transfer_load_replace);
-        } else {
-            menu.findItem(R.id.menu_transfer_download_current).setEnabled(networkConnected).setTitle(R.string.menu_transfer_download_current);
-            menu.findItem(R.id.menu_transfer_download_replace).setEnabled(networkConnected).setTitle(R.string.menu_transfer_download_replace);
-        }
-        // note: isDirty is not a good indicator of if if there is really
-        // something to upload
-        final boolean hasChanges = !delegator.getApiStorage().isEmpty();
-        menu.findItem(R.id.menu_transfer_upload).setEnabled(networkConnected && hasChanges);
-        menu.findItem(R.id.menu_transfer_review).setEnabled(hasChanges);
-        final boolean hasData = !delegator.getCurrentStorage().isEmpty();
-        menu.findItem(R.id.menu_transfer_update).setEnabled(networkConnected && !hasMapSplitSource && hasData);
-        menu.findItem(R.id.menu_transfer_data_clear).setEnabled(hasData);
-
-        menu.findItem(R.id.menu_transfer_bugs_download_current).setEnabled(networkConnected);
-        menu.findItem(R.id.menu_transfer_bugs_upload).setEnabled(networkConnected && App.getTaskStorage().hasChanges());
-
-        // the following depends on us having permission to write to "external"
-        // storage
-        boolean storagePermissionGranted = isStoragePermissionGranted();
-        menu.findItem(R.id.menu_transfer_export).setEnabled(storagePermissionGranted);
-        menu.findItem(R.id.menu_transfer_save_file).setEnabled(storagePermissionGranted);
-        menu.findItem(R.id.menu_transfer_save_notes_all).setEnabled(storagePermissionGranted);
-        menu.findItem(R.id.menu_transfer_save_notes_new_and_changed).setEnabled(storagePermissionGranted);
-
-        // main menu items
-        menu.findItem(R.id.menu_search_objects).setEnabled(!logic.isLocked());
-
-        Filter filter = logic.getFilter();
-        if (filter instanceof TagFilter && !prefs.getEnableTagFilter()) {
-            // something is wrong, try to sync
-            prefs.enableTagFilter(true);
-            Log.d(DEBUG_TAG, "had to resync tagfilter pref");
-        }
-
-        final Mode mode = logic.getMode();
-        final boolean supportsFilters = mode.supportsFilters();
-        menu.findItem(R.id.menu_enable_tagfilter).setEnabled(supportsFilters).setChecked(prefs.getEnableTagFilter() && logic.getFilter() instanceof TagFilter);
-        menu.findItem(R.id.menu_enable_presetfilter).setEnabled(supportsFilters)
-                .setChecked(prefs.getEnablePresetFilter() && logic.getFilter() instanceof PresetFilter);
-
-        menu.findItem(R.id.menu_simple_actions).setChecked(prefs.areSimpleActionsEnabled());
-
-        // only works with network
-        menu.findItem(R.id.menu_feedback).setEnabled(networkConnected);
-
-        // enable the JS console menu entry
-        menu.findItem(R.id.tag_menu_js_console).setEnabled(prefs.isJsConsoleEnabled());
-
-        menuUtil.setShowAlways(menu);
-        // only show camera icon if we have a camera, and a camera app is
-        // installed
-        if (haveCamera) {
-            menu.findItem(R.id.menu_camera).setShowAsAction(prefs.showCameraAction() ? MenuItem.SHOW_AS_ACTION_ALWAYS : MenuItem.SHOW_AS_ACTION_NEVER);
-        } else {
-            menu.findItem(R.id.menu_camera).setVisible(false).setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER);
-        }
-
-        menu.findItem(R.id.menu_tools_calibrate_height)
-                .setVisible(sensorManager != null && sensorManager.getDefaultSensor(Sensor.TYPE_PRESSURE) != null && haveTracker);
-
-        Uri egmUri = prefs.getEgmFile();
-        boolean egmInstalled = egmUri != null && new File(egmUri.getPath()).exists();
-        menu.findItem(R.id.menu_tools_install_egm).setVisible(!egmInstalled);
-        menu.findItem(R.id.menu_tools_remove_egm).setVisible(egmInstalled);
+        MenuItem profileItem = menu.findItem(R.id.profile);
+//        fieldsItem.setOnMenuItemClickListener(new AddNewFieldListener());
+        profileItem.setActionView(R.layout.agro_button_profile);
+//        addNewFieldItem.setShowAsActionFlags(SHOW_AS_ACTION_IF_ROOM);
+//        setShowAsAction(menu.findItem(R.id.fields), R.id.fields);
+//        setShowAsAction(addNewFieldItem, R.id.add_new_field);
+//        setShowAsAction(menu.findItem(R.id.profile), R.id.profile);
+//        menu.findItem(R.id.menu_gps_show).setEnabled(locationProviderEnabled).setChecked(showGPS);
+//        menu.findItem(R.id.menu_gps_follow).setEnabled(locationProviderEnabled).setChecked(followGPS);
+//        menu.findItem(R.id.menu_gps_goto).setEnabled(locationProviderEnabled);
+//        final boolean haveTracker = getTracker() != null;
+//        MenuItem startGPX = menu.findItem(R.id.menu_gps_start).setEnabled(haveTracker && !getTracker().isTracking() && gpsProviderEnabled);
+//        if (haveTracker) {
+//            startGPX.setTitle(getString(getTracker().hasTrackPoints() ? R.string.menu_gps_resume : R.string.menu_gps_start));
+//        }
+//        menu.findItem(R.id.menu_gps_pause).setEnabled(haveTracker && getTracker().isTracking() && gpsProviderEnabled);
+//        menu.findItem(R.id.menu_enable_gps_autodownload).setEnabled(haveTracker && locationProviderEnabled && (networkConnected || hasMapSplitSource))
+//                .setChecked(prefs.getAutoDownload());
+//        menu.findItem(R.id.menu_enable_pan_and_zoom_auto_download).setEnabled(networkConnected || hasMapSplitSource)
+//                .setChecked(prefs.getPanAndZoomAutoDownload());
+//        menu.findItem(R.id.menu_transfer_bugs_autodownload).setEnabled(haveTracker && locationProviderEnabled && networkConnected)
+//                .setChecked(prefs.getBugAutoDownload());
+//
+//        menu.findItem(R.id.menu_gps_clear).setEnabled(haveTracker && (getTracker().hasTrackPoints() || getTracker().hasWayPoints()));
+//
+//        final Logic logic = App.getLogic();
+//        MenuItem undo = menu.findItem(R.id.menu_undo);
+//        UndoStorage undoStorage = logic.getUndo();
+//        undo.setVisible(!logic.isLocked() && (undoStorage.canUndo() || undoStorage.canRedo()));
+//        View undoView = undo.getActionView();
+//        undoView.setOnClickListener(undoListener);
+//        undoView.setOnLongClickListener(undoListener);
+//
+//        menu.findItem(R.id.menu_gps_goto_last_edit).setEnabled(undoStorage.canUndo());
+//        menu.findItem(R.id.menu_gps_add_bookmark).setEnabled(map.getViewBox().isValid());
+//        menu.findItem(R.id.menu_gps_show_bookmarks).setEnabled(true);
+//
+//        LayerDrawable transfer = (LayerDrawable) menu.findItem(R.id.menu_transfer).getIcon();
+//        final StorageDelegator delegator = App.getDelegator();
+//        BadgeDrawable.setBadgeWithCount(this, transfer, delegator.getApiElementCount(), prefs.getUploadOkLimit(), prefs.getUploadWarnLimit());
+//
+//        menu.findItem(R.id.menu_transfer_close_changeset).setVisible(server.hasOpenChangeset());
+//
+//        if (hasMapSplitSource) {
+//            menu.findItem(R.id.menu_transfer_download_current).setEnabled(true).setTitle(R.string.menu_transfer_load_current);
+//            menu.findItem(R.id.menu_transfer_download_replace).setEnabled(true).setTitle(R.string.menu_transfer_load_replace);
+//        } else {
+//            menu.findItem(R.id.menu_transfer_download_current).setEnabled(networkConnected).setTitle(R.string.menu_transfer_download_current);
+//            menu.findItem(R.id.menu_transfer_download_replace).setEnabled(networkConnected).setTitle(R.string.menu_transfer_download_replace);
+//        }
+//        // note: isDirty is not a good indicator of if if there is really
+//        // something to upload
+//        final boolean hasChanges = !delegator.getApiStorage().isEmpty();
+//        menu.findItem(R.id.menu_transfer_upload).setEnabled(networkConnected && hasChanges);
+//        menu.findItem(R.id.menu_transfer_review).setEnabled(hasChanges);
+//        final boolean hasData = !delegator.getCurrentStorage().isEmpty();
+//        menu.findItem(R.id.menu_transfer_update).setEnabled(networkConnected && !hasMapSplitSource && hasData);
+//        menu.findItem(R.id.menu_transfer_data_clear).setEnabled(hasData);
+//
+//        menu.findItem(R.id.menu_transfer_bugs_download_current).setEnabled(networkConnected);
+//        menu.findItem(R.id.menu_transfer_bugs_upload).setEnabled(networkConnected && App.getTaskStorage().hasChanges());
+//
+//        // the following depends on us having permission to write to "external"
+//        // storage
+//        boolean storagePermissionGranted = isStoragePermissionGranted();
+//        menu.findItem(R.id.menu_transfer_export).setEnabled(storagePermissionGranted);
+//        menu.findItem(R.id.menu_transfer_save_file).setEnabled(storagePermissionGranted);
+//        menu.findItem(R.id.menu_transfer_save_notes_all).setEnabled(storagePermissionGranted);
+//        menu.findItem(R.id.menu_transfer_save_notes_new_and_changed).setEnabled(storagePermissionGranted);
+//
+//        // main menu items
+//        menu.findItem(R.id.menu_search_objects).setEnabled(!logic.isLocked());
+//
+//        Filter filter = logic.getFilter();
+//        if (filter instanceof TagFilter && !prefs.getEnableTagFilter()) {
+//            // something is wrong, try to sync
+//            prefs.enableTagFilter(true);
+//            Log.d(DEBUG_TAG, "had to resync tagfilter pref");
+//        }
+//
+//        final Mode mode = logic.getMode();
+//        final boolean supportsFilters = mode.supportsFilters();
+//        menu.findItem(R.id.menu_enable_tagfilter).setEnabled(supportsFilters).setChecked(prefs.getEnableTagFilter() && logic.getFilter() instanceof TagFilter);
+//        menu.findItem(R.id.menu_enable_presetfilter).setEnabled(supportsFilters)
+//                .setChecked(prefs.getEnablePresetFilter() && logic.getFilter() instanceof PresetFilter);
+//
+//        menu.findItem(R.id.menu_simple_actions).setChecked(prefs.areSimpleActionsEnabled());
+//
+//        // only works with network
+//        menu.findItem(R.id.menu_feedback).setEnabled(networkConnected);
+//
+//        // enable the JS console menu entry
+//        menu.findItem(R.id.tag_menu_js_console).setEnabled(prefs.isJsConsoleEnabled());
+//
+//        menuUtil.setShowAlways(menu);
+//        // only show camera icon if we have a camera, and a camera app is
+//        // installed
+//        if (haveCamera) {
+//            menu.findItem(R.id.menu_camera).setShowAsAction(prefs.showCameraAction() ? MenuItem.SHOW_AS_ACTION_ALWAYS : MenuItem.SHOW_AS_ACTION_NEVER);
+//        } else {
+//            menu.findItem(R.id.menu_camera).setVisible(false).setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER);
+//        }
+//
+//        menu.findItem(R.id.menu_tools_calibrate_height)
+//                .setVisible(sensorManager != null && sensorManager.getDefaultSensor(Sensor.TYPE_PRESSURE) != null && haveTracker);
+//
+//        Uri egmUri = prefs.getEgmFile();
+//        boolean egmInstalled = egmUri != null && new File(egmUri.getPath()).exists();
+//        menu.findItem(R.id.menu_tools_install_egm).setVisible(!egmInstalled);
+//        menu.findItem(R.id.menu_tools_remove_egm).setVisible(egmInstalled);
 
         // per mode menu items
-        List<Mode> allModes = new ArrayList<>(Arrays.asList(Mode.values()));
-        final FloatingActionButton lock = getLock();
-        Menu modesMenu = noSubMenus ? menu : menu.findItem(R.id.menu_modes).getSubMenu();
-        modesMenu.removeGroup(R.id.menu_mode_group);
-        for (final Mode newMode : allModes) {
-            if (newMode.isSubModeOf() == null && newMode.isEnabled()) {
-                MenuItem modeItem = modesMenu.add(R.id.menu_mode_group, Menu.NONE, Menu.NONE, newMode.getName(Main.this));
-                modeItem.setCheckable(true);
-                setModeMenuListener(logic, modeItem, lock, newMode);
-                if (mode == newMode) {
-                    modeItem.setChecked(true);
-                }
-            }
-        }
+//        List<Mode> allModes = new ArrayList<>(Arrays.asList(Mode.values()));
+//        final FloatingActionButton lock = getLock();
+//        Menu modesMenu = noSubMenus ? menu : menu.findItem(R.id.menu_modes).getSubMenu();
+//        modesMenu.removeGroup(R.id.menu_mode_group);
+//        for (final Mode newMode : allModes) {
+//            if (newMode.isSubModeOf() == null && newMode.isEnabled()) {
+//                MenuItem modeItem = modesMenu.add(R.id.menu_mode_group, Menu.NONE, Menu.NONE, newMode.getName(Main.this));
+//                modeItem.setCheckable(true);
+//                setModeMenuListener(logic, modeItem, lock, newMode);
+//                if (mode == newMode) {
+//                    modeItem.setChecked(true);
+//                }
+//            }
+//        }
         return true;
     }
 
@@ -2599,11 +2615,11 @@ public class Main extends FullScreenAppCompatActivity
         case R.id.menu_authors:
             startActivity(new Intent(this, LicenseViewer.class));
             return true;
-        case R.id.logout:
-            prefs.setCgiToken(null);
-            startActivity(new Intent(this, LoginActivity.class));
-            finish();
-            return true;
+//        case R.id.logout:
+//            prefs.setCgiToken(null);
+//            startActivity(new Intent(this, LoginActivity.class));
+//            finish();
+//            return true;
         case R.id.menu_privacy:
             HelpViewer.start(this, R.string.help_privacy);
             return true;
@@ -3108,7 +3124,7 @@ public class Main extends FullScreenAppCompatActivity
     /**
      * Handles the menu click on "download current view".<br>
      * 
-     * When the user made some changes, {@link #DIALOG_TRANSFER_DOWNLOAD_CURRENT_WITH_CHANGES} will be shown.<br>
+     * When the user made some changes,  will be shown.<br>
      * Otherwise the current viewBox will be downloaded from the server.
      * 
      * @param add Boolean flag indicating to handle changes (true) or not (false).
@@ -3364,15 +3380,15 @@ public class Main extends FullScreenAppCompatActivity
      * Set the standard on click listener for the simple actions button
      */
     public void setSimpleActionsButtonListener() {
-        simpleActionsButton.setOnClickListener(v -> {
-            Logic logic = App.getLogic();
-            if (!logic.isInEditZoomRange()) {
-                ScreenMessage.toastTopInfo(Main.this, R.string.toast_not_in_edit_range);
-            } else {
-                PopupMenu popup = SimpleActionModeCallback.getMenu(Main.this, simpleActionsButton);
-                popup.show();
-            }
-        });
+//        simpleActionsButton.setOnClickListener(v -> {
+//            Logic logic = App.getLogic();
+//            if (!logic.isInEditZoomRange()) {
+//                ScreenMessage.toastTopInfo(Main.this, R.string.toast_not_in_edit_range);
+//            } else {
+//                PopupMenu popup = SimpleActionModeCallback.getMenu(Main.this, simpleActionsButton);
+//                popup.show();
+//            }
+//        });
     }
 
     /**
@@ -4556,7 +4572,7 @@ public class Main extends FullScreenAppCompatActivity
     /**
      * Set the position of the splitter in pixels
      * 
-     * @param the new position
+     * @param pos new position
      */
     public void setSplitterPosition(float pos) {
         ((SplitPaneLayout) findViewById(R.id.pane_layout)).setSplitterPositionPercent(pos);
@@ -4645,20 +4661,20 @@ public class Main extends FullScreenAppCompatActivity
      * Schedule automatic locking of the screen in a configurable time in the future
      */
     public void scheduleAutoLock() {
-        map.removeCallbacks(autoLock);
-        if (prefs != null) {
-            long delay = prefs.getAutolockDelay();
-            if (delay > 0) {
-                map.postDelayed(autoLock, delay);
-            }
-        }
+//        map.removeCallbacks(autoLock);
+//        if (prefs != null) {
+//            long delay = prefs.getAutolockDelay();
+//            if (delay > 0) {
+//                map.postDelayed(autoLock, delay);
+//            }
+//        }
     }
 
     /**
      * Remove any pending automatic lock tasks
      */
     public void descheduleAutoLock() {
-        map.removeCallbacks(autoLock);
+//        map.removeCallbacks(autoLock);
     }
 
     /**
@@ -4749,4 +4765,20 @@ public class Main extends FullScreenAppCompatActivity
         }
         list.append(e.getDescription(this));
     }
+
+    public class AddNewFieldListener implements OnClickListener {
+
+        @Override
+        public void onClick(View v) {
+            Logic logic = App.getLogic();
+            if (logic == null) return;
+            unlock();
+            if (!logic.isInEditZoomRange()) {
+                ScreenMessage.toastTopInfo(Main.this, R.string.toast_not_in_edit_range);
+            } else {
+                startSupportActionMode(new SimpleActionModeCallback(getEasyEditManager(), SimpleActionModeCallback.SimpleAction.WAY));
+            }
+        }
+    }
+
 }

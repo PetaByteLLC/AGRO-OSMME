@@ -245,6 +245,7 @@ public abstract class EasyEditActionModeCallback implements ActionMode.Callback 
      */
     public boolean onBackPressed() {
         mode.finish();
+        logic.setLocked(true);
         return true;
     }
 
@@ -254,6 +255,7 @@ public abstract class EasyEditActionModeCallback implements ActionMode.Callback 
     protected void onCloseClicked() {
         Log.d(DEBUG_TAG, "onCloseClicked");
         mode.finish();
+        logic.setLocked(true);
     }
 
     /**

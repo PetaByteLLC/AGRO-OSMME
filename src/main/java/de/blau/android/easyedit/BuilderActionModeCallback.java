@@ -23,7 +23,7 @@ import de.blau.android.util.ThemeUtils;
 public abstract class BuilderActionModeCallback extends EasyEditActionModeCallback implements android.view.MenuItem.OnMenuItemClickListener {
 
     protected final Preferences prefs;
-    protected Drawable          savedButton;
+//    protected Drawable          savedButton;
 
     /**
      * Construct a callback that shows a FAB with a check instead of the SimpleActionsButton
@@ -42,14 +42,14 @@ public abstract class BuilderActionModeCallback extends EasyEditActionModeCallba
         menu = replaceMenu(menu, mode, this);
         menu.clear();
         menuUtil.reset();
-        menu.add(GROUP_BASE, MENUITEM_HELP, Menu.CATEGORY_SYSTEM | 10, R.string.menu_help).setIcon(ThemeUtils.getResIdFromAttribute(main, R.attr.menu_help));
-        FloatingActionButton button = main.getSimpleActionsButton();
-        button.setOnClickListener(v -> finishBuilding());
-        savedButton = button.getDrawable();
-        button.setImageResource(R.drawable.ic_done_white_36dp);
-        if (!prefs.areSimpleActionsEnabled()) {
-            main.showSimpleActionsButton();
-        }
+//        menu.add(GROUP_BASE, MENUITEM_HELP, Menu.CATEGORY_SYSTEM | 10, R.string.menu_help).setIcon(ThemeUtils.getResIdFromAttribute(main, R.attr.menu_help));
+        //        FloatingActionButton button = main.getSimpleActionsButton();
+//        button.setOnClickListener(v -> finishBuilding());
+//        savedButton = button.getDrawable();
+//        button.setImageResource(R.drawable.ic_done_white_36dp);
+//        if (!prefs.areSimpleActionsEnabled()) {
+//            main.showSimpleActionsButton();
+//        }
         main.descheduleAutoLock();
         return true;
     }
@@ -63,12 +63,12 @@ public abstract class BuilderActionModeCallback extends EasyEditActionModeCallba
     @Override
     public void onDestroyActionMode(ActionMode mode) {
         super.onDestroyActionMode(mode);
-        FloatingActionButton button = main.getSimpleActionsButton();
-        button.setImageDrawable(savedButton);
-        main.setSimpleActionsButtonListener();
-        if (!prefs.areSimpleActionsEnabled()) {
-            main.hideSimpleActionsButton();
-        }
+//        FloatingActionButton button = main.getSimpleActionsButton();
+//        button.setImageDrawable(savedButton);
+//        main.setSimpleActionsButtonListener();
+//        if (!prefs.areSimpleActionsEnabled()) {
+//            main.hideSimpleActionsButton();
+//        }
     }
 
     @Override

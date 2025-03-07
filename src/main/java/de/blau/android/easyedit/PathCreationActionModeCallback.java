@@ -232,17 +232,22 @@ public class PathCreationActionModeCallback extends BuilderActionModeCallback {
         undo.setActionView(undoView);
         undoView.setEnabled(wayToFollow == null);
 
-        addSnapCheckBox(main, menu, snap, (CompoundButton buttonView, boolean isChecked) -> {
-            snap = isChecked;
-            logic.getPrefs().enableWaySnap(isChecked);
-        });
+//        addSnapCheckBox(main, menu, snap, (CompoundButton buttonView, boolean isChecked) -> {
+//            snap = isChecked;
+//            logic.getPrefs().enableWaySnap(isChecked);
+//        });
         //
-        menu.add(Menu.NONE, MENUITEM_NEWWAY_PRESET, Menu.NONE, R.string.tag_menu_preset).setIcon(ThemeUtils.getResIdFromAttribute(main, R.attr.menu_preset));
-        if (candidatesForFollowing != null && !candidatesForFollowing.isEmpty()) {
-            menu.add(Menu.NONE, MENUITEM_FOLLOW_WAY, Menu.NONE, R.string.menu_follow_way).setIcon(ThemeUtils.getResIdFromAttribute(main, R.attr.menu_follow));
-        }
-        menu.add(Menu.NONE, MENUITEM_ADDRESS, Menu.NONE, R.string.tag_menu_address).setIcon(ThemeUtils.getResIdFromAttribute(main, R.attr.menu_address));
-        menu.add(GROUP_BASE, MENUITEM_HELP, Menu.CATEGORY_SYSTEM | 10, R.string.menu_help).setIcon(ThemeUtils.getResIdFromAttribute(main, R.attr.menu_help));
+//        menu.add(Menu.NONE, MENUITEM_NEWWAY_PRESET, Menu.NONE, R.string.tag_menu_preset).setIcon(ThemeUtils.getResIdFromAttribute(main, R.attr.menu_preset));
+//        if (candidatesForFollowing != null && !candidatesForFollowing.isEmpty()) {
+//            menu.add(Menu.NONE, MENUITEM_FOLLOW_WAY, Menu.NONE, R.string.menu_follow_way).setIcon(ThemeUtils.getResIdFromAttribute(main, R.attr.menu_follow));
+//        }
+//        menu.add(Menu.NONE, MENUITEM_ADDRESS, Menu.NONE, R.string.tag_menu_address).setIcon(ThemeUtils.getResIdFromAttribute(main, R.attr.menu_address));
+//        menu.add(GROUP_BASE, MENUITEM_HELP, Menu.CATEGORY_SYSTEM | 10, R.string.menu_help).setIcon(ThemeUtils.getResIdFromAttribute(main, R.attr.menu_help));
+        MenuItem menuItem = menu.add("Save").setIcon(R.drawable.ic_done_black_36dp);
+        menuItem.setOnMenuItemClickListener(v -> {
+            finishBuilding();
+            return true;
+        });
         arrangeMenu(menu);
         return super.onPrepareActionMode(mode, menu);
     }
@@ -329,7 +334,7 @@ public class PathCreationActionModeCallback extends BuilderActionModeCallback {
         logic.setSelectedWay(createdWay);
         logic.setSelectedNode((Node) element);
         mode.setTitle(savedTitle);
-        mode.setSubtitle(R.string.add_way_node_instruction);
+        mode.setSubtitle(R.string.add_next_point);
         wayToFollow = null;
         mode.invalidate();
         main.invalidateMap();
@@ -430,7 +435,7 @@ public class PathCreationActionModeCallback extends BuilderActionModeCallback {
             mode.invalidate();
         }
 
-        mode.setSubtitle(R.string.add_way_node_instruction);
+        mode.setSubtitle(R.string.add_next_point);
         main.invalidateMap();
     }
 

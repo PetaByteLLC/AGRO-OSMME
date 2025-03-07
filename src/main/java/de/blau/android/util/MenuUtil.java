@@ -90,7 +90,7 @@ public class MenuUtil {
         FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
         if (Screen.isLarge(activity)) {
             params.width = ViewGroup.LayoutParams.WRAP_CONTENT;
-            params.gravity = Gravity.END;
+            params.gravity = Gravity.CENTER;
         }
         bar.setLayoutParams(params);
         if (fullScreen) {

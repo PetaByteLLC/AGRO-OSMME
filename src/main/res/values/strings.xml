@@ -1806,4 +1806,11 @@
     <string name="lp_title2">Enter your username and password</string>
     <string name="project_name">AgroMap</string>
     <string name="logotype">logotype</string>
+    <string name="logout">logout</string>
+    <string name="fields">Fields</string>
+    <string name="add_field">Add field</string>
+    <string name="profile">Profile</string>
+    <string name="adding_field">Adding field</string>
+    <string name="put_first_point">Put the first point</string>
+    <string name="add_next_point">Add next point</string>
 </resources>
