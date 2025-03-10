@@ -2,11 +2,11 @@
 <menu
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
-    <item
-        android:id="@+id/tag_menu_address"
-        android:icon="?attr/menu_address"
-        android:title="@string/tag_menu_address"
-        app:showAsAction="always" />
+<!--    <item-->
+<!--        android:id="@+id/tag_menu_address"-->
+<!--        android:icon="?attr/menu_address"-->
+<!--        android:title="@string/tag_menu_address"-->
+<!--        app:showAsAction="always" />-->
     <item
         android:id="@+id/tag_menu_apply_preset"
         android:icon="?attr/menu_apply_preset"

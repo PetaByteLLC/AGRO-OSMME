@@ -2032,7 +2032,7 @@ public class TagEditorFragment extends SelectableRowsFragment implements Propert
     public void onPrepareOptionsMenu(Menu menu) {
         super.onPrepareOptionsMenu(menu);
         // disable address prediction for stuff that won't have an address
-        menu.findItem(R.id.tag_menu_address).setVisible(elements.length == 1 && (!(elements[0] instanceof Way) || ((Way) elements[0]).isClosed()));
+//        menu.findItem(R.id.tag_menu_address).setVisible(elements.length == 1 && (!(elements[0] instanceof Way) || ((Way) elements[0]).isClosed()));
         boolean multiSelect = elements.length > 1;
         menu.findItem(R.id.tag_menu_apply_preset).setEnabled(!multiSelect);
         menu.findItem(R.id.tag_menu_apply_preset_with_optional).setEnabled(!multiSelect);
@@ -2048,9 +2048,9 @@ public class TagEditorFragment extends SelectableRowsFragment implements Propert
         case android.R.id.home:
             propertyEditorListener.updateAndFinish();
             return true;
-        case R.id.tag_menu_address:
-            predictAddressTags(false);
-            return true;
+//        case R.id.tag_menu_address:
+//            predictAddressTags(false);
+//            return true;
         case R.id.tag_menu_sourcesurvey:
             doSourceSurvey();
             return true;

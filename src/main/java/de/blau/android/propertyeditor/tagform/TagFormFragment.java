@@ -219,13 +219,13 @@ public class TagFormFragment extends BaseFragment implements FormUpdate {
         if (savedInstanceState == null) {
             // No previous state to restore - get the state from the intent
             Log.d(DEBUG_TAG, "Initializing from original arguments");
-            displayMRUpresets = getArguments().getBoolean(DISPLAY_MRU_PRESETS, false);
-            focusOnAddress = getArguments().getBoolean(FOCUS_ON_ADDRESS, false);
+            displayMRUpresets = false;
+            focusOnAddress = false;
             focusTag = getArguments().getString(FOCUS_TAG);
         } else {
             // Restore activity from saved state
             Log.d(DEBUG_TAG, "Restoring from savedInstanceState");
-            displayMRUpresets = savedInstanceState.getBoolean(DISPLAY_MRU_PRESETS);
+            displayMRUpresets = false;
             Serializable temp = Util.getSerializeable(savedInstanceState, SAVED_DISPLAY_OPTIONAL, Serializable.class);
             if (temp instanceof Map<?, ?>) {
                 final PresetGroup rootGroup = App.getCurrentRootPreset(getContext()).getRootGroup();
@@ -480,7 +480,7 @@ public class TagFormFragment extends BaseFragment implements FormUpdate {
         super.onPrepareOptionsMenu(menu);
         // disable address prediction for stuff that won't have an address
         OsmElement element = propertyEditorListener.getElement();
-        menu.findItem(R.id.tag_menu_address).setVisible((!(element instanceof Way) || ((Way) element).isClosed()));
+//        menu.findItem(R.id.tag_menu_address).setVisible((!(element instanceof Way) || ((Way) element).isClosed()));
     }
 
     @Override
@@ -491,14 +491,14 @@ public class TagFormFragment extends BaseFragment implements FormUpdate {
             updateEditorFromText();
             propertyEditorListener.updateAndFinish();
             return true;
-        case R.id.tag_menu_address:
-            updateEditorFromText();
-            tagListener.predictAddressTags(true);
-            update();
-            if (!focusOnTag(Tags.KEY_ADDR_HOUSENUMBER)) {
-                focusOnTag(Tags.KEY_ADDR_STREET);
-            }
-            return true;
+//        case R.id.tag_menu_address:
+//            updateEditorFromText();
+//            tagListener.predictAddressTags(true);
+//            update();
+//            if (!focusOnTag(Tags.KEY_ADDR_HOUSENUMBER)) {
+//                focusOnTag(Tags.KEY_ADDR_STREET);
+//            }
+//            return true;
         case R.id.tag_menu_apply_preset:
         case R.id.tag_menu_apply_preset_with_optional:
             PresetItem pi = tagListener.getBestPreset();
