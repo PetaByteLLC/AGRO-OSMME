@@ -4,11 +4,13 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:textColor="@color/black">
     <de.blau.android.views.ExtendedViewPager
         android:id="@+id/pager"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:textColor="@color/black">
         <de.blau.android.views.ExtendedPagerTabStrip
             android:id="@+id/pager_header"
             style="?attr/PagerTabStrip"
@@ -18,23 +20,27 @@
             android:paddingBottom="4dp"
             android:paddingTop="4dp"
             android:paddingLeft="?attr/dialogPreferredPadding"
-            android:paddingRight="?attr/dialogPreferredPadding" />
+            android:paddingRight="?attr/dialogPreferredPadding"
+            android:textColor="@color/black"/>
         <LinearLayout
             android:id="@+id/review_page"
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
             android:paddingLeft="?attr/dialogPreferredPadding"
             android:paddingRight="?attr/dialogPreferredPadding"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:textColor="@color/black">
             <TextView
                 android:id="@+id/review_heading"
                 android:layout_width="wrap_content"
                 android:layout_height="48dp"
-                android:gravity="center_vertical" />
+                android:gravity="center_vertical"
+                android:textColor="@color/black"/>
             <ListView
                 android:id="@+id/upload_changes"
                 android:layout_width="fill_parent"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:textColor="@color/black"/>
         </LinearLayout>
         <LinearLayout
             android:id="@+id/tags_page"
@@ -42,25 +48,29 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:paddingLeft="?attr/dialogPreferredPadding"
-            android:paddingRight="?attr/dialogPreferredPadding">
+            android:paddingRight="?attr/dialogPreferredPadding"
+            android:textColor="@color/black">
             <ScrollView
                 xmlns:android="http://schemas.android.com/apk/res/android"
                 xmlns:tools="http://schemas.android.com/tools"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:fillViewport="true">
+                android:fillViewport="true"
+                android:textColor="@color/black">
                 <RelativeLayout
                     android:id="@+id/upload_comment_controls"
                     android:layout_width="fill_parent"
                     android:layout_height="fill_parent"
-                    android:gravity="top">
+                    android:gravity="top"
+                    android:textColor="@color/black">
                     <TextView
                         android:id="@+id/upload_comment_label"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:paddingTop="16dp"
                         android:gravity="center_vertical"
-                        android:text="@string/upload_comment_label" />
+                        android:text="@string/upload_comment_label"
+                        android:textColor="@color/black"/>
                     <ImageButton
                         android:id="@+id/upload_comment_clear"
                         android:layout_width="wrap_content"
@@ -73,7 +83,8 @@
                         android:layout_alignParentRight="true"
                         android:background="@android:color/transparent"
                         app:tint="?attr/colorAccent"
-                        android:src="@drawable/baseline_clear_white_36dp" />
+                        android:src="@drawable/baseline_clear_white_36dp"
+                        android:textColor="@color/black"/>
                     <de.blau.android.views.MultiLineAutoCompleteTextView
                         android:id="@+id/upload_comment"
                         android:layout_width="fill_parent"
@@ -85,7 +96,8 @@
                         android:inputType="textMultiLine"
                         android:maxLength="255"
                         android:lines="3"
-                        android:maxLines="3" />
+                        android:maxLines="3"
+                        android:textColor="@color/black"/>
                     <TextView
                         android:id="@+id/upload_source_label"
                         android:layout_width="wrap_content"
@@ -93,7 +105,8 @@
                         android:paddingTop="10dp"
                         android:layout_below="@id/upload_comment"
                         android:gravity="center_vertical"
-                        android:text="@string/upload_source_label" />
+                        android:text="@string/upload_source_label"
+                        android:textColor="@color/black"/>
                     <ImageButton
                         android:id="@+id/upload_source_clear"
                         android:layout_width="wrap_content"
@@ -106,7 +119,8 @@
                         android:layout_alignParentRight="true"
                         android:background="@android:color/transparent"
                         app:tint="?attr/colorAccent"
-                        android:src="@drawable/baseline_clear_white_36dp" />
+                        android:src="@drawable/baseline_clear_white_36dp"
+                        android:textColor="@color/black"/>
                     <de.blau.android.views.MultiLineAutoCompleteTextView
                         android:id="@+id/upload_source"
                         android:layout_width="fill_parent"
@@ -118,14 +132,16 @@
                         android:inputType="textMultiLine"
                         android:maxLength="255"
                         android:lines="3"
-                        android:maxLines="3" />
+                        android:maxLines="3"
+                        android:textColor="@color/black"/>
                     <TextView
                         android:id="@+id/upload_close_open_changeset_label"
                         android:layout_width="wrap_content"
                         android:layout_height="36dp"
                         android:layout_below="@id/upload_source"
                         android:gravity="center_vertical"
-                        android:text="@string/upload_close_open_changeset_label" />
+                        android:text="@string/upload_close_open_changeset_label"
+                        android:textColor="@color/black"/>
                     <CheckBox
                         android:id="@+id/upload_close_open_changeset"
                         android:layout_width="wrap_content"
@@ -136,14 +152,16 @@
                         android:layout_alignTop="@id/upload_close_open_changeset_label"
                         android:layout_below="@id/upload_source"
                         android:gravity="center_vertical"
-                        android:text="" />
+                        android:text=""
+                        android:textColor="@color/black"/>
                     <TextView
                         android:id="@+id/upload_close_changeset_label"
                         android:layout_width="wrap_content"
                         android:layout_height="36dp"
                         android:layout_below="@id/upload_close_open_changeset_label"
                         android:gravity="center_vertical"
-                        android:text="@string/upload_close_changeset_label" />
+                        android:text="@string/upload_close_changeset_label"
+                        android:textColor="@color/black"/>
                     <CheckBox
                         android:id="@+id/upload_close_changeset"
                         android:layout_width="wrap_content"
@@ -154,14 +172,16 @@
                         android:layout_alignTop="@id/upload_close_changeset_label"
                         android:layout_below="@id/upload_source"
                         android:gravity="center_vertical"
-                        android:text="" />
+                        android:text=""
+                        android:textColor="@color/black"/>
                     <TextView
                         android:id="@+id/upload_request_review_label"
                         android:layout_width="wrap_content"
                         android:layout_height="36dp"
                         android:layout_below="@id/upload_close_changeset_label"
                         android:gravity="center_vertical"
-                        android:text="@string/upload_request_review_label" />
+                        android:text="@string/upload_request_review_label"
+                        android:textColor="@color/black"/>
                     <CheckBox
                         android:id="@+id/upload_request_review"
                         android:layout_width="wrap_content"
@@ -171,14 +191,16 @@
                         android:layout_alignRight="@id/upload_close_changeset"
                         android:layout_below="@id/upload_close_changeset"
                         android:gravity="center_vertical"
-                        android:text="" />
+                        android:text=""
+                        android:textColor="@color/black"/>
                     <TextView
                         android:id="@+id/upload_empty_comment_warning_label"
                         android:layout_width="wrap_content"
                         android:layout_height="36dp"
                         android:layout_below="@id/upload_request_review_label"
                         android:gravity="center_vertical"
-                        android:text="@string/upload_empty_comment_warning_label" />
+                        android:text="@string/upload_empty_comment_warning_label"
+                        android:textColor="@color/black"/>
                     <CheckBox
                         android:id="@+id/upload_empty_comment_warning"
                         android:layout_width="wrap_content"
@@ -188,7 +210,8 @@
                         android:layout_alignRight="@id/upload_request_review"
                         android:layout_below="@id/upload_request_review"
                         android:gravity="center_vertical"
-                        android:text="" />
+                        android:text=""
+                        android:textColor="@color/black"/>
                 </RelativeLayout>
             </ScrollView>
         </LinearLayout>

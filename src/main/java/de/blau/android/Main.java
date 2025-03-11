@@ -1865,15 +1865,12 @@ public class Main extends FullScreenAppCompatActivity
             hideFollowButton();
         }
 
-        MenuItem fieldsItem = menu.findItem(R.id.fields);
-        fieldsItem.setActionView(R.layout.agro_button_fields);
-
         MenuItem addNewFieldItem = menu.findItem(R.id.add_new_field);
         addNewFieldItem.setActionView(R.layout.agro_button_add_field);
         addNewFieldItem.getActionView().setOnClickListener(new AddNewFieldListener());
 
-        MenuItem profileItem = menu.findItem(R.id.profile);
-        profileItem.setActionView(R.layout.agro_button_profile);
+//        MenuItem profileItem = menu.findItem(R.id.profile);
+//        profileItem.setActionView(R.layout.agro_button_profile);
 //        addNewFieldItem.setShowAsActionFlags(SHOW_AS_ACTION_IF_ROOM);
 //        setShowAsAction(menu.findItem(R.id.fields), R.id.fields);
 //        setShowAsAction(addNewFieldItem, R.id.add_new_field);
@@ -1908,6 +1905,7 @@ public class Main extends FullScreenAppCompatActivity
 //        menu.findItem(R.id.menu_gps_add_bookmark).setEnabled(map.getViewBox().isValid());
 //        menu.findItem(R.id.menu_gps_show_bookmarks).setEnabled(true);
 //
+//        transferItem.setActionView(R.layout.agro_button_fields);
         LayerDrawable transfer = (LayerDrawable) menu.findItem(R.id.menu_transfer).getIcon();
         final StorageDelegator delegator = App.getDelegator();
         BadgeDrawable.setBadgeWithCount(this, transfer, delegator.getApiElementCount(), prefs.getUploadOkLimit(), prefs.getUploadWarnLimit());
@@ -2619,11 +2617,11 @@ public class Main extends FullScreenAppCompatActivity
         case R.id.menu_authors:
             startActivity(new Intent(this, LicenseViewer.class));
             return true;
-//        case R.id.logout:
-//            prefs.setCgiToken(null);
-//            startActivity(new Intent(this, LoginActivity.class));
-//            finish();
-//            return true;
+        case R.id.logout:
+            prefs.setCgiToken(null);
+            startActivity(new Intent(this, LoginActivity.class));
+            finish();
+            return true;
         case R.id.menu_privacy:
             HelpViewer.start(this, R.string.help_privacy);
             return true;
