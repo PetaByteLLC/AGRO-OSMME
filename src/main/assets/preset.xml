@@ -3160,11 +3160,21 @@
             <label text="... other transportation modes possible" />
         </optional>
     </chunk>
+    <chunk id="landuse_area">
+        <text key="area" text="Area"/>
+        <combo display_values="Hectare (ha),Square Mile (mi²),Square foot (ft²),Acres (ac),Kilometres (km²),Metres (m²),Centimetres (cm²),Millimetres (mm²)"
+            editable="false" key="areaUnit" text="Area unit" values="ha,mi2,ft2,ac,km2,m2,cm2,mm2"/>
+    </chunk>
+    <chunk id="gps_position">
+        <text key="position" text="Position"/>
+    </chunk>
     <item name="Farmyard" icon="icons/png/landuse_grass.png" preset_name_label="true"
         type="closedway,multipolygon">
         <link wiki="Tag:landuse=farmyard" />
         <space />
         <key key="landuse" value="farmyard" />
+        <reference ref="landuse_area" />
+        <reference ref="gps_position" />
     </item>
     <item name="Farmland" icon="icons/png/landuse_plant_26008.png" preset_name_label="true"
         type="closedway,multipolygon">
@@ -3175,5 +3185,8 @@
             editable="false" key="culture" text="Culture"
             values="wheat,cereals,barley,corn,raw cotton,sugar beet" />
         <combo editable="true" key="variety" text="Variety" display_values="Hybrid" values="hybrid"/>
+        <space />
+        <reference ref="landuse_area" />
+        <reference ref="gps_position" />
     </item>
 </presets>
