@@ -780,7 +780,7 @@ public class PathCreationActionModeCallback extends BuilderActionModeCallback {
                 if (select) {
                     main.startSupportActionMode(new NodeSelectionActionModeCallback(manager, possibleNode));
                 }
-                main.performTagEdit(possibleNode, null, false, false);
+                main.performTagEdit(possibleNode, null, false, true);
             } else {
                 Log.e(DEBUG_TAG, "tagApplicable called with null arguments");
             }
@@ -788,7 +788,7 @@ public class PathCreationActionModeCallback extends BuilderActionModeCallback {
             if (select) {
                 main.startSupportActionMode(new WaySelectionActionModeCallback(manager, possibleWay));
             }
-            main.performTagEdit(possibleWay, null, false, false);
+            main.performTagEdit(possibleWay, null, false, true);
         }
     }
 }

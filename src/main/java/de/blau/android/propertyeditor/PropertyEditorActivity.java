@@ -98,10 +98,10 @@ public class PropertyEditorActivity<M extends Map<String, String> & Serializable
             @NonNull PropertyEditorData[] dataClass, boolean predictAddressTags, boolean showPresets, M extraTags, L presetItems) {
         Intent intent = new Intent(activity, PropertyEditorActivity.class);
         intent.putExtra(PropertyEditorFragment.TAGEDIT_DATA, dataClass);
-        intent.putExtra(PropertyEditorFragment.TAGEDIT_LAST_ADDRESS_TAGS, false);
-        intent.putExtra(PropertyEditorFragment.TAGEDIT_SHOW_PRESETS, false);
-//        intent.putExtra(PropertyEditorFragment.TAGEDIT_EXTRA_TAGS, extraTags);
-//        intent.putExtra(PropertyEditorFragment.TAGEDIT_PRESETSTOAPPLY, presetItems);
+        intent.putExtra(PropertyEditorFragment.TAGEDIT_LAST_ADDRESS_TAGS, Boolean.valueOf(predictAddressTags));
+        intent.putExtra(PropertyEditorFragment.TAGEDIT_SHOW_PRESETS, Boolean.valueOf(showPresets));
+        intent.putExtra(PropertyEditorFragment.TAGEDIT_EXTRA_TAGS, extraTags);
+        intent.putExtra(PropertyEditorFragment.TAGEDIT_PRESETSTOAPPLY, presetItems);
         return intent;
     }
 
