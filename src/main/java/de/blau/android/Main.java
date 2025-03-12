@@ -495,7 +495,6 @@ public class Main extends FullScreenAppCompatActivity
 
         LinearLayout ml = (LinearLayout) getLayoutInflater().inflate(layout, null);
         mapLayout = (RelativeLayout) ml.findViewById(R.id.mainMap);
-
         Logic logic = App.getLogic(); // logic instance might still be around
         Map previousMap = logic != null ? logic.getMap() : null;
         map = new Map(this);
