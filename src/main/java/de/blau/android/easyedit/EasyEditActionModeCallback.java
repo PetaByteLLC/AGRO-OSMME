@@ -136,6 +136,7 @@ public abstract class EasyEditActionModeCallback implements ActionMode.Callback 
         main.showLock();
         main.showLayersControl();
         App.getLogic().setLocked(true);
+        main.changeBottomBarHeight(120);
     }
 
     /**

@@ -310,6 +310,7 @@ public class SimpleActionModeCallback extends EasyEditActionModeCallback impleme
 //        simpleAction.addMenuItems(manager, main, menu);
 //        menu.add(GROUP_BASE, MENUITEM_HELP, Menu.CATEGORY_SYSTEM | 10, R.string.menu_help).setIcon(ThemeUtils.getResIdFromAttribute(main, R.attr.menu_help));
 //        arrangeMenu(menu);
+        main.changeBottomBarHeight(0);
         return true;
     }
 

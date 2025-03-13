@@ -82,4 +82,15 @@
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize" />
     </FrameLayout>
+    <TextView
+        android:id="@+id/unlockButton"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:text="Выйти из режима добавления полей"
+        android:textAlignment="center"
+        android:textIsSelectable="false"
+        android:textColor="@color/material_red"
+        android:gravity="center"
+        android:visibility="visible"
+        />
 </LinearLayout>

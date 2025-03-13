@@ -3284,6 +3284,7 @@ public class Main extends FullScreenAppCompatActivity
         if (lock != null) {
             lock.hide();
         }
+        visibleLockButton();
     }
 
     /**
@@ -3294,6 +3295,7 @@ public class Main extends FullScreenAppCompatActivity
         if (lock != null) {
             lock.show();
         }
+        invisibleUnlockButton();
     }
 
     /**
@@ -4780,9 +4782,33 @@ public class Main extends FullScreenAppCompatActivity
                 App.getLogic().setLocked(false);
                 updateActionbarEditMode();
                 map.invalidate();
+                visibleLockButton();
                 startSupportActionMode(new SimpleActionModeCallback(getEasyEditManager(), SimpleActionModeCallback.SimpleAction.WAY));
             }
         }
     }
 
+    public void visibleLockButton() {
+        View viewById = findViewById(R.id.unlockButton);
+        ViewGroup.LayoutParams layoutParams = viewById.getLayoutParams();
+        layoutParams.height = 120;
+        viewById.setLayoutParams(layoutParams);
+        viewById.setOnClickListener(v -> {
+            getEasyEditManager().finish();
+        });
+    }
+
+    public void invisibleUnlockButton() {
+        View viewById = findViewById(R.id.unlockButton);
+        ViewGroup.LayoutParams layoutParams = viewById.getLayoutParams();
+        layoutParams.height = 0;
+        viewById.setLayoutParams(layoutParams);
+    }
+
+    public void changeBottomBarHeight(int pixel) {
+        View viewById = findViewById(R.id.bottomBar);
+        ViewGroup.LayoutParams layoutParams = viewById.getLayoutParams();
+        layoutParams.height = pixel;
+        viewById.setLayoutParams(layoutParams);
+    }
 }
