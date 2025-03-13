@@ -71,6 +71,7 @@ import android.view.ViewStub;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.RelativeLayout.LayoutParams;
+import android.widget.TextView;
 import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -88,6 +89,7 @@ import androidx.fragment.app.FragmentActivity;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.work.PeriodicWorkRequest;
 import androidx.work.WorkManager;
+
 import de.blau.android.Logic.CursorPaddirection;
 import de.blau.android.RemoteControlUrlActivity.RemoteControlUrlData;
 import de.blau.android.Selection.Ids;
@@ -124,6 +126,7 @@ import de.blau.android.easyedit.MultiSelectActionModeCallback;
 import de.blau.android.easyedit.SimpleActionModeCallback;
 import de.blau.android.exception.OsmException;
 import de.blau.android.exception.OsmIllegalOperationException;
+import de.blau.android.exception.StorageException;
 import de.blau.android.filter.Filter;
 import de.blau.android.filter.PresetFilter;
 import de.blau.android.filter.TagFilter;
@@ -211,7 +214,7 @@ import de.blau.android.views.ZoomControls;
 
 /**
  * This is the main Activity from where other Activities will be started.
- * 
+ *
  * @author mb
  * @author Simon Poole
  */
@@ -221,7 +224,7 @@ public class Main extends FullScreenAppCompatActivity
     /**
      * Tag used for Android-logging.
      */
-    private static final int    TAG_LEN   = Math.min(LOG_TAG_LEN, Main.class.getSimpleName().length());
+    private static final int TAG_LEN = Math.min(LOG_TAG_LEN, Main.class.getSimpleName().length());
     private static final String DEBUG_TAG = Main.class.getSimpleName().substring(0, TAG_LEN);
 
     /**
@@ -242,16 +245,16 @@ public class Main extends FullScreenAppCompatActivity
     /**
      * Requests voice recognition.
      */
-    public static final int VOICE_RECOGNITION_REQUEST_CODE      = 3;
+    public static final int VOICE_RECOGNITION_REQUEST_CODE = 3;
     public static final int VOICE_RECOGNITION_NOTE_REQUEST_CODE = 4;
 
-    public static final String ACTION_EXIT                  = "de.blau.android.EXIT";
-    public static final String ACTION_UPDATE                = "de.blau.android.UPDATE";
-    public static final String ACTION_DELETE_PHOTO          = "de.blau.android.DELETE_PHOTO";
-    public static final String ACTION_IMAGE_SELECT          = "de.blau.android.ACTION_MAPILLARY_SELECT";
-    public static final String ACTION_MAP_UPDATE            = "de.blau.android.MAP_UPDATE";
-    public static final String ACTION_PUSH_SELECTION        = "de.blau.android.PUSH_SELECTION";
-    public static final String ACTION_POP_SELECTION         = "de.blau.android.POP_SELECTION";
+    public static final String ACTION_EXIT = "de.blau.android.EXIT";
+    public static final String ACTION_UPDATE = "de.blau.android.UPDATE";
+    public static final String ACTION_DELETE_PHOTO = "de.blau.android.DELETE_PHOTO";
+    public static final String ACTION_IMAGE_SELECT = "de.blau.android.ACTION_MAPILLARY_SELECT";
+    public static final String ACTION_MAP_UPDATE = "de.blau.android.MAP_UPDATE";
+    public static final String ACTION_PUSH_SELECTION = "de.blau.android.PUSH_SELECTION";
+    public static final String ACTION_POP_SELECTION = "de.blau.android.POP_SELECTION";
     public static final String ACTION_CLEAR_SELECTION_STACK = "de.blau.android.CLEAR_SELECTION_STACK";
 
     /**
@@ -301,11 +304,17 @@ public class Main extends FullScreenAppCompatActivity
      */
     private RelativeLayout mapLayout;
 
-    /** The map View. */
-    private Map                                map;
-    /** Detector for taps, drags, and scaling. */
-    private VersionedGestureDetector           mDetector;
-    /** Onscreen map zoom controls. */
+    /**
+     * The map View.
+     */
+    private Map map;
+    /**
+     * Detector for taps, drags, and scaling.
+     */
+    private VersionedGestureDetector mDetector;
+    /**
+     * Onscreen map zoom controls.
+     */
     private de.blau.android.views.ZoomControls zoomControls;
 
     /**
@@ -328,14 +337,14 @@ public class Main extends FullScreenAppCompatActivity
      * potentially are processing results of intents before onResume runs Set by {@link #onCreate(Bundle)}. Overridden
      * by {@link #redownloadOnResume}.
      */
-    private boolean      loadOnResume;
+    private boolean loadOnResume;
     private final Object loadOnResumeLock = new Object();
 
     /**
      * Flag indicating if we should set the view box bounding box in onResume Again we may be already setting the view
      * box by an intent and don't want to overwrite it
      */
-    private boolean      setViewBox     = true;
+    private boolean setViewBox = true;
     private final Object setViewBoxLock = new Object();
 
     private boolean showGPS;
@@ -347,12 +356,12 @@ public class Main extends FullScreenAppCompatActivity
      */
     private boolean wantLocationUpdates = false;
 
-    private Queue<Intent>        newIntents     = new LinkedList<>();
-    private final Object         newIntentsLock = new Object();
-    private GeoUriData           geoData        = null;
-    private RemoteControlUrlData rcData         = null;
-    private Uri                  contentUri     = null;
-    private String               contentUriType = null;
+    private Queue<Intent> newIntents = new LinkedList<>();
+    private final Object newIntentsLock = new Object();
+    private GeoUriData geoData = null;
+    private RemoteControlUrlData rcData = null;
+    private Uri contentUri = null;
+    private String contentUriType = null;
 
     /**
      * Optional bottom toolbar
@@ -388,10 +397,12 @@ public class Main extends FullScreenAppCompatActivity
 
     private Location lastLocation = null;
 
-    /** Objects to handle showing device orientation. */
+    /**
+     * Objects to handle showing device orientation.
+     */
     private SensorManager sensorManager;
-    private Sensor        rotation;
-    private float         lastAzimut = -9999;
+    private Sensor rotation;
+    private float lastAzimut = -9999;
 
     private final CompassEventListener compassEventListener = new CompassEventListener((float azimut) -> {
         map.setOrientation(azimut);
@@ -414,13 +425,13 @@ public class Main extends FullScreenAppCompatActivity
      */
     private class PermissionStatus {
         boolean granted = false;
-        boolean asked   = false;
+        boolean asked = false;
     }
 
     private final java.util.Map<String, PermissionStatus> permissions;
 
     /**
-     * 
+     *
      */
     private NetworkStatus networkStatus;
 
@@ -478,7 +489,7 @@ public class Main extends FullScreenAppCompatActivity
 //        if (prefs.lightThemeEnabled()) {
 //            setTheme(statusBarHidden() ? R.style.Theme_customMain_Light_FullScreen : R.style.Theme_customMain_Light);
 //        } else if (statusBarHidden()) {
-            setTheme(R.style.Theme_customMain_Light_FullScreen);
+        setTheme(R.style.Theme_customMain_Light_FullScreen);
 //        }
 
         super.onCreate(savedInstanceState);
@@ -509,7 +520,7 @@ public class Main extends FullScreenAppCompatActivity
         map.setOnGenericMotionListener(new MotionEventListener());
 
         mapLayout.addView(map, 0); // index 0 so that anything in the layout
-                                   // comes after it/on top
+        // comes after it/on top
 
         mDetector = VersionedGestureDetector.newInstance(this, mapTouchListener);
 
@@ -575,7 +586,7 @@ public class Main extends FullScreenAppCompatActivity
         setSupportActionBar(toolbar);
 
 //        if (prefs.splitActionBarEnabled()) {
-            setBottomBar((androidx.appcompat.widget.ActionMenuView) findViewById(R.id.bottomToolbar));
+        setBottomBar((androidx.appcompat.widget.ActionMenuView) findViewById(R.id.bottomToolbar));
 //        } else {
 //            findViewById(R.id.bottomBar).setVisibility(View.GONE);
 //        }
@@ -624,25 +635,25 @@ public class Main extends FullScreenAppCompatActivity
      */
     private void setScreenOrientation() {
         switch (prefs.getMapOrientation()) {
-        case "CURRENT":
-            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LOCKED);
-            break;
-        case "PORTRAIT":
-            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-            break;
-        case "LANDSCAPE":
-            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
-            break;
-        case "AUTO":
-        default:
-            // do nothing
-            break;
+            case "CURRENT":
+                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LOCKED);
+                break;
+            case "PORTRAIT":
+                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+                break;
+            case "LANDSCAPE":
+                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+                break;
+            case "AUTO":
+            default:
+                // do nothing
+                break;
         }
     }
 
     /**
      * Get the best last position from the LocactionManager
-     * 
+     *
      * @return a Location object
      */
     @Nullable
@@ -693,6 +704,9 @@ public class Main extends FullScreenAppCompatActivity
         showActionBar();
 
         Util.clearCaches(this, App.getConfiguration(), getResources().getConfiguration());
+
+        findViewById(R.id.undo_button).setOnClickListener(v -> handleUndo());
+        findViewById(R.id.next_button).setOnClickListener(v -> finishBuilding());
     }
 
     @Override
@@ -750,7 +764,7 @@ public class Main extends FullScreenAppCompatActivity
                 setShowGPS(prefs.getShowGPS());
             }
             map.setPrefs(Main.this, prefs); // set again as ViewBox may have
-                                            // changed
+            // changed
 //            setupLockButton();
             if (logic.getFilter() != null) {
                 logic.getFilter().addControls(mapLayout, () -> {
@@ -858,9 +872,9 @@ public class Main extends FullScreenAppCompatActivity
 
     /**
      * Set a new instance of Preferences
-     * 
+     * <p>
      * As the in device shared preferences may have been changed we need to be able to update our copy
-     * 
+     *
      * @param prefs the new Preferences instance
      */
     public void updatePrefs(@NonNull Preferences prefs) {
@@ -869,7 +883,7 @@ public class Main extends FullScreenAppCompatActivity
 
     /**
      * Check if this device has an active camera
-     * 
+     *
      * @return true is a camera is present
      */
     private boolean checkForCamera() {
@@ -881,7 +895,7 @@ public class Main extends FullScreenAppCompatActivity
 
     /**
      * Check if we have fine location permission and ask for it if not Side effect: binds to TrackerService
-     * 
+     *
      * @param whenDone run this when finished, use this if you need permissions before an operation is executed
      */
     private void checkPermissions(@NonNull Runnable whenDone) {
@@ -904,10 +918,10 @@ public class Main extends FullScreenAppCompatActivity
 
     /**
      * Check if a permission needs to be requested, and if that is the case add it to a list
-     * 
-     * @param permission the permission in question
+     *
+     * @param permission      the permission in question
      * @param permissionsList the list to add it to
-     * @param onGranted execute this id the permission has been granted
+     * @param onGranted       execute this id the permission has been granted
      */
     private void checkPermission(@NonNull final String permission, @NonNull final List<String> permissionsList, @Nullable Runnable onGranted) {
         PermissionStatus permissionStatus = permissions.get(permission);
@@ -981,73 +995,73 @@ public class Main extends FullScreenAppCompatActivity
                 Log.d(DEBUG_TAG, "action " + action);
                 final Logic logic = App.getLogic();
                 switch (action) {
-                case ACTION_EXIT:
-                    exit();
-                    return;
-                case ACTION_UPDATE:
-                    updatePrefs(new Preferences(this));
-                    logic.setPrefs(prefs);
-                    if (map != null) {
-                        map.setPrefs(this, prefs);
-                        map.invalidate();
-                    }
-                    break;
-                case ACTION_DELETE_PHOTO: // harmless as this just deletes from the index
-                    try (PhotoIndex index = new PhotoIndex(this)) {
-                        Uri uri = intent.getData();
-                        if (!index.deletePhoto(this, uri)) {
-                            String path = ContentResolverUtil.getPath(this, uri);
-                            if (path == null || !index.deletePhoto(this, path)) {
-                                Log.e(DEBUG_TAG, "deleting " + uri + " from index failed");
+                    case ACTION_EXIT:
+                        exit();
+                        return;
+                    case ACTION_UPDATE:
+                        updatePrefs(new Preferences(this));
+                        logic.setPrefs(prefs);
+                        if (map != null) {
+                            map.setPrefs(this, prefs);
+                            map.invalidate();
+                        }
+                        break;
+                    case ACTION_DELETE_PHOTO: // harmless as this just deletes from the index
+                        try (PhotoIndex index = new PhotoIndex(this)) {
+                            Uri uri = intent.getData();
+                            if (!index.deletePhoto(this, uri)) {
+                                String path = ContentResolverUtil.getPath(this, uri);
+                                if (path == null || !index.deletePhoto(this, path)) {
+                                    Log.e(DEBUG_TAG, "deleting " + uri + " from index failed");
+                                }
+                            }
+                            if (uri.equals(contentUri)) {
+                                contentUri = null;
                             }
                         }
-                        if (uri.equals(contentUri)) {
-                            contentUri = null;
+                        final de.blau.android.layer.photos.MapOverlay photoLayer = map != null ? map.getPhotoLayer() : null;
+                        if (photoLayer != null) {
+                            photoLayer.deselectObjects();
+                            photoLayer.invalidate();
                         }
-                    }
-                    final de.blau.android.layer.photos.MapOverlay photoLayer = map != null ? map.getPhotoLayer() : null;
-                    if (photoLayer != null) {
-                        photoLayer.deselectObjects();
-                        photoLayer.invalidate();
-                    }
-                    break;
-                case ACTION_IMAGE_SELECT:
-                    if (map != null) {
-                        SelectImageInterface layer = (SelectImageInterface) map
-                                .getLayer(Util.getSerializableExtra(intent, NetworkImageLoader.LAYER_TYPE_KEY, LayerType.class));
-                        selectImageOnLayer(intent, layer);
-                    }
-                    break;
-                case ACTION_MAP_UPDATE:
-                    invalidateMap();
-                    break;
-                case ACTION_PUSH_SELECTION:
-                case ACTION_POP_SELECTION:
-                    if (ACTION_PUSH_SELECTION.equals(action)) {
-                        Selection.Ids ids = Util.getSerializableExtra(intent, Selection.SELECTION_KEY, Ids.class);
-                        Selection selection = new Selection();
-                        selection.fromIds(this, App.getDelegator(), ids);
-                        logic.pushSelection(selection);
-                    } else {
-                        logic.popSelection();
-                    }
-                    final List<OsmElement> selectedElements = logic.getSelectedElements();
-                    zoomTo(selectedElements);
-                    if (Mode.MODE_EASYEDIT == logic.getMode() && !selectedElements.isEmpty()) {
-                        getEasyEditManager().startElementSelectionMode();
-                    }
-                    invalidateMap();
-                    break;
-                case ACTION_CLEAR_SELECTION_STACK:
-                    Deque<Selection> stack = logic.getSelectionStack();
-                    while (stack.size() > 1) {
-                        logic.popSelection();
-                    }
-                    handlePropertyEditorResult();
-                    break;
-                default:
-                    // carry on
-                    Log.d(DEBUG_TAG, "Intent action " + action);
+                        break;
+                    case ACTION_IMAGE_SELECT:
+                        if (map != null) {
+                            SelectImageInterface layer = (SelectImageInterface) map
+                                    .getLayer(Util.getSerializableExtra(intent, NetworkImageLoader.LAYER_TYPE_KEY, LayerType.class));
+                            selectImageOnLayer(intent, layer);
+                        }
+                        break;
+                    case ACTION_MAP_UPDATE:
+                        invalidateMap();
+                        break;
+                    case ACTION_PUSH_SELECTION:
+                    case ACTION_POP_SELECTION:
+                        if (ACTION_PUSH_SELECTION.equals(action)) {
+                            Selection.Ids ids = Util.getSerializableExtra(intent, Selection.SELECTION_KEY, Ids.class);
+                            Selection selection = new Selection();
+                            selection.fromIds(this, App.getDelegator(), ids);
+                            logic.pushSelection(selection);
+                        } else {
+                            logic.popSelection();
+                        }
+                        final List<OsmElement> selectedElements = logic.getSelectedElements();
+                        zoomTo(selectedElements);
+                        if (Mode.MODE_EASYEDIT == logic.getMode() && !selectedElements.isEmpty()) {
+                            getEasyEditManager().startElementSelectionMode();
+                        }
+                        invalidateMap();
+                        break;
+                    case ACTION_CLEAR_SELECTION_STACK:
+                        Deque<Selection> stack = logic.getSelectionStack();
+                        while (stack.size() > 1) {
+                            logic.popSelection();
+                        }
+                        handlePropertyEditorResult();
+                        break;
+                    default:
+                        // carry on
+                        Log.d(DEBUG_TAG, "Intent action " + action);
                 }
             }
             if (geoData != null) {
@@ -1078,9 +1092,9 @@ public class Main extends FullScreenAppCompatActivity
 
     /**
      * Select an image on a layer
-     * 
+     *
      * @param intent the intent that we need to process
-     * @param layer the relevant layer
+     * @param layer  the relevant layer
      */
     private void selectImageOnLayer(Intent intent, final SelectImageInterface layer) {
         if (layer != null) {
@@ -1110,30 +1124,30 @@ public class Main extends FullScreenAppCompatActivity
 
     /**
      * Process an incoming content url
-     * 
+     *
      * @param type a mime type or file extension
      * @return true if we were able to process the Uri
      */
     private boolean processContentUri(@NonNull String type) {
         switch (type) {
-        case MimeTypes.JPEG:
-        case MimeTypes.ALL_IMAGE_FORMATS:
-        case FileExtensions.JPG:
-        case FileExtensions.HEIC:
-            handlePhotoUri();
-            break;
-        case MimeTypes.GPX:
-        case FileExtensions.GPX:
-            loadGPXFile(contentUri);
-            break;
-        case MimeTypes.GEOJSON:
-        case FileExtensions.JSON:
-        case FileExtensions.GEOJSON:
-            loadGeoJson();
-            break;
-        default:
-            Log.e(DEBUG_TAG, "Unknown content type or file extension " + type);
-            return false;
+            case MimeTypes.JPEG:
+            case MimeTypes.ALL_IMAGE_FORMATS:
+            case FileExtensions.JPG:
+            case FileExtensions.HEIC:
+                handlePhotoUri();
+                break;
+            case MimeTypes.GPX:
+            case FileExtensions.GPX:
+                loadGPXFile(contentUri);
+                break;
+            case MimeTypes.GEOJSON:
+            case FileExtensions.JSON:
+            case FileExtensions.GEOJSON:
+                loadGeoJson();
+                break;
+            default:
+                Log.e(DEBUG_TAG, "Unknown content type or file extension " + type);
+                return false;
         }
         return true;
     }
@@ -1158,7 +1172,7 @@ public class Main extends FullScreenAppCompatActivity
 
     /**
      * Process JOSM remote control Urls
-     * 
+     *
      * @param data the data from the intent
      */
     void processJosmRc(@NonNull final RemoteControlUrlData data) {
@@ -1206,9 +1220,9 @@ public class Main extends FullScreenAppCompatActivity
 
     /**
      * Display a note potentially downloading it and adding it to storage
-     * 
+     *
      * @param logic current
-     * @param id note id
+     * @param id    note id
      */
     private void displayNote(@NonNull final Context ctx, @NonNull final Logic logic, @NonNull final long id) {
         new ExecutorTask<Long, Void, Note>(logic.getExecutorService(), logic.getHandler()) {
@@ -1241,7 +1255,7 @@ public class Main extends FullScreenAppCompatActivity
 
     /**
      * Process Geo Urls
-     * 
+     *
      * @param geoData the data from the intent
      */
     void processGeoIntent(@NonNull final GeoUriData geoData) {
@@ -1312,9 +1326,9 @@ public class Main extends FullScreenAppCompatActivity
 
     /**
      * Load a GPX file from an Uri in to a new layer
-     * 
+     * <p>
      * Zooms to the first trackpoint if one exists
-     * 
+     *
      * @param uri the Uri
      */
     private void loadGPXFile(@NonNull final Uri uri) {
@@ -1336,7 +1350,7 @@ public class Main extends FullScreenAppCompatActivity
 
     /**
      * Download bugs/tasks for a BoundingBox
-     * 
+     *
      * @param bbox the BoundingBox
      */
     public void downLoadBugs(BoundingBox bbox) {
@@ -1355,7 +1369,7 @@ public class Main extends FullScreenAppCompatActivity
 
     /**
      * Parse the parameters of a JOSM remote control URL and select and edit the OSM objects.
-     * 
+     *
      * @param rcData Data of a remote control data URL.
      */
     private void rcDataEdit(@NonNull RemoteControlUrlData rcData) {
@@ -1394,28 +1408,28 @@ public class Main extends FullScreenAppCompatActivity
 
     /**
      * Select a list of elements by id
-     * 
-     * @param logic current Logic instance
+     *
+     * @param logic            current Logic instance
      * @param storageDelegator current delegator instance
-     * @param type element type
-     * @param ids list of ids
+     * @param type             element type
+     * @param ids              list of ids
      */
     private void selectElements(final Logic logic, StorageDelegator storageDelegator, String type, List<Long> ids) {
         for (long id : ids) {
             OsmElement e = storageDelegator.getOsmElement(type, id);
             if (e != null) {
                 switch (type) {
-                case Node.NAME:
-                    logic.addSelectedNode((Node) e);
-                    break;
-                case Way.NAME:
-                    logic.addSelectedWay((Way) e);
-                    break;
-                case Relation.NAME:
-                    logic.addSelectedRelation((Relation) e);
-                    break;
-                default:
-                    Log.e(DEBUG_TAG, "Unknown element type " + type);
+                    case Node.NAME:
+                        logic.addSelectedNode((Node) e);
+                        break;
+                    case Way.NAME:
+                        logic.addSelectedWay((Way) e);
+                        break;
+                    case Relation.NAME:
+                        logic.addSelectedRelation((Relation) e);
+                        break;
+                    default:
+                        Log.e(DEBUG_TAG, "Unknown element type " + type);
                 }
             }
         }
@@ -1495,7 +1509,7 @@ public class Main extends FullScreenAppCompatActivity
 
     /**
      * Update the state of the onscreen zoom controls to reflect their ability to zoom in/out.
-     * 
+     * <p>
      * Will trigger an update of any menubars
      */
     private void updateZoomControls() {
@@ -1563,7 +1577,7 @@ public class Main extends FullScreenAppCompatActivity
 
     /**
      * Check if permission to write to "external" storage has been granted
-     * 
+     *
      * @return true if the permission has been granted
      */
     public boolean isStoragePermissionGranted() {
@@ -1573,7 +1587,7 @@ public class Main extends FullScreenAppCompatActivity
 
     /**
      * Check if permission to write to "external" storage has been granted
-     * 
+     *
      * @return true if the permission has been granted
      */
     public boolean isLocationPermissionGranted() {
@@ -1600,7 +1614,7 @@ public class Main extends FullScreenAppCompatActivity
 
     /**
      * Setup the GPS follow button
-     * 
+     * <p>
      * This needs to called after GPS permissions have been enabled
      */
     private void setupFollowButton() {
@@ -1615,8 +1629,8 @@ public class Main extends FullScreenAppCompatActivity
 //                    params.addRule(RelativeLayout.ALIGN_PARENT_RIGHT, 0);
 //                    params.addRule(RelativeLayout.ALIGN_PARENT_LEFT, RelativeLayout.TRUE);
 //                } else if (getString(R.string.follow_GPS_right).equals(followGPSbuttonPosition)) {
-                    params.addRule(RelativeLayout.ALIGN_PARENT_LEFT, 0);
-                    params.addRule(RelativeLayout.ALIGN_PARENT_RIGHT, RelativeLayout.TRUE);
+                params.addRule(RelativeLayout.ALIGN_PARENT_LEFT, 0);
+                params.addRule(RelativeLayout.ALIGN_PARENT_RIGHT, RelativeLayout.TRUE);
 //                } else if (getString(R.string.follow_GPS_none).equals(followGPSbuttonPosition)) {
 //                    followButton.hide();
 //                    isVisible = false;
@@ -1632,8 +1646,8 @@ public class Main extends FullScreenAppCompatActivity
 
     /**
      * Set the icon on the follow button
-     * 
-     * @param gps if true the GPS icon will be displayed
+     *
+     * @param gps       if true the GPS icon will be displayed
      * @param isVisible true if the FAB is currently being shown
      */
     private void setFollowImage(boolean gps, boolean isVisible) {
@@ -1669,8 +1683,8 @@ public class Main extends FullScreenAppCompatActivity
         lock.setTag(mode.tag());
 
         StateListDrawable states = new StateListDrawable();
-        states.addState(new int[] { android.R.attr.state_pressed }, ContextCompat.getDrawable(this, mode.iconResourceId()));
-        states.addState(new int[] { 0 }, ContextCompat.getDrawable(this, R.drawable.locked_opaque));
+        states.addState(new int[]{android.R.attr.state_pressed}, ContextCompat.getDrawable(this, mode.iconResourceId()));
+        states.addState(new int[]{0}, ContextCompat.getDrawable(this, R.drawable.locked_opaque));
         lock.setImageDrawable(states);
         lock.hide(); // workaround https://issuetracker.google.com/issues/117476935
         lock.show();
@@ -1682,12 +1696,12 @@ public class Main extends FullScreenAppCompatActivity
             Log.d(DEBUG_TAG, "Lock state length " + drawableState.length + " " + (drawableState.length == 1 ? Integer.toHexString(drawableState[0]) : ""));
             if (drawableState.length == 0 || drawableState[0] != android.R.attr.state_pressed) {
                 logic.setMode(Main.this, Mode.modeForTag((String) b.getTag()));
-                ((FloatingActionButton) b).setImageState(new int[] { android.R.attr.state_pressed }, false);
+                ((FloatingActionButton) b).setImageState(new int[]{android.R.attr.state_pressed}, false);
                 logic.setLocked(false);
                 enableSimpleActionsButton();
             } else {
                 logic.setLocked(true);
-                ((FloatingActionButton) b).setImageState(new int[] { 0 }, false);
+                ((FloatingActionButton) b).setImageState(new int[]{0}, false);
                 disableSimpleActionsButton();
             }
             updateActionbarEditMode();
@@ -1732,15 +1746,15 @@ public class Main extends FullScreenAppCompatActivity
             l.setMode(Main.this, newMode);
             lock.setTag(newMode.tag());
             StateListDrawable mStates = new StateListDrawable();
-            mStates.addState(new int[] { android.R.attr.state_pressed }, ContextCompat.getDrawable(Main.this, newMode.iconResourceId()));
-            mStates.addState(new int[] {}, ContextCompat.getDrawable(Main.this, R.drawable.locked_opaque));
+            mStates.addState(new int[]{android.R.attr.state_pressed}, ContextCompat.getDrawable(Main.this, newMode.iconResourceId()));
+            mStates.addState(new int[]{}, ContextCompat.getDrawable(Main.this, R.drawable.locked_opaque));
             lock.setImageDrawable(mStates);
             lock.hide(); // workaround https://issuetracker.google.com/issues/117476935
             lock.show();
             if (l.isLocked()) {
-                lock.setImageState(new int[] { 0 }, false);
+                lock.setImageState(new int[]{0}, false);
             } else {
-                lock.setImageState(new int[] { android.R.attr.state_pressed }, false);
+                lock.setImageState(new int[]{android.R.attr.state_pressed}, false);
             }
             updateActionbarEditMode();
             return true;
@@ -1761,7 +1775,7 @@ public class Main extends FullScreenAppCompatActivity
 
     /**
      * Get the lock button
-     * 
+     *
      * @return the lock
      */
     private FloatingActionButton getLock() {
@@ -1770,9 +1784,9 @@ public class Main extends FullScreenAppCompatActivity
 
     /**
      * Set lock button to locked or unlocked depending on the edit mode
-     * 
+     * <p>
      * Side effect disables/enables the simple actions button too
-     * 
+     *
      * @param mode Program mode.
      * @return Button to display checked/unchecked states.
      */
@@ -1820,7 +1834,7 @@ public class Main extends FullScreenAppCompatActivity
     /**
      * Creates the menu from the XML file "main_menu.xml".<br>
      * {@inheritDoc}
-     * 
+     * <p>
      * Note for not entirely clear reasons *:setShowAsAction doesn't work in the menu definition and has to be done
      * programmatically here.
      */
@@ -1842,7 +1856,7 @@ public class Main extends FullScreenAppCompatActivity
 //            if (noSubMenus) {
 //                inflater.inflate(R.menu.main_menu_nosubmenus, menu);
 //            } else {
-                inflater.inflate(R.menu.main_menu, menu);
+            inflater.inflate(R.menu.main_menu, menu);
 //            }
         }
         MenuCompat.setGroupDividerEnabled(menu, true);
@@ -1999,9 +2013,9 @@ public class Main extends FullScreenAppCompatActivity
 
     /**
      * Check if we have a specific location provider
-     * 
+     *
      * @param providers list holding the provider names
-     * @param provider the provider
+     * @param provider  the provider
      * @return true if the provider is present
      */
     private boolean haveLocationProvider(@NonNull List<String> providers, @Nullable String provider) {
@@ -2034,614 +2048,614 @@ public class Main extends FullScreenAppCompatActivity
         StorageDelegator delegator = App.getDelegator();
         final boolean haveTracker = getTracker() != null;
         switch (item.getItemId()) {
-        case R.id.menu_config:
-            PrefEditor.start(this, REQUEST_PREFERENCES);
-            return true;
-        case R.id.menu_find:
-            descheduleAutoLock();
-            SearchForm.showDialog(this, map.getViewBox());
-            return true;
-        case R.id.menu_search_objects:
-            descheduleAutoLock();
-            Search.search(this);
-            return true;
-        case R.id.menu_enable_tagfilter:
-        case R.id.menu_enable_presetfilter:
-            Filter newFilter = null;
-            switch (item.getItemId()) {
+            case R.id.menu_config:
+                PrefEditor.start(this, REQUEST_PREFERENCES);
+                return true;
+            case R.id.menu_find:
+                descheduleAutoLock();
+                SearchForm.showDialog(this, map.getViewBox());
+                return true;
+            case R.id.menu_search_objects:
+                descheduleAutoLock();
+                Search.search(this);
+                return true;
             case R.id.menu_enable_tagfilter:
-                Log.d(DEBUG_TAG, "filter menu tag");
-                if (prefs.getEnableTagFilter()) {
-                    // already selected turn off
-                    prefs.enableTagFilter(false);
-                    item.setChecked(false);
-                } else {
-                    prefs.enableTagFilter(true);
-                    item.setChecked(true);
-                    prefs.enablePresetFilter(false);
-                    newFilter = new TagFilter(this);
-                }
-                break;
             case R.id.menu_enable_presetfilter:
-                Log.d(DEBUG_TAG, "filter menu preset");
-                if (prefs.getEnablePresetFilter()) {
+                Filter newFilter = null;
+                switch (item.getItemId()) {
+                    case R.id.menu_enable_tagfilter:
+                        Log.d(DEBUG_TAG, "filter menu tag");
+                        if (prefs.getEnableTagFilter()) {
+                            // already selected turn off
+                            prefs.enableTagFilter(false);
+                            item.setChecked(false);
+                        } else {
+                            prefs.enableTagFilter(true);
+                            item.setChecked(true);
+                            prefs.enablePresetFilter(false);
+                            newFilter = new TagFilter(this);
+                        }
+                        break;
+                    case R.id.menu_enable_presetfilter:
+                        Log.d(DEBUG_TAG, "filter menu preset");
+                        if (prefs.getEnablePresetFilter()) {
+                            // already selected turn off
+                            prefs.enablePresetFilter(false);
+                            item.setChecked(false);
+                        } else {
+                            prefs.enablePresetFilter(true);
+                            item.setChecked(true);
+                            prefs.enableTagFilter(false);
+                            newFilter = new PresetFilter(this);
+                        }
+                        break;
+                    default:
+                        Log.w(DEBUG_TAG, "Should't happen");
+                }
+                Filter currentFilter = logic.getFilter();
+                if (currentFilter != null) {
+                    currentFilter.saveState();
+                    currentFilter.hideControls();
+                    currentFilter.removeControls();
+                    logic.setFilter(null);
+                }
+                if (newFilter != null) {
+                    logic.setFilter(newFilter);
+                    logic.getFilter().addControls(getMapLayout(), () -> {
+                        map.invalidate();
+                        scheduleAutoLock();
+                    });
+                    logic.getFilter().showControls();
+                }
+                triggerMenuInvalidation();
+                map.invalidate();
+                return true;
+            case R.id.menu_simple_actions:
+                if (prefs.areSimpleActionsEnabled()) {
+                    prefs.enableSimpleActions(false);
+                    item.setChecked(false);
+                    hideSimpleActionsButton();
+                } else {
+                    prefs.enableSimpleActions(true);
+                    item.setChecked(true);
+                    showSimpleActionsButton();
+                }
+                return true;
+            case R.id.menu_share:
+                Util.sharePosition(this, map.getViewBox().getCenter(), map.getZoomLevel());
+                return true;
+
+            case R.id.menu_help:
+                HelpViewer.start(this, R.string.help_main);
+                return true;
+            case R.id.menu_camera:
+                Intent startCamera = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                try {
+                    String cameraApp = prefs.getCameraApp();
+                    if (!"".equals(cameraApp)) {
+                        startCamera.setPackage(cameraApp);
+                    }
+                    imageFile = getImageFile();
+                    Uri photoUri = FileProvider.getUriForFile(this, getString(R.string.content_provider), imageFile);
+                    if (photoUri != null) {
+                        startCamera.setFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+                        startCamera.putExtra(MediaStore.EXTRA_OUTPUT, photoUri);
+                        startActivityForResult(startCamera, REQUEST_IMAGE_CAPTURE);
+                    }
+                } catch (Exception ex) {
+                    try {
+                        ScreenMessage.barError(this, getResources().getString(R.string.toast_camera_error, ex.getMessage()));
+                        Log.e(DEBUG_TAG, ex.getMessage());
+                    } catch (Exception e) {
+                        // protect against translation errors
+                    }
+                }
+                return true;
+            case R.id.menu_gps_show:
+                toggleShowGPS();
+                return true;
+            case R.id.menu_gps_follow:
+                toggleFollowGPS();
+                return true;
+            case R.id.menu_gps_add_bookmark:
+                // the soft keyboard will potentially change the current view box
+                final ViewBox bookmarkViewBox = new ViewBox(map.getViewBox());
+                BookmarkEdit.get(this, null, new BookmarkEdit.HandleResult() {
+                    @Override
+                    public void onSuccess(String message, Context context) {
+                        if (message.trim().isEmpty()) {
+                            return;
+                        }
+                        new BookmarkStorage().writer(context, message, bookmarkViewBox);
+                    }
+
+                    @Override
+                    public void onError(Context context) {
+                        runOnUiThread(() -> ScreenMessage.toastTopError(context, R.string.toast_error_saving_bookmark));
+                    }
+                });
+                return true;
+            case R.id.menu_gps_show_bookmarks:
+                new BookmarksDialog(this).showDialog();
+                return true;
+            case R.id.menu_gps_goto_nearest_todo:
+                gotoNearestTodo();
+                return true;
+            case R.id.menu_gps_goto:
+                gotoCurrentLocation();
+                return true;
+            case R.id.menu_gps_goto_coordinates:
+                descheduleAutoLock();
+                GeocodeInput.get(this, new GeocodeInput.HandleResult() {
+                    @Override
+                    public void onSuccess(LatLon ll) {
+                        runOnUiThread(() -> {
+                            logic.setZoom(getMap(), Ui.ZOOM_FOR_ZOOMTO);
+                            setFollowGPS(false);
+                            map.setFollowGPS(false);
+                            map.getViewBox().moveTo(map, (int) (ll.getLon() * 1E7d), (int) (ll.getLat() * 1E7d));
+                            map.invalidate();
+                        });
+                    }
+
+                    @Override
+                    public void onError(String message) {
+                        runOnUiThread(() -> ScreenMessage.toastTopError(Main.this, message));
+                    }
+                });
+                return true;
+            case R.id.menu_gps_goto_last_edit:
+                BoundingBox box = logic.getUndo().getCurrentBounds();
+                if (box != null) {
+                    setFollowGPS(false);
+                    if (box.isEmpty()) {
+                        logic.setZoom(getMap(), Ui.ZOOM_FOR_ZOOMTO);
+                        map.getViewBox().moveTo(map, box.getRight(), box.getTop());
+                    } else {
+                        map.getViewBox().fitToBoundingBox(map, box);
+                    }
+                    map.invalidate();
+                }
+                return true;
+
+            case R.id.menu_gps_position_info:
+                GnssPositionInfo.showDialog(Main.this, getTracker());
+                return true;
+
+            case R.id.menu_gps_start:
+                List<Integer> tipKeys = new ArrayList<>();
+                tipKeys.add(R.string.tip_gpx_recording_key);
+                List<Integer> tipMessageIds = new ArrayList<>();
+                tipMessageIds.add(R.string.tip_gpx_recording);
+                if (prefs.getEgmFile() == null && getString(R.string.gps_source_internal).equals(prefs.getGpsSource())) {
+                    tipKeys.add(R.string.tip_gpx_no_elevation_key);
+                    tipMessageIds.add(R.string.tip_gpx_no_elevation);
+                }
+                if (haveTracker && haveLocationProvider(getEnabledLocationProviders(), LocationManager.GPS_PROVIDER)) {
+                    getTracker().startTracking();
+                    setFollowGPS(true);
+                }
+                addGpxLayer();
+                mapLayout.post(() -> {
+                    triggerMenuInvalidation();
+                    Tip.showDialog(Main.this, tipKeys, tipMessageIds);
+                });
+                return true;
+            case R.id.menu_gps_pause:
+                if (haveTracker && haveLocationProvider(getEnabledLocationProviders(), LocationManager.GPS_PROVIDER)) {
+                    getTracker().stopTracking(false);
+                }
+                mapLayout.post(this::triggerMenuInvalidation);
+                return true;
+            case R.id.menu_gps_clear:
+                if (haveTracker) {
+                    Runnable stopAndClearTracking = () -> {
+                        if (getTracker() != null) {
+                            getTracker().stopTracking(true);
+                        }
+                        map.invalidate();
+                        invalidateOptionsMenu();
+                    };
+                    if (!getTracker().isEmpty()) {
+                        new AlertDialog.Builder(this).setTitle(R.string.menu_gps_clear).setMessage(R.string.clear_track_description)
+                                .setPositiveButton(R.string.clear_anyway, (dialog, which) -> stopAndClearTracking.run()).setNeutralButton(R.string.cancel, null)
+                                .show();
+                    } else {
+                        stopAndClearTracking.run();
+                    }
+                }
+                return true;
+            case R.id.menu_enable_gps_autodownload:
+                Log.d(DEBUG_TAG, "gps auto download menu");
+                if (prefs.getAutoDownload()) {
                     // already selected turn off
-                    prefs.enablePresetFilter(false);
+                    prefs.setAutoDownload(false);
                     item.setChecked(false);
                 } else {
-                    prefs.enablePresetFilter(true);
+                    prefs.setAutoDownload(true);
                     item.setChecked(true);
-                    prefs.enableTagFilter(false);
-                    newFilter = new PresetFilter(this);
+                    prefs.setPanAndZoomAutoDownload(false);
                 }
+                startStopAutoDownload();
+                map.setPrefs(this, prefs);
+                return true;
+            case R.id.menu_enable_pan_and_zoom_auto_download:
+                Log.d(DEBUG_TAG, "pan and zoom auto download menu");
+                if (prefs.getPanAndZoomAutoDownload()) {
+                    // already selected turn off
+                    prefs.setPanAndZoomAutoDownload(false);
+                    item.setChecked(false);
+                } else {
+                    prefs.setPanAndZoomAutoDownload(true);
+                    item.setChecked(true);
+                    prefs.setAutoDownload(false);
+                    Tip.showDialog(this, R.string.tip_pan_and_zoom_auto_download_key, R.string.tip_pan_and_zoom_auto_download);
+                }
+                startStopAutoDownload();
+                map.setPrefs(this, prefs);
+                return true;
+            case R.id.menu_transfer_download_current:
+                onMenuDownloadCurrent(true);
+                return true;
+            case R.id.menu_transfer_download_replace:
+                onMenuDownloadCurrent(false);
+                return true;
+            case R.id.menu_transfer_query_overpass:
+                descheduleAutoLock();
+                showOverpassConsole(this, null);
                 break;
-            default:
-                Log.w(DEBUG_TAG, "Should't happen");
-            }
-            Filter currentFilter = logic.getFilter();
-            if (currentFilter != null) {
-                currentFilter.saveState();
-                currentFilter.hideControls();
-                currentFilter.removeControls();
-                logic.setFilter(null);
-            }
-            if (newFilter != null) {
-                logic.setFilter(newFilter);
-                logic.getFilter().addControls(getMapLayout(), () -> {
+            case R.id.menu_transfer_upload:
+                confirmUpload(null);
+                return true;
+            case R.id.menu_transfer_review:
+                Review.showDialog(this);
+                return true;
+            case R.id.menu_transfer_update:
+                logic.redownload(this, false, null);
+                return true;
+            case R.id.menu_transfer_data_clear:
+                Runnable reset = () -> {
+                    delegator.reset(true);
+                    invalidateOptionsMenu();
                     map.invalidate();
-                    scheduleAutoLock();
-                });
-                logic.getFilter().showControls();
-            }
-            triggerMenuInvalidation();
-            map.invalidate();
-            return true;
-        case R.id.menu_simple_actions:
-            if (prefs.areSimpleActionsEnabled()) {
-                prefs.enableSimpleActions(false);
-                item.setChecked(false);
-                hideSimpleActionsButton();
-            } else {
-                prefs.enableSimpleActions(true);
-                item.setChecked(true);
-                showSimpleActionsButton();
-            }
-            return true;
-        case R.id.menu_share:
-            Util.sharePosition(this, map.getViewBox().getCenter(), map.getZoomLevel());
-            return true;
+                };
+                if (logic != null && logic.hasChanges()) {
+                    DataLoss.createDialog(this, (dialog, which) -> reset.run()).show();
+                } else {
+                    reset.run();
+                }
+                return true;
+            case R.id.menu_transfer_close_changeset:
+                if (server.hasOpenChangeset()) {
+                    // fail silently if it doesn't work, next upload will open a new
+                    // changeset in any case
+                    new ExecutorTask<Void, Integer, Void>(logic.getExecutorService(), logic.getHandler()) {
+                        @Override
+                        protected Void doInBackground(Void param) {
+                            try {
+                                server.closeChangeset();
+                            } catch (IOException e) {
+                                // Never fail
+                            }
+                            return null;
+                        }
 
-        case R.id.menu_help:
-            HelpViewer.start(this, R.string.help_main);
-            return true;
-        case R.id.menu_camera:
-            Intent startCamera = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-            try {
-                String cameraApp = prefs.getCameraApp();
-                if (!"".equals(cameraApp)) {
-                    startCamera.setPackage(cameraApp);
+                        @Override
+                        protected void onPostExecute(Void result) {
+                            triggerMenuInvalidation();
+                        }
+                    }.execute();
                 }
-                imageFile = getImageFile();
-                Uri photoUri = FileProvider.getUriForFile(this, getString(R.string.content_provider), imageFile);
-                if (photoUri != null) {
-                    startCamera.setFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
-                    startCamera.putExtra(MediaStore.EXTRA_OUTPUT, photoUri);
-                    startActivityForResult(startCamera, REQUEST_IMAGE_CAPTURE);
-                }
-            } catch (Exception ex) {
-                try {
-                    ScreenMessage.barError(this, getResources().getString(R.string.toast_camera_error, ex.getMessage()));
-                    Log.e(DEBUG_TAG, ex.getMessage());
-                } catch (Exception e) {
-                    // protect against translation errors
-                }
-            }
-            return true;
-        case R.id.menu_gps_show:
-            toggleShowGPS();
-            return true;
-        case R.id.menu_gps_follow:
-            toggleFollowGPS();
-            return true;
-        case R.id.menu_gps_add_bookmark:
-            // the soft keyboard will potentially change the current view box
-            final ViewBox bookmarkViewBox = new ViewBox(map.getViewBox());
-            BookmarkEdit.get(this, null, new BookmarkEdit.HandleResult() {
-                @Override
-                public void onSuccess(String message, Context context) {
-                    if (message.trim().isEmpty()) {
-                        return;
+                return true;
+            case R.id.menu_transfer_export:
+                descheduleAutoLock();
+                saveOscFile(this, delegator, prefs);
+                return true;
+            case R.id.menu_transfer_apply_osc_file:
+                descheduleAutoLock();
+                SelectFile.read(this, R.string.config_osmPreferredDir_key, new ReadFile() {
+                    private static final long serialVersionUID = 1L;
+
+                    @Override
+                    public boolean read(FragmentActivity currentActivity, Uri fileUri) {
+                        try {
+                            logic.applyOscFile(currentActivity, fileUri, new PostFileReadCallback(currentActivity, fileUri.toString()));
+                        } catch (FileNotFoundException e) {
+                            fileNotFound(fileUri);
+                        }
+                        SelectFile.savePref(prefs, R.string.config_osmPreferredDir_key, fileUri);
+                        map.invalidate();
+                        return true;
                     }
-                    new BookmarkStorage().writer(context, message, bookmarkViewBox);
-                }
+                });
+                return true;
+            case R.id.menu_transfer_read_file:
+            case R.id.menu_transfer_read_pbf_file:
+                descheduleAutoLock();
+                final ReadFile readFile = new ReadFile() {
+                    private static final long serialVersionUID = 1L;
 
-                @Override
-                public void onError(Context context) {
-                    runOnUiThread(() -> ScreenMessage.toastTopError(context, R.string.toast_error_saving_bookmark));
+                    @Override
+                    public boolean read(FragmentActivity currentActivity, Uri fileUri) {
+                        try {
+                            if (item.getItemId() == R.id.menu_transfer_read_file) {
+                                logic.readOsmFile(currentActivity, fileUri, false);
+                            } else {
+                                logic.readPbfFile(currentActivity, fileUri, false);
+                            }
+                        } catch (FileNotFoundException e) {
+                            fileNotFound(fileUri);
+                        }
+                        SelectFile.savePref(prefs, R.string.config_osmPreferredDir_key, fileUri);
+                        map.invalidate();
+                        return true;
+                    }
+                };
+                if (logic != null && logic.hasChanges()) {
+                    DataLoss.createDialog(this, (dialog, which) -> SelectFile.read(Main.this, R.string.config_osmPreferredDir_key, readFile)).show();
+                } else {
+                    SelectFile.read(this, R.string.config_osmPreferredDir_key, readFile);
                 }
-            });
-            return true;
-        case R.id.menu_gps_show_bookmarks:
-            new BookmarksDialog(this).showDialog();
-            return true;
-        case R.id.menu_gps_goto_nearest_todo:
-            gotoNearestTodo();
-            return true;
-        case R.id.menu_gps_goto:
-            gotoCurrentLocation();
-            return true;
-        case R.id.menu_gps_goto_coordinates:
-            descheduleAutoLock();
-            GeocodeInput.get(this, new GeocodeInput.HandleResult() {
-                @Override
-                public void onSuccess(LatLon ll) {
-                    runOnUiThread(() -> {
-                        logic.setZoom(getMap(), Ui.ZOOM_FOR_ZOOMTO);
-                        setFollowGPS(false);
-                        map.setFollowGPS(false);
-                        map.getViewBox().moveTo(map, (int) (ll.getLon() * 1E7d), (int) (ll.getLat() * 1E7d));
+                return true;
+            case R.id.menu_transfer_save_file:
+                descheduleAutoLock();
+                SelectFile.save(this, MimeTypes.OSMXML, R.string.config_osmPreferredDir_key, new SaveFile() {
+                    private static final long serialVersionUID = 1L;
+
+                    @Override
+                    public boolean save(FragmentActivity currentActivity, Uri fileUri) {
+
+                        App.getLogic().writeOsmFile(currentActivity, fileUri, new PostFileWriteCallback(currentActivity, fileUri.getPath()) {
+                            @Override
+                            public void onSuccess() {
+                                super.onSuccess();
+                                addExtensionIfNeeded(currentActivity, fileUri, FileExtensions.OSM);
+                            }
+                        });
+
+                        SelectFile.savePref(prefs, R.string.config_osmPreferredDir_key, fileUri);
+                        return true;
+                    }
+                });
+                return true;
+            case R.id.menu_transfer_download_msf:
+                descheduleAutoLock();
+                DownloadActivity.start(this, Urls.MSF_SERVER);
+                return true;
+            case R.id.menu_transfer_bugs_download_current:
+                downLoadBugs(map.getViewBox().copy());
+                return true;
+            case R.id.menu_transfer_bugs_upload:
+                if (App.getTaskStorage().hasChanges()) {
+                    TransferTasks.upload(this, server, null);
+                } else {
+                    ScreenMessage.barInfo(this, R.string.toast_no_changes);
+                }
+                return true;
+
+            case R.id.menu_transfer_bugs_clear:
+                if (App.getTaskStorage().hasChanges()) {
+                    ScreenMessage.barError(this, R.string.toast_unsaved_changes, R.string.clear_anyway, v -> {
+                        App.getTaskStorage().reset();
                         map.invalidate();
                     });
+                    return true;
                 }
-
-                @Override
-                public void onError(String message) {
-                    runOnUiThread(() -> ScreenMessage.toastTopError(Main.this, message));
-                }
-            });
-            return true;
-        case R.id.menu_gps_goto_last_edit:
-            BoundingBox box = logic.getUndo().getCurrentBounds();
-            if (box != null) {
-                setFollowGPS(false);
-                if (box.isEmpty()) {
-                    logic.setZoom(getMap(), Ui.ZOOM_FOR_ZOOMTO);
-                    map.getViewBox().moveTo(map, box.getRight(), box.getTop());
-                } else {
-                    map.getViewBox().fitToBoundingBox(map, box);
-                }
+                App.getTaskStorage().reset();
                 map.invalidate();
-            }
-            return true;
+                return true;
 
-        case R.id.menu_gps_position_info:
-            GnssPositionInfo.showDialog(Main.this, getTracker());
-            return true;
-
-        case R.id.menu_gps_start:
-            List<Integer> tipKeys = new ArrayList<>();
-            tipKeys.add(R.string.tip_gpx_recording_key);
-            List<Integer> tipMessageIds = new ArrayList<>();
-            tipMessageIds.add(R.string.tip_gpx_recording);
-            if (prefs.getEgmFile() == null && getString(R.string.gps_source_internal).equals(prefs.getGpsSource())) {
-                tipKeys.add(R.string.tip_gpx_no_elevation_key);
-                tipMessageIds.add(R.string.tip_gpx_no_elevation);
-            }
-            if (haveTracker && haveLocationProvider(getEnabledLocationProviders(), LocationManager.GPS_PROVIDER)) {
-                getTracker().startTracking();
-                setFollowGPS(true);
-            }
-            addGpxLayer();
-            mapLayout.post(() -> {
-                triggerMenuInvalidation();
-                Tip.showDialog(Main.this, tipKeys, tipMessageIds);
-            });
-            return true;
-        case R.id.menu_gps_pause:
-            if (haveTracker && haveLocationProvider(getEnabledLocationProviders(), LocationManager.GPS_PROVIDER)) {
-                getTracker().stopTracking(false);
-            }
-            mapLayout.post(this::triggerMenuInvalidation);
-            return true;
-        case R.id.menu_gps_clear:
-            if (haveTracker) {
-                Runnable stopAndClearTracking = () -> {
-                    if (getTracker() != null) {
-                        getTracker().stopTracking(true);
-                    }
-                    map.invalidate();
-                    invalidateOptionsMenu();
-                };
-                if (!getTracker().isEmpty()) {
-                    new AlertDialog.Builder(this).setTitle(R.string.menu_gps_clear).setMessage(R.string.clear_track_description)
-                            .setPositiveButton(R.string.clear_anyway, (dialog, which) -> stopAndClearTracking.run()).setNeutralButton(R.string.cancel, null)
-                            .show();
-                } else {
-                    stopAndClearTracking.run();
-                }
-            }
-            return true;
-        case R.id.menu_enable_gps_autodownload:
-            Log.d(DEBUG_TAG, "gps auto download menu");
-            if (prefs.getAutoDownload()) {
-                // already selected turn off
-                prefs.setAutoDownload(false);
-                item.setChecked(false);
-            } else {
-                prefs.setAutoDownload(true);
-                item.setChecked(true);
-                prefs.setPanAndZoomAutoDownload(false);
-            }
-            startStopAutoDownload();
-            map.setPrefs(this, prefs);
-            return true;
-        case R.id.menu_enable_pan_and_zoom_auto_download:
-            Log.d(DEBUG_TAG, "pan and zoom auto download menu");
-            if (prefs.getPanAndZoomAutoDownload()) {
-                // already selected turn off
-                prefs.setPanAndZoomAutoDownload(false);
-                item.setChecked(false);
-            } else {
-                prefs.setPanAndZoomAutoDownload(true);
-                item.setChecked(true);
-                prefs.setAutoDownload(false);
-                Tip.showDialog(this, R.string.tip_pan_and_zoom_auto_download_key, R.string.tip_pan_and_zoom_auto_download);
-            }
-            startStopAutoDownload();
-            map.setPrefs(this, prefs);
-            return true;
-        case R.id.menu_transfer_download_current:
-            onMenuDownloadCurrent(true);
-            return true;
-        case R.id.menu_transfer_download_replace:
-            onMenuDownloadCurrent(false);
-            return true;
-        case R.id.menu_transfer_query_overpass:
-            descheduleAutoLock();
-            showOverpassConsole(this, null);
-            break;
-        case R.id.menu_transfer_upload:
-            confirmUpload(null);
-            return true;
-        case R.id.menu_transfer_review:
-            Review.showDialog(this);
-            return true;
-        case R.id.menu_transfer_update:
-            logic.redownload(this, false, null);
-            return true;
-        case R.id.menu_transfer_data_clear:
-            Runnable reset = () -> {
-                delegator.reset(true);
-                invalidateOptionsMenu();
-                map.invalidate();
-            };
-            if (logic != null && logic.hasChanges()) {
-                DataLoss.createDialog(this, (dialog, which) -> reset.run()).show();
-            } else {
-                reset.run();
-            }
-            return true;
-        case R.id.menu_transfer_close_changeset:
-            if (server.hasOpenChangeset()) {
-                // fail silently if it doesn't work, next upload will open a new
-                // changeset in any case
-                new ExecutorTask<Void, Integer, Void>(logic.getExecutorService(), logic.getHandler()) {
-                    @Override
-                    protected Void doInBackground(Void param) {
-                        try {
-                            server.closeChangeset();
-                        } catch (IOException e) {
-                            // Never fail
-                        }
-                        return null;
-                    }
+            case R.id.menu_transfer_bugs_autodownload:
+                prefs.setBugAutoDownload(!prefs.getBugAutoDownload());
+                startStopBugAutoDownload();
+                return true;
+            case R.id.menu_transfer_save_notes_all:
+            case R.id.menu_transfer_save_notes_new_and_changed:
+                descheduleAutoLock();
+                SelectFile.save(this, MimeTypes.OSNXML, R.string.config_notesPreferredDir_key, new SaveFile() {
+                    private static final long serialVersionUID = 1L;
 
                     @Override
-                    protected void onPostExecute(Void result) {
-                        triggerMenuInvalidation();
+                    public boolean save(FragmentActivity currentActivity, Uri fileUri) {
+                        TransferTasks.writeOsnFile(currentActivity, item.getItemId() == R.id.menu_transfer_save_notes_all, fileUri,
+                                new PostFileWriteCallback(currentActivity, fileUri.toString()) {
+                                    @Override
+                                    public void onSuccess() {
+                                        super.onSuccess();
+                                        addExtensionIfNeeded(currentActivity, fileUri, FileExtensions.OSN);
+                                    }
+                                });
+                        SelectFile.savePref(prefs, R.string.config_notesPreferredDir_key, fileUri);
+                        return true;
                     }
-                }.execute();
-            }
-            return true;
-        case R.id.menu_transfer_export:
-            descheduleAutoLock();
-            saveOscFile(this, delegator, prefs);
-            return true;
-        case R.id.menu_transfer_apply_osc_file:
-            descheduleAutoLock();
-            SelectFile.read(this, R.string.config_osmPreferredDir_key, new ReadFile() {
-                private static final long serialVersionUID = 1L;
+                });
+                return true;
+            case R.id.menu_transfer_read_notes:
+                descheduleAutoLock();
+                SelectFile.read(this, R.string.config_notesPreferredDir_key, new ReadFile() {
+                    private static final long serialVersionUID = 1L;
 
-                @Override
-                public boolean read(FragmentActivity currentActivity, Uri fileUri) {
-                    try {
-                        logic.applyOscFile(currentActivity, fileUri, new PostFileReadCallback(currentActivity, fileUri.toString()));
-                    } catch (FileNotFoundException e) {
-                        fileNotFound(fileUri);
+                    @Override
+                    public boolean read(FragmentActivity currentActivity, Uri fileUri) {
+                        TransferTasks.readOsnFile(currentActivity, fileUri, true, new PostFileReadCallback(currentActivity, fileUri.toString()));
+                        SelectFile.savePref(prefs, R.string.config_osmPreferredDir_key, fileUri);
+                        map.invalidate();
+                        return true;
                     }
-                    SelectFile.savePref(prefs, R.string.config_osmPreferredDir_key, fileUri);
-                    map.invalidate();
-                    return true;
-                }
-            });
-            return true;
-        case R.id.menu_transfer_read_file:
-        case R.id.menu_transfer_read_pbf_file:
-            descheduleAutoLock();
-            final ReadFile readFile = new ReadFile() {
-                private static final long serialVersionUID = 1L;
+                });
+                return true;
+            case R.id.menu_transfer_read_todos:
+                descheduleAutoLock();
+                SelectFile.read(this, R.string.config_osmPreferredDir_key, new ReadFile() {
+                    private static final long serialVersionUID = 1L;
 
-                @Override
-                public boolean read(FragmentActivity currentActivity, Uri fileUri) {
-                    try {
-                        if (item.getItemId() == R.id.menu_transfer_read_file) {
-                            logic.readOsmFile(currentActivity, fileUri, false);
-                        } else {
-                            logic.readPbfFile(currentActivity, fileUri, false);
-                        }
-                    } catch (FileNotFoundException e) {
-                        fileNotFound(fileUri);
+                    @Override
+                    public boolean read(FragmentActivity currentActivity, Uri fileUri) {
+                        TransferTasks.readTodos(currentActivity, fileUri, false, new PostFileReadCallback(currentActivity, fileUri.toString()));
+                        SelectFile.savePref(prefs, R.string.config_osmPreferredDir_key, fileUri);
+                        map.invalidate();
+                        return true;
                     }
-                    SelectFile.savePref(prefs, R.string.config_osmPreferredDir_key, fileUri);
-                    map.invalidate();
-                    return true;
+                });
+                return true;
+            case R.id.menu_transfer_write_todos:
+                descheduleAutoLock();
+                final List<StringWithDescription> todoListnames = App.getTaskStorage().getTodoLists(this);
+                if (todoListnames.size() == 1) {
+                    writeTodos(todoListnames.get(0).getValue());
+                } else {
+                    ElementSelectionActionModeCallback.selectTodoList(this, todoListnames,
+                            (DialogInterface dialog, int which) -> writeTodos(todoListnames.get(which).getValue()));
                 }
-            };
-            if (logic != null && logic.hasChanges()) {
-                DataLoss.createDialog(this, (dialog, which) -> SelectFile.read(Main.this, R.string.config_osmPreferredDir_key, readFile)).show();
-            } else {
-                SelectFile.read(this, R.string.config_osmPreferredDir_key, readFile);
-            }
-            return true;
-        case R.id.menu_transfer_save_file:
-            descheduleAutoLock();
-            SelectFile.save(this, MimeTypes.OSMXML, R.string.config_osmPreferredDir_key, new SaveFile() {
-                private static final long serialVersionUID = 1L;
-
-                @Override
-                public boolean save(FragmentActivity currentActivity, Uri fileUri) {
-
-                    App.getLogic().writeOsmFile(currentActivity, fileUri, new PostFileWriteCallback(currentActivity, fileUri.getPath()) {
-                        @Override
-                        public void onSuccess() {
-                            super.onSuccess();
-                            addExtensionIfNeeded(currentActivity, fileUri, FileExtensions.OSM);
-                        }
-                    });
-
-                    SelectFile.savePref(prefs, R.string.config_osmPreferredDir_key, fileUri);
-                    return true;
-                }
-            });
-            return true;
-        case R.id.menu_transfer_download_msf:
-            descheduleAutoLock();
-            DownloadActivity.start(this, Urls.MSF_SERVER);
-            return true;
-        case R.id.menu_transfer_bugs_download_current:
-            downLoadBugs(map.getViewBox().copy());
-            return true;
-        case R.id.menu_transfer_bugs_upload:
-            if (App.getTaskStorage().hasChanges()) {
-                TransferTasks.upload(this, server, null);
-            } else {
-                ScreenMessage.barInfo(this, R.string.toast_no_changes);
-            }
-            return true;
-
-        case R.id.menu_transfer_bugs_clear:
-            if (App.getTaskStorage().hasChanges()) {
-                ScreenMessage.barError(this, R.string.toast_unsaved_changes, R.string.clear_anyway, v -> {
-                    App.getTaskStorage().reset();
+                return true;
+            case R.id.menu_undo:
+                // should not happen
+                undoListener.onClick(null);
+                return true;
+            case R.id.menu_tools_flush_all_tile_caches:
+                ScreenMessage.barWarning(this, getString(R.string.toast_flus_all_caches), R.string.Yes, v -> {
+                    MapTilesLayer<?> backgroundLayer = map.getBackgroundLayer();
+                    if (backgroundLayer != null) {
+                        backgroundLayer.flushTileCache(Main.this, null, true);
+                    }
                     map.invalidate();
                 });
                 return true;
-            }
-            App.getTaskStorage().reset();
-            map.invalidate();
-            return true;
-
-        case R.id.menu_transfer_bugs_autodownload:
-            prefs.setBugAutoDownload(!prefs.getBugAutoDownload());
-            startStopBugAutoDownload();
-            return true;
-        case R.id.menu_transfer_save_notes_all:
-        case R.id.menu_transfer_save_notes_new_and_changed:
-            descheduleAutoLock();
-            SelectFile.save(this, MimeTypes.OSNXML, R.string.config_notesPreferredDir_key, new SaveFile() {
-                private static final long serialVersionUID = 1L;
-
-                @Override
-                public boolean save(FragmentActivity currentActivity, Uri fileUri) {
-                    TransferTasks.writeOsnFile(currentActivity, item.getItemId() == R.id.menu_transfer_save_notes_all, fileUri,
-                            new PostFileWriteCallback(currentActivity, fileUri.toString()) {
-                                @Override
-                                public void onSuccess() {
-                                    super.onSuccess();
-                                    addExtensionIfNeeded(currentActivity, fileUri, FileExtensions.OSN);
-                                }
-                            });
-                    SelectFile.savePref(prefs, R.string.config_notesPreferredDir_key, fileUri);
-                    return true;
-                }
-            });
-            return true;
-        case R.id.menu_transfer_read_notes:
-            descheduleAutoLock();
-            SelectFile.read(this, R.string.config_notesPreferredDir_key, new ReadFile() {
-                private static final long serialVersionUID = 1L;
-
-                @Override
-                public boolean read(FragmentActivity currentActivity, Uri fileUri) {
-                    TransferTasks.readOsnFile(currentActivity, fileUri, true, new PostFileReadCallback(currentActivity, fileUri.toString()));
-                    SelectFile.savePref(prefs, R.string.config_osmPreferredDir_key, fileUri);
-                    map.invalidate();
-                    return true;
-                }
-            });
-            return true;
-        case R.id.menu_transfer_read_todos:
-            descheduleAutoLock();
-            SelectFile.read(this, R.string.config_osmPreferredDir_key, new ReadFile() {
-                private static final long serialVersionUID = 1L;
-
-                @Override
-                public boolean read(FragmentActivity currentActivity, Uri fileUri) {
-                    TransferTasks.readTodos(currentActivity, fileUri, false, new PostFileReadCallback(currentActivity, fileUri.toString()));
-                    SelectFile.savePref(prefs, R.string.config_osmPreferredDir_key, fileUri);
-                    map.invalidate();
-                    return true;
-                }
-            });
-            return true;
-        case R.id.menu_transfer_write_todos:
-            descheduleAutoLock();
-            final List<StringWithDescription> todoListnames = App.getTaskStorage().getTodoLists(this);
-            if (todoListnames.size() == 1) {
-                writeTodos(todoListnames.get(0).getValue());
-            } else {
-                ElementSelectionActionModeCallback.selectTodoList(this, todoListnames,
-                        (DialogInterface dialog, int which) -> writeTodos(todoListnames.get(which).getValue()));
-            }
-            return true;
-        case R.id.menu_undo:
-            // should not happen
-            undoListener.onClick(null);
-            return true;
-        case R.id.menu_tools_flush_all_tile_caches:
-            ScreenMessage.barWarning(this, getString(R.string.toast_flus_all_caches), R.string.Yes, v -> {
+            case R.id.menu_tools_apply_local_offset:
                 MapTilesLayer<?> backgroundLayer = map.getBackgroundLayer();
                 if (backgroundLayer != null) {
-                    backgroundLayer.flushTileCache(Main.this, null, true);
+                    ImageryOffsetUtils.applyImageryOffsets(this, logic.getPrefs(), backgroundLayer.getTileLayerConfiguration(), null);
                 }
-                map.invalidate();
-            });
-            return true;
-        case R.id.menu_tools_apply_local_offset:
-            MapTilesLayer<?> backgroundLayer = map.getBackgroundLayer();
-            if (backgroundLayer != null) {
-                ImageryOffsetUtils.applyImageryOffsets(this, logic.getPrefs(), backgroundLayer.getTileLayerConfiguration(), null);
-            }
-            return true;
-        case R.id.menu_tools_update_imagery_configuration:
-            updateImagery(logic, TileLayerDatabase.SOURCE_JOSM_IMAGERY, Urls.JOSM_IMAGERY);
-            return true;
-        case R.id.menu_tools_update_imagery_configuration_eli:
-            updateImagery(logic, TileLayerDatabase.SOURCE_ELI, Urls.ELI);
-            return true;
-        case R.id.menu_tools_install_egm:
-            DownloadManager mgr = (DownloadManager) getSystemService(DOWNLOAD_SERVICE);
-            Uri egm96 = Uri.parse(Urls.EGM96);
-            String egmFile = egm96.getLastPathSegment();
-            DownloadManager.Request request = new DownloadManager.Request(egm96).setAllowedOverRoaming(false).setTitle(egmFile)
-                    .setDestinationInExternalFilesDir(this, Environment.DIRECTORY_DOWNLOADS, egmFile + "." + FileExtensions.TEMP)
-                    .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
-            mgr.enqueue(request);
-            return true;
-        case R.id.menu_tools_remove_egm:
-            Uri egmPath = prefs.getEgmFile();
-            if (egmPath != null) {
-                if (!new File(egmPath.getPath()).delete()) { // NOSONAR nio.delete requires newer Android API
-                    Log.e(DEBUG_TAG, "Unable to delete " + egmPath);
-                }
-                prefs.setEgmFile(null);
-                invalidateOptionsMenu();
-            }
-            return true;
-        case R.id.menu_tools_load_keys:
-            descheduleAutoLock();
-            SelectFile.read(this, R.string.config_osmPreferredDir_key, new ReadFile() {
-                private static final long serialVersionUID = 1L;
-
-                @Override
-                public boolean read(FragmentActivity currentActivity, Uri fileUri) {
-                    try (KeyDatabaseHelper keyDatabase = new KeyDatabaseHelper(currentActivity)) {
-                        keyDatabase.keysFromStream(currentActivity, currentActivity.getContentResolver().openInputStream(fileUri));
-                        SelectFile.savePref(prefs, R.string.config_osmPreferredDir_key, fileUri);
-                    } catch (FileNotFoundException fex) {
-                        fileNotFound(fileUri);
+                return true;
+            case R.id.menu_tools_update_imagery_configuration:
+                updateImagery(logic, TileLayerDatabase.SOURCE_JOSM_IMAGERY, Urls.JOSM_IMAGERY);
+                return true;
+            case R.id.menu_tools_update_imagery_configuration_eli:
+                updateImagery(logic, TileLayerDatabase.SOURCE_ELI, Urls.ELI);
+                return true;
+            case R.id.menu_tools_install_egm:
+                DownloadManager mgr = (DownloadManager) getSystemService(DOWNLOAD_SERVICE);
+                Uri egm96 = Uri.parse(Urls.EGM96);
+                String egmFile = egm96.getLastPathSegment();
+                DownloadManager.Request request = new DownloadManager.Request(egm96).setAllowedOverRoaming(false).setTitle(egmFile)
+                        .setDestinationInExternalFilesDir(this, Environment.DIRECTORY_DOWNLOADS, egmFile + "." + FileExtensions.TEMP)
+                        .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
+                mgr.enqueue(request);
+                return true;
+            case R.id.menu_tools_remove_egm:
+                Uri egmPath = prefs.getEgmFile();
+                if (egmPath != null) {
+                    if (!new File(egmPath.getPath()).delete()) { // NOSONAR nio.delete requires newer Android API
+                        Log.e(DEBUG_TAG, "Unable to delete " + egmPath);
                     }
-                    return true;
+                    prefs.setEgmFile(null);
+                    invalidateOptionsMenu();
                 }
-            });
-            return true;
-        case R.id.menu_tools_import_data_style:
-            descheduleAutoLock();
-            SelectFile.read(this, R.string.config_osmPreferredDir_key, new ReadFile() {
-                private static final long serialVersionUID = 1L;
+                return true;
+            case R.id.menu_tools_load_keys:
+                descheduleAutoLock();
+                SelectFile.read(this, R.string.config_osmPreferredDir_key, new ReadFile() {
+                    private static final long serialVersionUID = 1L;
 
-                @Override
-                public boolean read(FragmentActivity currentActivity, Uri fileUri) {
-                    try (InputStream in = currentActivity.getContentResolver().openInputStream(fileUri)) {
-                        File destDir = FileUtil.getApplicationDirectory(currentActivity, Paths.DIRECTORY_PATH_STYLES);
-                        String filename = ContentResolverUtil.getDisplaynameColumn(currentActivity, fileUri);
-                        File dest = new File(destDir, filename);
-                        FileUtil.copy(in, dest);
-                        if (filename.toLowerCase(Locale.US).endsWith("." + FileExtensions.ZIP)) {
-                            FileUtil.unpackZip(destDir.getAbsolutePath() + Paths.DELIMITER, filename);
-                            dest.delete(); // NOSONAR delete the zip file
+                    @Override
+                    public boolean read(FragmentActivity currentActivity, Uri fileUri) {
+                        try (KeyDatabaseHelper keyDatabase = new KeyDatabaseHelper(currentActivity)) {
+                            keyDatabase.keysFromStream(currentActivity, currentActivity.getContentResolver().openInputStream(fileUri));
+                            SelectFile.savePref(prefs, R.string.config_osmPreferredDir_key, fileUri);
+                        } catch (FileNotFoundException fex) {
+                            fileNotFound(fileUri);
                         }
-                        App.getDataStyle(currentActivity).reset();
-                        App.getDataStyle(currentActivity).getStylesFromFiles(currentActivity);
-                        SelectFile.savePref(prefs, R.string.config_osmPreferredDir_key, fileUri);
-                    } catch (IOException fex) {
-                        fileNotFound(fileUri);
+                        return true;
                     }
-                    return true;
+                });
+                return true;
+            case R.id.menu_tools_import_data_style:
+                descheduleAutoLock();
+                SelectFile.read(this, R.string.config_osmPreferredDir_key, new ReadFile() {
+                    private static final long serialVersionUID = 1L;
+
+                    @Override
+                    public boolean read(FragmentActivity currentActivity, Uri fileUri) {
+                        try (InputStream in = currentActivity.getContentResolver().openInputStream(fileUri)) {
+                            File destDir = FileUtil.getApplicationDirectory(currentActivity, Paths.DIRECTORY_PATH_STYLES);
+                            String filename = ContentResolverUtil.getDisplaynameColumn(currentActivity, fileUri);
+                            File dest = new File(destDir, filename);
+                            FileUtil.copy(in, dest);
+                            if (filename.toLowerCase(Locale.US).endsWith("." + FileExtensions.ZIP)) {
+                                FileUtil.unpackZip(destDir.getAbsolutePath() + Paths.DELIMITER, filename);
+                                dest.delete(); // NOSONAR delete the zip file
+                            }
+                            App.getDataStyle(currentActivity).reset();
+                            App.getDataStyle(currentActivity).getStylesFromFiles(currentActivity);
+                            SelectFile.savePref(prefs, R.string.config_osmPreferredDir_key, fileUri);
+                        } catch (IOException fex) {
+                            fileNotFound(fileUri);
+                        }
+                        return true;
+                    }
+                });
+                return true;
+            case R.id.tag_menu_reset_address_prediction:
+                Address.resetLastAddresses(this);
+                return true;
+            case R.id.menu_tools_oauth_reset: // reset the current OAuth tokens
+                if (server.getOAuth()) {
+                    try (AdvancedPrefDatabase prefdb = new AdvancedPrefDatabase(this)) {
+                        prefdb.setAPIAccessToken(null, null);
+                    }
+                } else {
+                    ScreenMessage.barError(this, R.string.toast_oauth_not_enabled);
                 }
-            });
-            return true;
-        case R.id.tag_menu_reset_address_prediction:
-            Address.resetLastAddresses(this);
-            return true;
-        case R.id.menu_tools_oauth_reset: // reset the current OAuth tokens
-            if (server.getOAuth()) {
-                try (AdvancedPrefDatabase prefdb = new AdvancedPrefDatabase(this)) {
-                    prefdb.setAPIAccessToken(null, null);
+                return true;
+            case R.id.menu_tools_oauth_authorisation: // immediately start
+                // authorization handshake
+                if (server.getOAuth()) {
+                    Authorize.startForResult(this, null);
+                } else {
+                    ScreenMessage.barError(this, R.string.toast_oauth_not_enabled);
                 }
-            } else {
-                ScreenMessage.barError(this, R.string.toast_oauth_not_enabled);
-            }
-            return true;
-        case R.id.menu_tools_oauth_authorisation: // immediately start
-                                                  // authorization handshake
-            if (server.getOAuth()) {
-                Authorize.startForResult(this, null);
-            } else {
-                ScreenMessage.barError(this, R.string.toast_oauth_not_enabled);
-            }
-            return true;
-        case R.id.menu_tools_set_maproulette_apikey:
-            MapRouletteApiKey.set(this, server, true);
-            return true;
-        case R.id.menu_tools_clear_clipboard:
-            App.getDelegator().clearClipboard();
-            return true;
-        case R.id.menu_tools_calibrate_height:
-            BarometerCalibration.showDialog(this);
-            return true;
-        case R.id.tag_menu_js_console:
-            Main.showJsConsole(this);
-            return true;
-        case R.id.menu_authors:
-            startActivity(new Intent(this, LicenseViewer.class));
-            return true;
-        case R.id.logout:
-            prefs.setCgiToken(null);
-            startActivity(new Intent(this, LoginActivity.class));
-            finish();
-            return true;
-        case R.id.menu_privacy:
-            HelpViewer.start(this, R.string.help_privacy);
-            return true;
-        case R.id.menu_feedback:
-            Feedback.start(this, prefs.useUrlForFeedback());
-            return true;
-        case R.id.menu_debug:
-            startActivity(new Intent(this, DebugInformation.class));
-            return true;
-        default:
-            Log.w(DEBUG_TAG, "Unknown menu item " + item.getItemId());
+                return true;
+            case R.id.menu_tools_set_maproulette_apikey:
+                MapRouletteApiKey.set(this, server, true);
+                return true;
+            case R.id.menu_tools_clear_clipboard:
+                App.getDelegator().clearClipboard();
+                return true;
+            case R.id.menu_tools_calibrate_height:
+                BarometerCalibration.showDialog(this);
+                return true;
+            case R.id.tag_menu_js_console:
+                Main.showJsConsole(this);
+                return true;
+            case R.id.menu_authors:
+                startActivity(new Intent(this, LicenseViewer.class));
+                return true;
+            case R.id.logout:
+                prefs.setCgiToken(null);
+                startActivity(new Intent(this, LoginActivity.class));
+                finish();
+                return true;
+            case R.id.menu_privacy:
+                HelpViewer.start(this, R.string.help_privacy);
+                return true;
+            case R.id.menu_feedback:
+                Feedback.start(this, prefs.useUrlForFeedback());
+                return true;
+            case R.id.menu_debug:
+                startActivity(new Intent(this, DebugInformation.class));
+                return true;
+            default:
+                Log.w(DEBUG_TAG, "Unknown menu item " + item.getItemId());
         }
         return false;
     }
 
     /**
      * Show the file picker and save current changes to an osmChanges file
-     * 
-     * @param activity a FragmentActivity
+     *
+     * @param activity  a FragmentActivity
      * @param delegator a StorageDelegator instance
-     * @param prefs current Preferences
+     * @param prefs     current Preferences
      */
     public static void saveOscFile(@NonNull FragmentActivity activity, @NonNull StorageDelegator delegator, @NonNull Preferences prefs) {
         SelectFile.save(activity, null, R.string.config_osmPreferredDir_key, new SaveFile() {
@@ -2658,9 +2672,9 @@ public class Main extends FullScreenAppCompatActivity
 
     /**
      * Update the imagery configuration from a network source
-     * 
+     *
      * @param logic the current logic instance
-     * @param url the url for the source
+     * @param url   the url for the source
      */
     private void updateImagery(@NonNull final Logic logic, @NonNull String source, @NonNull String url) {
         new ExecutorTask<Void, Void, Void>(logic.getExecutorService(), logic.getHandler()) {
@@ -2693,9 +2707,9 @@ public class Main extends FullScreenAppCompatActivity
 
     /**
      * Show a console for writing and executing Overpass queries
-     * 
+     *
      * @param activity the calling FragmentActivity
-     * @param text initial overpass query
+     * @param text     initial overpass query
      */
     public static void showOverpassConsole(@NonNull final FragmentActivity activity, @Nullable String text) {
         ConsoleDialog.showDialog(activity, R.string.overpass_console, R.string.merge_result, R.string.select_result, text, null,
@@ -2729,7 +2743,7 @@ public class Main extends FullScreenAppCompatActivity
 
     /**
      * Show the JS console
-     * 
+     *
      * @param main the current instance of Main
      */
     public static void showJsConsole(@NonNull final Main main) {
@@ -2748,7 +2762,7 @@ public class Main extends FullScreenAppCompatActivity
 
     /**
      * Write the contents of a todo list to a file // NOSONAR
-     * 
+     *
      * @param listName the todo list name or null for all // NOSONAR
      */
     private void writeTodos(@Nullable String listName) {
@@ -2771,7 +2785,6 @@ public class Main extends FullScreenAppCompatActivity
     }
 
     /**
-     * 
      * Determine the nearest Todo and show the corresponding modal // NOSONAR
      */
     private void gotoNearestTodo() {
@@ -2792,7 +2805,7 @@ public class Main extends FullScreenAppCompatActivity
             final List<StringWithDescription> todoLists = App.getTaskStorage().getTodoLists(this);
             if (todoLists.size() > 1) {
                 ElementSelectionActionModeCallback.selectTodoList(this, todoLists, (DialogInterface dialog,
-                        int which) -> showNearestTodo(App.getTaskStorage().getTodos(todoLists.get(which).getValue(), false), center[0], center[1]));
+                                                                                    int which) -> showNearestTodo(App.getTaskStorage().getTodos(todoLists.get(which).getValue(), false), center[0], center[1]));
                 return;
             }
             showNearestTodo(todos, center[0], center[1]);
@@ -2803,10 +2816,10 @@ public class Main extends FullScreenAppCompatActivity
 
     /**
      * Goto the position of the nearest todo and show the todo dialog //NOSONAR
-     * 
+     *
      * @param todos a List of possible Todos // NOSONAR
-     * @param lon the relevant WGS84 longitude
-     * @param lat the relevant WGS84 latitude
+     * @param lon   the relevant WGS84 longitude
+     * @param lat   the relevant WGS84 latitude
      */
     private void showNearestTodo(@NonNull List<Todo> todos, double lon, double lat) {
         if (todos.isEmpty()) {
@@ -2821,7 +2834,7 @@ public class Main extends FullScreenAppCompatActivity
 
     /**
      * Display a toast when we can't find a file
-     * 
+     *
      * @param fileUri the file uri
      */
     private void fileNotFound(Uri fileUri) {
@@ -2834,7 +2847,7 @@ public class Main extends FullScreenAppCompatActivity
 
     /**
      * Add a recording GPX layer if none exists
-     * 
+     * <p>
      * Only call this once the TrackerService has been started
      */
     private void addGpxLayer() {
@@ -2864,7 +2877,7 @@ public class Main extends FullScreenAppCompatActivity
         if (gotoLoc == null && !getEnabledLocationProviders().isEmpty()) { // fallback
             gotoLoc = getLastLocation();
         } // else moan? without GPS enabled this shouldn't be selectable
-          // currently
+        // currently
         if (gotoLoc != null) {
             App.getLogic().setZoom(getMap(), Ui.ZOOM_FOR_ZOOMTO);
             map.getViewBox().moveTo(getMap(), (int) (gotoLoc.getLongitude() * 1E7d), (int) (gotoLoc.getLatitude() * 1E7d));
@@ -2877,8 +2890,8 @@ public class Main extends FullScreenAppCompatActivity
 
     /**
      * Zoom to the GPS TrackPoint
-     * 
-     * @param logic the current Login instance
+     *
+     * @param logic      the current Login instance
      * @param trackPoint the TrackPoint
      */
     public void gotoTrackPoint(@NonNull final Logic logic, @NonNull TrackPoint trackPoint) {
@@ -2892,7 +2905,7 @@ public class Main extends FullScreenAppCompatActivity
 
     /**
      * Get a new File for storing an image
-     * 
+     *
      * @return a File object
      * @throws IOException if reading the file went wrong
      */
@@ -2908,7 +2921,7 @@ public class Main extends FullScreenAppCompatActivity
 
     /**
      * If an image has successfully been captured by a camera app, index the file, otherwise delete
-     * 
+     *
      * @param resultCode the result code from the intent
      */
     private void indexImage(final int resultCode) {
@@ -2969,7 +2982,7 @@ public class Main extends FullScreenAppCompatActivity
 
     /**
      * If show is true start locations updates and start following the GPS position otherwise turn location updates off
-     * 
+     *
      * @param show turn location updates on or off
      */
     private void setShowGPS(boolean show) {
@@ -2992,7 +3005,7 @@ public class Main extends FullScreenAppCompatActivity
 
     /**
      * Checks if GPS is enabled in the settings. If not, returns null and shows location settings.
-     * 
+     *
      * @return the provider if a usable one is enabled, null if not
      */
     @NonNull
@@ -3030,7 +3043,7 @@ public class Main extends FullScreenAppCompatActivity
 
     /**
      * Set if we are centering the map on the current location
-     * 
+     *
      * @param follow if true center on current location
      */
     public synchronized void setFollowGPS(boolean follow) {
@@ -3058,7 +3071,7 @@ public class Main extends FullScreenAppCompatActivity
             }
         }
         if (follow && lastLocation != null) { // update if we are returning from
-                                              // pause/stop
+            // pause/stop
             Log.d(DEBUG_TAG, "Setting lastLocation");
             onLocationChanged(lastLocation);
         }
@@ -3066,7 +3079,7 @@ public class Main extends FullScreenAppCompatActivity
 
     /**
      * Check if the screen should be centered on the current location or not
-     * 
+     *
      * @return true if we should be following the location
      */
     public synchronized boolean getFollowGPS() {
@@ -3124,10 +3137,10 @@ public class Main extends FullScreenAppCompatActivity
 
     /**
      * Handles the menu click on "download current view".<br>
-     * 
+     * <p>
      * When the user made some changes,  will be shown.<br>
      * Otherwise the current viewBox will be downloaded from the server.
-     * 
+     *
      * @param add Boolean flag indicating to handle changes (true) or not (false).
      */
     private void onMenuDownloadCurrent(boolean add) {
@@ -3193,7 +3206,7 @@ public class Main extends FullScreenAppCompatActivity
 
     /**
      * Restore the file name for a photograph
-     * 
+     *
      * @param savedImageFileName Image file name.
      */
     public void setImageFileName(@Nullable String savedImageFileName) {
@@ -3205,7 +3218,7 @@ public class Main extends FullScreenAppCompatActivity
 
     /**
      * Return the file name for a photograph
-     * 
+     *
      * @return Image file name.
      */
     @Nullable
@@ -3222,9 +3235,9 @@ public class Main extends FullScreenAppCompatActivity
 
     /**
      * Download OSM data for the currently displayed area
-     * 
+     * <p>
      * Will include Tasks for the same if enabled
-     * 
+     *
      * @param add if true merge the data with the current contents, if false replace
      */
     public void performCurrentViewHttpLoad(boolean add) {
@@ -3241,14 +3254,14 @@ public class Main extends FullScreenAppCompatActivity
 
     /**
      * Check if there are changes present and then show the upload dialog, getting authorisation if necessary
-     * 
+     *
      * @param elements List of OsmElements to upload, if null all changes are uploaded
      */
     public void confirmUpload(@Nullable List<OsmElement> elements) {
         final Server server = prefs.getServer();
         if (App.getLogic().hasChanges()) {
 //            if (Server.checkOsmAuthentication(this, server, () -> ReviewAndUpload.showDialog(Main.this, elements))) {
-                ReviewAndUpload.showDialog(this, elements);
+            ReviewAndUpload.showDialog(this, elements);
 //            }
         } else {
             ScreenMessage.barInfo(this, R.string.toast_no_changes);
@@ -3298,6 +3311,7 @@ public class Main extends FullScreenAppCompatActivity
             lock.show();
         }
         invisibleUnlockButton();
+        showNextPanel(false);
     }
 
     /**
@@ -3338,7 +3352,7 @@ public class Main extends FullScreenAppCompatActivity
 
     /**
      * Get the SimpleActions FAB
-     * 
+     *
      * @return the FAB or null
      */
     @Nullable
@@ -3366,8 +3380,8 @@ public class Main extends FullScreenAppCompatActivity
 
     /**
      * Change the sate of the simple actions button
-     * 
-     * @param enabled the new state
+     *
+     * @param enabled   the new state
      * @param stateList the ColorStateList
      */
     private void changeSimpleActionsButtonState(boolean enabled, @NonNull ColorStateList stateList) {
@@ -3399,11 +3413,11 @@ public class Main extends FullScreenAppCompatActivity
 
     /**
      * Start the PropertyEditor for the element in question, single element version
-     * 
-     * @param selectedElement Selected OpenStreetMap element.
-     * @param focusOn if not null focus on the value field of this key.
+     *
+     * @param selectedElement      Selected OpenStreetMap element.
+     * @param focusOn              if not null focus on the value field of this key.
      * @param applyLastAddressTags add address tags to the object being edited.
-     * @param showPresets show the preset tab on start up.
+     * @param showPresets          show the preset tab on start up.
      */
     public void performTagEdit(@NonNull final OsmElement selectedElement, @Nullable String focusOn, boolean applyLastAddressTags, boolean showPresets) {
         final Logic logic = App.getLogic();
@@ -3413,14 +3427,14 @@ public class Main extends FullScreenAppCompatActivity
 
     /**
      * Start the PropertyEditor for the element in question, single element version
-     * 
+     *
      * @param selectedElement Selected OpenStreetMap element.
-     * @param presetPath path to preset to apply
-     * @param tags any existing tags to apply
-     * @param showPresets show the preset tab on start up.
+     * @param presetPath      path to preset to apply
+     * @param tags            any existing tags to apply
+     * @param showPresets     show the preset tab on start up.
      */
     public <M extends java.util.Map<String, String> & Serializable> void performTagEdit(@NonNull final OsmElement selectedElement,
-            @Nullable PresetElementPath presetPath, @Nullable M tags, boolean showPresets) {
+                                                                                        @Nullable PresetElementPath presetPath, @Nullable M tags, boolean showPresets) {
         ArrayList<PresetElementPath> presetPathList = new ArrayList<>();
         if (presetPath != null) {
             presetPathList.add(presetPath);
@@ -3430,13 +3444,13 @@ public class Main extends FullScreenAppCompatActivity
 
     /**
      * Start the PropertyEditor for the element in question, single element version
-     * 
-     * @param selectedElement Selected OpenStreetMap element.
-     * @param focusOn if not null focus on the value field of this key.
+     *
+     * @param selectedElement      Selected OpenStreetMap element.
+     * @param focusOn              if not null focus on the value field of this key.
      * @param applyLastAddressTags add address tags to the object being edited.
-     * @param presetPathList list of paths to presets to apply
-     * @param tags any existing tags to apply
-     * @param showPresets show the preset tab on start up.
+     * @param presetPathList       list of paths to presets to apply
+     * @param tags                 any existing tags to apply
+     * @param showPresets          show the preset tab on start up.
      */
     private <M extends java.util.Map<String, String> & Serializable, L extends List<PresetElementPath> & Serializable> void performTagEdit(
             @NonNull final OsmElement selectedElement, @Nullable String focusOn, boolean applyLastAddressTags, @Nullable L presetPathList, @Nullable M tags,
@@ -3464,10 +3478,10 @@ public class Main extends FullScreenAppCompatActivity
 
     /**
      * Start the PropertyEditor for the element in question, multiple element version
-     * 
-     * @param selection list of selected elements
+     *
+     * @param selection            list of selected elements
      * @param applyLastAddressTags add address tags to the object being edited
-     * @param showPresets show the preset tab on start up.
+     * @param showPresets          show the preset tab on start up.
      */
     public void performTagEdit(final List<OsmElement> selection, boolean applyLastAddressTags, boolean showPresets) {
         performTagEdit(selection, applyLastAddressTags, null, showPresets);
@@ -3475,14 +3489,14 @@ public class Main extends FullScreenAppCompatActivity
 
     /**
      * Start the PropertyEditor for the element in question, multiple element version
-     * 
-     * @param selection list of selected elements
+     *
+     * @param selection            list of selected elements
      * @param applyLastAddressTags add address tags to the object being edited
-     * @param tags any existing tags to apply
-     * @param showPresets show the preset tab on start up.
+     * @param tags                 any existing tags to apply
+     * @param showPresets          show the preset tab on start up.
      */
     public <M extends java.util.Map<String, String> & Serializable> void performTagEdit(final List<OsmElement> selection, boolean applyLastAddressTags,
-            @Nullable M tags, boolean showPresets) {
+                                                                                        @Nullable M tags, boolean showPresets) {
         descheduleAutoLock();
         unlock();
         List<PropertyEditorData> multiple = new ArrayList<>();
@@ -3559,7 +3573,7 @@ public class Main extends FullScreenAppCompatActivity
                 actionResult = easyEditManager.handleBackPressed();
                 return actionResult;
             } else { // note to avoid tons of error messages we need to
-                     // consume both events
+                // consume both events
                 return actionResult;
             }
         }
@@ -3598,7 +3612,7 @@ public class Main extends FullScreenAppCompatActivity
 
         /**
          * Actually undo
-         * 
+         *
          * @param logic the current Logic instance
          */
         @Override
@@ -3633,7 +3647,7 @@ public class Main extends FullScreenAppCompatActivity
 
     /**
      * If an undo/redo deleted an element we need to resync selection
-     * 
+     *
      * @param logic the current instance of Logic
      */
     public void resync(final Logic logic) {
@@ -3645,7 +3659,7 @@ public class Main extends FullScreenAppCompatActivity
 
     /**
      * A TouchListener for all gestures made on the touchscreen.
-     * 
+     *
      * @author mb
      * @author simon
      */
@@ -3703,18 +3717,18 @@ public class Main extends FullScreenAppCompatActivity
                 map.invalidate();
             } else {
                 switch (clickedObjects.size()) {
-                case 0:
-                    if (!logic.isLocked()) {
-                        ScreenMessage.toastTopInfo(Main.this, R.string.toast_not_in_edit_range);
-                    }
-                    break;
-                case 1:
-                    descheduleAutoLock();
-                    clickedObjects.get(0).onSelected(Main.this);
-                    break;
-                default:
-                    showDisambiguationMenu(v, x, y);
-                    break;
+                    case 0:
+                        if (!logic.isLocked()) {
+                            ScreenMessage.toastTopInfo(Main.this, R.string.toast_not_in_edit_range);
+                        }
+                        break;
+                    case 1:
+                        descheduleAutoLock();
+                        clickedObjects.get(0).onSelected(Main.this);
+                        break;
+                    default:
+                        showDisambiguationMenu(v, x, y);
+                        break;
                 }
             }
         }
@@ -3774,12 +3788,11 @@ public class Main extends FullScreenAppCompatActivity
 
         /**
          * Get clicked objects from layers (with the exception of the data layer)
-         * 
-         * 
+         *
          * @param x screen x coordinate of click position
          * @param y screen y coordinate of click position
          */
-        @SuppressWarnings({ "unchecked", "rawtypes" })
+        @SuppressWarnings({"unchecked", "rawtypes"})
         private void getClickedObjects(final float x, final float y) {
             ViewBox viewBox = map.getViewBox();
             for (MapViewLayer layer : map.getLayers()) {
@@ -3830,14 +3843,14 @@ public class Main extends FullScreenAppCompatActivity
 
         /**
          * Perform edit touch processing.
-         * 
+         *
          * @param mode mode we are in
-         * @param v View affected by the touch event.
-         * @param x the click-position on the display.
-         * @param y the click-position on the display.
+         * @param v    View affected by the touch event.
+         * @param x    the click-position on the display.
+         * @param y    the click-position on the display.
          */
         public void performEdit(Mode mode, final View v, final float x, final float y) {
-            if (!getEasyEditManager().actionModeHandledClick(x, y)) {
+            if (!click(x, y)) {
                 Logic logic = App.getLogic();
                 clickedNodesAndWays = getClickedOsmElements(logic, x, y);
                 Filter filter = logic.getFilter();
@@ -3849,51 +3862,51 @@ public class Main extends FullScreenAppCompatActivity
                 int itemCount = elementCount + clickedObjectsCount;
                 boolean inEasyEditMode = logic.getMode().elementsGeomEditable();
                 switch (itemCount) {
-                case 0:
-                    // no elements were touched
-                    if (inEasyEditMode) {
-                        getEasyEditManager().nothingTouched(false);
-                    }
-                    break;
-                case 1:
-                    // exactly one element touched
-                    if (clickedObjects.size() == 1) {
-                        descheduleAutoLock();
-                        clickedObjects.get(0).onSelected(Main.this);
-                    } else if (clickedNodesAndWays.size() == 1) {
-                        if (inEasyEditMode || getEasyEditManager().inMultiSelectMode()) {
-                            getEasyEditManager().editElement(clickedNodesAndWays.get(0));
-                        } else {
-                            performTagEdit(clickedNodesAndWays.get(0), null, false, false);
-                        }
-                    } else {
-                        String debugString = "performEdit can't find what was clicked " + filter;
-                        Log.e(DEBUG_TAG, debugString);
-                        ACRAHelper.nocrashReport(null, debugString);
-                    }
-                    break;
-                default:
-                    // multiple possible elements touched - show menu
-                    if (menuRequired()) {
-                        showDisambiguationMenu(v, x, y);
-                    } else {
-                        // menuRequired tells us it's ok to just take the first one
+                    case 0:
+                        // no elements were touched
                         if (inEasyEditMode) {
-                            getEasyEditManager().editElement(clickedNodesAndWays.get(0));
-                        } else {
-                            performTagEdit(clickedNodesAndWays.get(0), null, false, false);
+                            getEasyEditManager().nothingTouched(false);
                         }
-                    }
-                    break;
+                        break;
+                    case 1:
+                        // exactly one element touched
+                        if (clickedObjects.size() == 1) {
+                            descheduleAutoLock();
+                            clickedObjects.get(0).onSelected(Main.this);
+                        } else if (clickedNodesAndWays.size() == 1) {
+                            if (inEasyEditMode || getEasyEditManager().inMultiSelectMode()) {
+                                getEasyEditManager().editElement(clickedNodesAndWays.get(0));
+                            } else {
+                                performTagEdit(clickedNodesAndWays.get(0), null, false, false);
+                            }
+                        } else {
+                            String debugString = "performEdit can't find what was clicked " + filter;
+                            Log.e(DEBUG_TAG, debugString);
+                            ACRAHelper.nocrashReport(null, debugString);
+                        }
+                        break;
+                    default:
+                        // multiple possible elements touched - show menu
+                        if (menuRequired()) {
+                            showDisambiguationMenu(v, x, y);
+                        } else {
+                            // menuRequired tells us it's ok to just take the first one
+                            if (inEasyEditMode) {
+                                getEasyEditManager().editElement(clickedNodesAndWays.get(0));
+                            } else {
+                                performTagEdit(clickedNodesAndWays.get(0), null, false, false);
+                            }
+                        }
+                        break;
                 }
             }
         }
 
         /**
          * Filter for elements
-         * 
+         * <p>
          * NOTE expensive for a large number of elements
-         * 
+         *
          * @param elements List of elements to filter
          * @return List of elements that have passed the filter
          */
@@ -3911,10 +3924,10 @@ public class Main extends FullScreenAppCompatActivity
 
         /**
          * Creates a context menu with the objects near where the screen was touched
-         * 
+         *
          * @param menu Menu object to add our entries to
-         * @param x x screen coordinate
-         * @param y y screen coordinate
+         * @param x    x screen coordinate
+         * @param y    y screen coordinate
          */
         public void onCreateDefaultDisambiguationMenu(@NonNull final DisambiguationMenu menu, float x, float y) {
             int id = 0;
@@ -3940,7 +3953,7 @@ public class Main extends FullScreenAppCompatActivity
          * Checks if a menu should be shown based on clickedNodesAndWays and clickedBugs. ClickedNodesAndWays needs to
          * contain nodes first, then ways, ordered by distance from the click. Assumes multiple elements have been
          * clicked, i.e. a choice is necessary unless heuristics work.
-         * 
+         *
          * @return true if a selection menu should be shown
          */
         private boolean menuRequired() {
@@ -3967,7 +3980,7 @@ public class Main extends FullScreenAppCompatActivity
                 Node candidate = (Node) clickedNodesAndWays.get(0);
                 if (candidate.hasParentRelations()) {
                     return true; // otherwise a relation that only has nodes as
-                                 // member is not selectable
+                    // member is not selectable
                 }
                 final Logic logic = App.getLogic();
                 float nodeX = logic.getNodeScreenX(candidate);
@@ -4020,7 +4033,7 @@ public class Main extends FullScreenAppCompatActivity
             } else if (mode.elementsEditable()) {
                 if (doubleTap) {
                     doubleTap = false;
-                    startSupportActionMode(new MultiSelectActionModeCallback(getEasyEditManager(), clickedNodesAndWays.get(0)));
+//                    startSupportActionMode(new MultiSelectActionModeCallback(getEasyEditManager(), clickedNodesAndWays.get(0)));
                 } else {
                     performTagEdit(element, null, false, false);
                 }
@@ -4052,7 +4065,7 @@ public class Main extends FullScreenAppCompatActivity
                     // menuRequired tells us it's ok to just take the first one
                     getEasyEditManager().startExtendedSelection(clickedNodesAndWays.get(0));
                 } else if (App.getLogic().getMode().elementsEditable()) {
-                    startSupportActionMode(new MultiSelectActionModeCallback(getEasyEditManager(), clickedNodesAndWays.get(0)));
+//                    startSupportActionMode(new MultiSelectActionModeCallback(getEasyEditManager(), clickedNodesAndWays.get(0)));
                 }
             } else {
                 ScreenMessage.toastTopInfo(Main.this, R.string.toast_already_in_multiselect);
@@ -4061,10 +4074,10 @@ public class Main extends FullScreenAppCompatActivity
 
         /**
          * Get clicked osm elements
-         * 
+         *
          * @param logic the current Logic instance
-         * @param x screen x coordinate
-         * @param y screen y coordinate
+         * @param x     screen x coordinate
+         * @param y     screen y coordinate
          */
         @NonNull
         private List<OsmElement> getClickedOsmElements(@NonNull final Logic logic, float x, float y) {
@@ -4074,10 +4087,10 @@ public class Main extends FullScreenAppCompatActivity
 
         /**
          * Create and show the disambiguation menu
-         * 
+         *
          * @param view the current anchor view
-         * @param x x screen coordinate
-         * @param y y screen coordinate
+         * @param x    x screen coordinate
+         * @param y    y screen coordinate
          */
         public void showDisambiguationMenu(@NonNull View view, float x, float y) {
             DisambiguationMenu menu = new DisambiguationMenu(view);
@@ -4089,6 +4102,222 @@ public class Main extends FullScreenAppCompatActivity
         }
     }
 
+    private boolean click(float x, float y) {
+        Logic logic = App.getLogic();
+        if (logic.getClickableElements() != null) { // way follow
+            return false;
+        }
+        try {
+            pathCreateNode(x, y);
+        } catch (StorageException e) {
+            ScreenMessage.toastTopError(this, e.getLocalizedMessage(), true);
+        } catch (OsmIllegalOperationException e) {
+            finishBuilding();
+            ScreenMessage.toastTopError(this, e.getLocalizedMessage(), true);
+        }
+        return true;
+    }
+
+    protected void finishBuilding() {
+        Logic logic = App.getLogic();
+        final Way lastSelectedWay = logic.getSelectedWay();
+        final Node lastSelectedNode = logic.getSelectedNode();
+        finishPath(lastSelectedWay, lastSelectedNode);
+        showNextPanel(false);
+    }
+
+    protected void finishPath(@Nullable final Way lastSelectedWay, @Nullable final Node lastSelectedNode) {
+        getEasyEditManager().finish();
+        App.getLogic().removeCheckpoint(this, createdWay != null ? R.string.undo_action_moveobjects : R.string.undo_action_movenode);
+        if (!addedNodes.isEmpty() && !dontTag) {
+            tagApplicable(lastSelectedNode, lastSelectedWay, false);
+            delayedResetHasProblem(lastSelectedWay);
+        }
+    }
+
+    protected List<Node> addedNodes             = new ArrayList<>();
+    private Node    appendTargetNode;
+    private boolean snap    = true;
+    private Integer checkpointName;
+    private Way          createdWay             = null;
+    private boolean dontTag = false;
+    private List<Node>   existingNodes          = new ArrayList<>();
+    private List<Way>    candidatesForFollowing = null;
+    private Node         initialFollowNode      = null;
+
+    private synchronized void pathCreateNode(float x, float y) {
+        Logic logic = App.getLogic();
+        Node lastSelectedNode = logic.getSelectedNode();
+        Way lastSelectedWay = logic.getSelectedWay();
+        final boolean firstNode = addedNodes.isEmpty();
+        Node clicked = logic.getClickedNode(x, y);
+        if (appendTargetNode != null) {
+            logic.performAppendAppend(this, x, y, false, snap);
+            appendTargetNode = logic.getSelectedNode();
+            if (firstNode) {
+                checkpointName = R.string.undo_action_append;
+            }
+        } else {
+            logic.performAdd(this, x, y, false, snap);
+            if (firstNode) {
+                checkpointName = R.string.undo_action_add;
+            }
+        }
+        if (logic.getSelectedNode() == null) {
+            // user clicked last node again -> finish adding
+            App.getLogic().removeCheckpoint(this, createdWay != null ? R.string.undo_action_moveobjects : R.string.undo_action_movenode);
+            if (!addedNodes.isEmpty() && !dontTag) {
+                tagApplicable(lastSelectedNode, lastSelectedWay, false);
+                delayedResetHasProblem(lastSelectedWay);
+            }
+            return;
+        }
+        // update cache for undo
+        createdWay = logic.getSelectedWay();
+        if (createdWay == null) {
+            addedNodes = new ArrayList<>();
+        } else {
+            createdWay.dontValidate();
+        }
+        addedNodes.add(logic.getSelectedNode());
+        if (firstNode) {
+            map.invalidate(); // activate undo
+        }
+        // node already existed id clicked != null
+        if (clicked != null) {
+            existingNodes.add(clicked);
+            // check if we are potentially can follow a way
+            if (lastSelectedNode != null) {
+                enableFollowWay(lastSelectedNode, clicked);
+            }
+        } else {
+            candidatesForFollowing = null;
+            map.invalidate();
+        }
+
+        showNextPanel(!addedNodes.isEmpty());
+        if (addedNodes != null) {
+            TextView pointCounterTextView = (TextView) findViewById(R.id.pointCount);
+            pointCounterTextView.setText(addedNodes.size() + " точек");
+        }
+
+        invalidateMap();
+    }
+
+    private void showNextPanel(boolean show) {
+        View nextPanel = findViewById(R.id.next_panel);
+        if (show) {
+            ViewGroup.LayoutParams layoutParams = nextPanel.getLayoutParams();
+            layoutParams.height = 120;
+            nextPanel.setLayoutParams(layoutParams);
+        } else {
+            ViewGroup.LayoutParams layoutParams = nextPanel.getLayoutParams();
+            layoutParams.height = 0;
+            nextPanel.setLayoutParams(layoutParams);
+        }
+    }
+
+    private void enableFollowWay(@NonNull Node current, @NonNull Node next) {
+        boolean alreadyAvailable = candidatesForFollowing != null && !candidatesForFollowing.isEmpty();
+        Logic logic = App.getLogic();
+        candidatesForFollowing = logic.getWaysForNode(current);
+        candidatesForFollowing.retainAll(logic.getWaysForNode(next));
+        candidatesForFollowing.remove(createdWay);
+        // remove any ways that we have "used up"
+        for (Way candidate : new ArrayList<>(candidatesForFollowing)) {
+            if (candidate.isEndNode(next) && !candidate.isClosed()) {
+                candidatesForFollowing.remove(candidate);
+            }
+        }
+        initialFollowNode = current;
+        if (!alreadyAvailable || candidatesForFollowing.isEmpty()) {
+            map.invalidate();
+        }
+    }
+
+    private void tagApplicable(@Nullable final Node possibleNode, @Nullable final Way possibleWay, final boolean select) {
+        if (possibleWay == null) {
+            // Single node was added
+            if (possibleNode != null) { // null-check to be sure
+                performTagEdit(possibleNode, null, false, true);
+            } else {
+                Log.e(DEBUG_TAG, "tagApplicable called with null arguments");
+            }
+        } else { // way was added
+            performTagEdit(possibleWay, null, false, true);
+        }
+    }
+
+    private synchronized void handleUndo() {
+        Logic logic = App.getLogic();
+        if (addedNodes.isEmpty()) {
+            Log.e(DEBUG_TAG, "Undo called but nothing to undo");
+            return;
+        }
+        Node removedNode = addedNodes.remove(addedNodes.size() - 1);
+        final boolean deleteNode = !existingNodes.contains(removedNode);
+        final List<Way> modifiedWays = logic.getWaysForNode(removedNode);
+        if (createdWay != null && createdWay.nodeCount() > 0) {
+            logic.performRemoveEndNodeFromWay(this, createdWay.getLastNode().equals(logic.getSelectedNode()), createdWay, deleteNode, false);
+            createdWay.dontValidate();
+            if (OsmElement.STATE_DELETED == createdWay.getState()) {
+                createdWay = null;
+                logic.setSelectedWay(null);
+            }
+        } else if (deleteNode) {
+            logic.performEraseNode(this, removedNode, false);
+        }
+        // undo any changes from creating and then removing nodes on ways
+        if (deleteNode) {
+            for (Way w : modifiedWays) {
+                if (!w.equals(createdWay)) {
+                    UndoStorage undo = logic.getUndo();
+                    List<UndoStorage.UndoElement> undoWays = undo.getUndoElements(w);
+                    UndoStorage.UndoElement undoWay = undoWays.get(undoWays.size() - 1);
+                    if (undoWay instanceof UndoStorage.UndoWay) {
+                        if (undoWay.getState() == OsmElement.STATE_UNCHANGED && w.getNodes().equals(((UndoStorage.UndoWay) undoWay).getNodes())) {
+                            undoWay.restore(); // this should just update the state
+                            undo.remove(w);
+                        } else {
+                            Log.w(DEBUG_TAG, "Not fixing up " + w);
+                        }
+                    } else {
+                        Log.e(DEBUG_TAG, "UndoElement should be an UndoWay " + undoWay.toString());
+                    }
+                }
+            }
+        }
+        // exit or select the previous node
+        if (addedNodes.isEmpty()) {
+//            logic.setSelectedNode(null);
+            // delete undo checkpoint
+//            if (checkpointName != null) {
+//                logic.rollback();
+//            } else {
+//                Log.e(DEBUG_TAG, "checkpointName is null");
+//            }
+//            // all nodes have been deleted, cancel action mode
+////            getEasyEditManager().finish();
+        } else {
+//            // select last node
+            int size = addedNodes.size();
+            Node lastSelected = addedNodes.get(size - 1);
+            logic.setSelectedNode(lastSelected);
+            candidatesForFollowing = null;
+            if (size > 1) {
+                enableFollowWay(addedNodes.get(size - 2), lastSelected);
+            }
+        }
+
+        createdWay = logic.getSelectedWay(); // will be null if way was deleted by undo
+        invalidateMap();
+        if (addedNodes != null) {
+            TextView pointCounterTextView = (TextView) findViewById(R.id.pointCount);
+            pointCounterTextView.setText(addedNodes.size() + " точек");
+        }
+    }
+
+
     /**
      * Create and show the disambiguation menu
      */
@@ -4098,7 +4327,7 @@ public class Main extends FullScreenAppCompatActivity
 
     /**
      * A KeyListener for all key events.
-     * 
+     *
      * @author mb
      * @author simon
      */
@@ -4112,77 +4341,77 @@ public class Main extends FullScreenAppCompatActivity
             boolean isProcessingAction = getEasyEditManager().isProcessingAction();
             boolean inElementSelectedMode = getEasyEditManager().inElementSelectedMode();
             switch (event.getAction()) {
-            case KeyEvent.ACTION_UP:
-                if (v.onKeyUp(keyCode, event)) {
-                    return true;
-                }
-                switch (keyCode) {
-                case KeyEvent.KEYCODE_VOLUME_UP:
-                case KeyEvent.KEYCODE_VOLUME_DOWN:
-                    // this stops the piercing beep related to volume
-                    // adjustments
-                    return true;
-                default:
-                    // IGNORE
-                }
-                break;
-            case KeyEvent.ACTION_DOWN:
-                if (v.onKeyDown(keyCode, event)) {
-                    return true;
-                }
-                switch (keyCode) {
-                case KeyEvent.KEYCODE_DPAD_CENTER:
-                    setFollowGPS(true);
-                    return true;
-                case KeyEvent.KEYCODE_DPAD_UP:
-                    translate(Logic.CursorPaddirection.DIRECTION_UP);
-                    return true;
-                case KeyEvent.KEYCODE_DPAD_DOWN:
-                    translate(Logic.CursorPaddirection.DIRECTION_DOWN);
-                    return true;
-                case KeyEvent.KEYCODE_DPAD_LEFT:
-                    translate(Logic.CursorPaddirection.DIRECTION_LEFT);
-                    return true;
-                case KeyEvent.KEYCODE_DPAD_RIGHT:
-                    translate(Logic.CursorPaddirection.DIRECTION_RIGHT);
-                    return true;
-                case KeyEvent.KEYCODE_VOLUME_UP:
-                case KeyEvent.KEYCODE_VOLUME_DOWN:
-                case KeyEvent.KEYCODE_SEARCH:
-                    if (!App.getPreferences(Main.this).zoomWithKeys()) {
-                        return false;
+                case KeyEvent.ACTION_UP:
+                    if (v.onKeyUp(keyCode, event)) {
+                        return true;
                     }
-                    logic.zoom(keyCode == KeyEvent.KEYCODE_VOLUME_DOWN ? Logic.ZOOM_OUT : Logic.ZOOM_IN);
-                    updateZoomControls();
-                    return true;
-                case KeyEvent.KEYCODE_MOVE_HOME:
-                case KeyEvent.KEYCODE_CTRL_LEFT:
-                case KeyEvent.KEYCODE_CTRL_RIGHT:
-                case KeyEvent.KEYCODE_SHIFT_LEFT:
-                case KeyEvent.KEYCODE_SHIFT_RIGHT:
-                case KeyEvent.KEYCODE_ALT_LEFT:
-                case KeyEvent.KEYCODE_ALT_RIGHT:
-                    // ignore
-                    return true;
-                case KeyEvent.KEYCODE_ESCAPE:
-                case KeyEvent.KEYCODE_BACK:
-                    // default handling
-                    return false;
+                    switch (keyCode) {
+                        case KeyEvent.KEYCODE_VOLUME_UP:
+                        case KeyEvent.KEYCODE_VOLUME_DOWN:
+                            // this stops the piercing beep related to volume
+                            // adjustments
+                            return true;
+                        default:
+                            // IGNORE
+                    }
+                    break;
+                case KeyEvent.ACTION_DOWN:
+                    if (v.onKeyDown(keyCode, event)) {
+                        return true;
+                    }
+                    switch (keyCode) {
+                        case KeyEvent.KEYCODE_DPAD_CENTER:
+                            setFollowGPS(true);
+                            return true;
+                        case KeyEvent.KEYCODE_DPAD_UP:
+                            translate(Logic.CursorPaddirection.DIRECTION_UP);
+                            return true;
+                        case KeyEvent.KEYCODE_DPAD_DOWN:
+                            translate(Logic.CursorPaddirection.DIRECTION_DOWN);
+                            return true;
+                        case KeyEvent.KEYCODE_DPAD_LEFT:
+                            translate(Logic.CursorPaddirection.DIRECTION_LEFT);
+                            return true;
+                        case KeyEvent.KEYCODE_DPAD_RIGHT:
+                            translate(Logic.CursorPaddirection.DIRECTION_RIGHT);
+                            return true;
+                        case KeyEvent.KEYCODE_VOLUME_UP:
+                        case KeyEvent.KEYCODE_VOLUME_DOWN:
+                        case KeyEvent.KEYCODE_SEARCH:
+                            if (!App.getPreferences(Main.this).zoomWithKeys()) {
+                                return false;
+                            }
+                            logic.zoom(keyCode == KeyEvent.KEYCODE_VOLUME_DOWN ? Logic.ZOOM_OUT : Logic.ZOOM_IN);
+                            updateZoomControls();
+                            return true;
+                        case KeyEvent.KEYCODE_MOVE_HOME:
+                        case KeyEvent.KEYCODE_CTRL_LEFT:
+                        case KeyEvent.KEYCODE_CTRL_RIGHT:
+                        case KeyEvent.KEYCODE_SHIFT_LEFT:
+                        case KeyEvent.KEYCODE_SHIFT_RIGHT:
+                        case KeyEvent.KEYCODE_ALT_LEFT:
+                        case KeyEvent.KEYCODE_ALT_RIGHT:
+                            // ignore
+                            return true;
+                        case KeyEvent.KEYCODE_ESCAPE:
+                        case KeyEvent.KEYCODE_BACK:
+                            // default handling
+                            return false;
+                        default:
+                            return handleShortCut(event, logic, isProcessingAction, inElementSelectedMode);
+                    }
                 default:
-                    return handleShortCut(event, logic, isProcessingAction, inElementSelectedMode);
-                }
-            default:
-                Log.w(DEBUG_TAG, "Unknown key event " + event.getAction());
+                    Log.w(DEBUG_TAG, "Unknown key event " + event.getAction());
             }
             return false;
         }
 
         /**
          * Handle a short cut - modifier button plus character
-         * 
-         * @param event the KeyEvent
-         * @param logic the current Logic instance
-         * @param isProcessingAction true if we are in an ActionMode
+         *
+         * @param event                 the KeyEvent
+         * @param logic                 the current Logic instance
+         * @param isProcessingAction    true if we are in an ActionMode
          * @param inElementSelectedMode true if we are in an Element selection mode
          */
         private boolean handleShortCut(@NonNull final KeyEvent event, @NonNull final Logic logic, boolean isProcessingAction, boolean inElementSelectedMode) {
@@ -4250,7 +4479,7 @@ public class Main extends FullScreenAppCompatActivity
 
         /**
          * Pan the map
-         * 
+         *
          * @param direction pan direction
          */
         private void translate(@NonNull final CursorPaddirection direction) {
@@ -4261,9 +4490,8 @@ public class Main extends FullScreenAppCompatActivity
 
     /**
      * Mouse scroll wheel support
-     * 
-     * @author simon
      *
+     * @author simon
      */
     @SuppressLint("NewApi")
     private class MotionEventListener implements OnGenericMotionListener {
@@ -4296,7 +4524,7 @@ public class Main extends FullScreenAppCompatActivity
 
     /**
      * Check if we have network connectivity
-     * 
+     *
      * @return true if connected
      */
     public boolean isConnected() {
@@ -4308,7 +4536,7 @@ public class Main extends FullScreenAppCompatActivity
 
     /**
      * Check if we are network connected or in the process of connecting
-     * 
+     *
      * @return true if either state is true
      */
     public boolean isConnectedOrConnecting() {
@@ -4320,7 +4548,7 @@ public class Main extends FullScreenAppCompatActivity
 
     /**
      * Get the current Map instance
-     * 
+     *
      * @return the current Map instance
      */
     @Nullable
@@ -4412,7 +4640,7 @@ public class Main extends FullScreenAppCompatActivity
 
     /**
      * Set the current ImageryAlignmentActionModeCallback
-     * 
+     *
      * @param callback the ImageryAlignmentActionModeCallback to set
      */
     public void setImageryAlignmentActionModeCallback(@Nullable ImageryAlignmentActionModeCallback callback) {
@@ -4436,10 +4664,10 @@ public class Main extends FullScreenAppCompatActivity
 
     /**
      * Zoom to a location and start editing the OsmElement
-     * 
+     *
      * @param lonE7 longitude in WGS84*1E7 coordinates
      * @param latE7 latitude in WGS84*1E7 coordinates
-     * @param e the OsmElement to edit
+     * @param e     the OsmElement to edit
      */
     public void zoomToAndEdit(int lonE7, int latE7, @NonNull OsmElement e) {
         Log.d(DEBUG_TAG, "zoomToAndEdit Zoom " + map.getZoomLevel());
@@ -4449,7 +4677,7 @@ public class Main extends FullScreenAppCompatActivity
 
     /**
      * Programmatically start editing an element
-     * 
+     *
      * @param e the OemElement
      */
     public void edit(@NonNull OsmElement e) {
@@ -4458,23 +4686,23 @@ public class Main extends FullScreenAppCompatActivity
         logic.setSelectedWay(null);
         logic.setSelectedRelation(null);
         switch (e.getType()) {
-        case NODE:
-            logic.setSelectedNode((Node) e);
-            break;
-        case WAY:
-        case CLOSEDWAY:
-            logic.setSelectedWay((Way) e);
-            break;
-        case RELATION:
-            logic.setSelectedRelation((Relation) e);
-            break;
-        case AREA:
-            if (Way.NAME.equals(e.getName())) {
+            case NODE:
+                logic.setSelectedNode((Node) e);
+                break;
+            case WAY:
+            case CLOSEDWAY:
                 logic.setSelectedWay((Way) e);
-            } else {
+                break;
+            case RELATION:
                 logic.setSelectedRelation((Relation) e);
-            }
-            break;
+                break;
+            case AREA:
+                if (Way.NAME.equals(e.getName())) {
+                    logic.setSelectedWay((Way) e);
+                } else {
+                    logic.setSelectedRelation((Relation) e);
+                }
+                break;
         }
         if (easyEditManager != null && logic.getMode().elementsGeomEditable()) {
             easyEditManager.editElement(e);
@@ -4486,10 +4714,10 @@ public class Main extends FullScreenAppCompatActivity
 
     /**
      * Zoom to the coordinates and try and set the viewbox size to something reasonable
-     * 
+     *
      * @param lonE7 longitude * 1E7
      * @param latE7 latitude * 1E7
-     * @param e OsmElement we want to show
+     * @param e     OsmElement we want to show
      */
     private void zoomTo(int lonE7, int latE7, @NonNull OsmElement e) {
         setFollowGPS(false); // otherwise the screen could move around
@@ -4504,7 +4732,7 @@ public class Main extends FullScreenAppCompatActivity
 
     /**
      * Zoom to the element and try and set the viewbox size to something reasonable
-     * 
+     *
      * @param e OsmElement we want to show
      */
     public void zoomTo(@NonNull OsmElement e) {
@@ -4513,7 +4741,7 @@ public class Main extends FullScreenAppCompatActivity
 
     /**
      * Zoom to the elements and try and set the viewbox size to something reasonable
-     * 
+     *
      * @param elements OsmElements we want to show
      */
     public void zoomTo(@NonNull List<OsmElement> elements) {
@@ -4568,7 +4796,7 @@ public class Main extends FullScreenAppCompatActivity
 
     /**
      * Get the current position of the splitter in pixels
-     * 
+     *
      * @return the current position
      */
     public float getSplitterPosition() {
@@ -4577,7 +4805,7 @@ public class Main extends FullScreenAppCompatActivity
 
     /**
      * Set the position of the splitter in pixels
-     * 
+     *
      * @param pos new position
      */
     public void setSplitterPosition(float pos) {
@@ -4685,7 +4913,7 @@ public class Main extends FullScreenAppCompatActivity
 
     /**
      * Get the Layout that should hold the map
-     * 
+     *
      * @return the Layout that should hold the map or null if it hasn't been set
      */
     @Nullable
@@ -4695,7 +4923,7 @@ public class Main extends FullScreenAppCompatActivity
 
     /**
      * Get the current UndoListener instance
-     * 
+     *
      * @return current UndoListener instance or null if it hasn't been set
      */
     @Nullable
@@ -4705,7 +4933,7 @@ public class Main extends FullScreenAppCompatActivity
 
     /**
      * Get the current EasyEditManager instance
-     * 
+     *
      * @return the current EasyEditManager instance
      */
     @NonNull
@@ -4723,8 +4951,8 @@ public class Main extends FullScreenAppCompatActivity
 
     /**
      * Get a description of an element suitable for display in a context menu
-     * 
-     * @param e the OsmELement
+     *
+     * @param e   the OsmELement
      * @param lon longitude of reference position, if < than the max lon value a direction arrow will be added
      * @param lat latitude of reference position
      * @return the description
@@ -4760,10 +4988,10 @@ public class Main extends FullScreenAppCompatActivity
 
     /**
      * Append to a textual list of elements
-     * 
-     * @param <E> OsmElement type
+     *
+     * @param <E>  OsmElement type
      * @param list a StringBuilder for the output
-     * @param e the OsmElement
+     * @param e    the OsmElement
      */
     private <E extends OsmElement> void appendToTextList(@NonNull StringBuilder list, @NonNull E e) {
         if (list.length() > 0) {
@@ -4817,5 +5045,16 @@ public class Main extends FullScreenAppCompatActivity
         ViewGroup.LayoutParams layoutParams = viewById.getLayoutParams();
         layoutParams.height = pixel;
         viewById.setLayoutParams(layoutParams);
+    }
+
+    protected void delayedResetHasProblem(@Nullable final Way way) {
+        Map map = getMap();
+        if (map != null) {
+            map.postDelayed(() -> {
+                if (way != null) {
+                    way.resetHasProblem(); // remove Validator.OK
+                }
+            }, 1000);
+        }
     }
 }
