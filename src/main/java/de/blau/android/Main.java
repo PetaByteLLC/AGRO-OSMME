@@ -574,11 +574,11 @@ public class Main extends FullScreenAppCompatActivity
         // Sets the Toolbar to act as the ActionBar for this Activity window.
         setSupportActionBar(toolbar);
 
-        if (prefs.splitActionBarEnabled()) {
+//        if (prefs.splitActionBarEnabled()) {
             setBottomBar((androidx.appcompat.widget.ActionMenuView) findViewById(R.id.bottomToolbar));
-        } else {
-            findViewById(R.id.bottomBar).setVisibility(View.GONE);
-        }
+//        } else {
+//            findViewById(R.id.bottomBar).setVisibility(View.GONE);
+//        }
 
         // check if first time user and display something if yes
         Version version = new Version(this);
@@ -3262,6 +3262,7 @@ public class Main extends FullScreenAppCompatActivity
         ActionMenuView bottomToolbar = getBottomBar();
         if (bottomToolbar != null) {
             bottomToolbar.setVisibility(View.GONE);
+            changeBottomBarHeight(0);
         }
     }
 
@@ -3272,6 +3273,7 @@ public class Main extends FullScreenAppCompatActivity
         ActionMenuView bottomToolbar = getBottomBar();
         if (bottomToolbar != null) {
             bottomToolbar.setVisibility(View.VISIBLE);
+            changeBottomBarHeight(120);
             lock();
         }
     }
@@ -4783,7 +4785,7 @@ public class Main extends FullScreenAppCompatActivity
                 updateActionbarEditMode();
                 map.invalidate();
                 visibleLockButton();
-                startSupportActionMode(new SimpleActionModeCallback(getEasyEditManager(), SimpleActionModeCallback.SimpleAction.WAY));
+//                startSupportActionMode(new SimpleActionModeCallback(getEasyEditManager(), SimpleActionModeCallback.SimpleAction.WAY));
             }
         }
     }
@@ -4794,8 +4796,12 @@ public class Main extends FullScreenAppCompatActivity
         layoutParams.height = 120;
         viewById.setLayoutParams(layoutParams);
         viewById.setOnClickListener(v -> {
-            getEasyEditManager().finish();
+            invisibleUnlockButton();
+            App.getLogic().setLocked(true);
+            updateActionbarEditMode();
+            map.invalidate();
         });
+        hideBottomBar();
     }
 
     public void invisibleUnlockButton() {
@@ -4803,6 +4809,7 @@ public class Main extends FullScreenAppCompatActivity
         ViewGroup.LayoutParams layoutParams = viewById.getLayoutParams();
         layoutParams.height = 0;
         viewById.setLayoutParams(layoutParams);
+        showBottomBar();
     }
 
     public void changeBottomBarHeight(int pixel) {

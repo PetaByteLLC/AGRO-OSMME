@@ -249,7 +249,6 @@ public class PathCreationActionModeCallback extends BuilderActionModeCallback {
             return true;
         });
         arrangeMenu(menu);
-        main.changeBottomBarHeight(120);
         return super.onPrepareActionMode(mode, menu);
     }
 
