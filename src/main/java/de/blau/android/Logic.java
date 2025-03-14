@@ -1863,7 +1863,7 @@ public class Logic {
         if (!getDelegator().isInDownload(lonE7, latE7)) {
             Log.d(DEBUG_TAG, "Outside of download");
             if (activity != null) {
-                ScreenMessage.toastTopWarning(activity, R.string.toast_outside_of_download);
+//                ScreenMessage.toastTopWarning(activity, R.string.toast_outside_of_download);
             }
             return true;
         }

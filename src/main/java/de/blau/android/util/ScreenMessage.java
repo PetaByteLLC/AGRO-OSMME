@@ -155,9 +155,9 @@ public final class ScreenMessage {
         }
     }
 
-    private static final int SHOW_DURATION_ACTION = 5000;
+    private static final int SHOW_DURATION_ACTION = 500;
 
-    protected static final int QUEUE_CAPACITY = 3;
+    protected static final int QUEUE_CAPACITY = 1;
 
     private static final String NULL_VIEW_IN_BAR_INFO    = "null View in barInfo";
     private static final String NULL_VIEW_IN_BAR_ERROR   = "null View in barError";
@@ -724,8 +724,7 @@ public final class ScreenMessage {
      */
     public static void toastTopWarning(@Nullable Context context, @NonNull String msg) {
         if (context != null) {
-            Toast warning = toastTop(context, msg, ThemeUtils.getStyleAttribColorValue(context, R.attr.snack_warning, R.color.material_yellow),
-                    Toast.LENGTH_LONG);
+            Toast warning = toastTop(context, msg, R.color.green, Toast.LENGTH_LONG);
             if (warning != null) {
                 enqueueWarning(new ToastWrapper(warning));
             }
@@ -827,12 +826,14 @@ public final class ScreenMessage {
         try {
             LayoutInflater inflater = LayoutInflater.from(context);
             View layout = inflater.inflate(R.layout.toast, null);
-            layout.setBackgroundColor(color);
+//            layout.setBackgroundResource(R.color.green);
+            layout.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
+            layout.setBackgroundResource(R.drawable.radius);
             TextView text = (TextView) layout.findViewById(R.id.text);
             text.setText(msg);
 
             Toast toast = new Toast(context);
-            int yOffset = ThemeUtils.getActionBarHeight(context) + 5;
+            int yOffset = ThemeUtils.getActionBarHeight(context) + 1;
             toast.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.TOP, 0, yOffset);
             toast.setDuration(duration);
             toast.setView(layout);

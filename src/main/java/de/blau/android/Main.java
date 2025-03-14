@@ -221,6 +221,8 @@ import de.blau.android.views.ZoomControls;
 public class Main extends FullScreenAppCompatActivity
         implements ServiceConnection, TrackerLocationListener, UpdateViewListener, SearchItemSelectedCallback, ActivityResultHandler {
 
+    private final int BAR_HEIGHT = 150;
+
     /**
      * Tag used for Android-logging.
      */
@@ -3286,7 +3288,7 @@ public class Main extends FullScreenAppCompatActivity
         ActionMenuView bottomToolbar = getBottomBar();
         if (bottomToolbar != null) {
             bottomToolbar.setVisibility(View.VISIBLE);
-            changeBottomBarHeight(120);
+            changeBottomBarHeight(BAR_HEIGHT);
             lock();
         }
     }
@@ -4199,6 +4201,10 @@ public class Main extends FullScreenAppCompatActivity
         if (addedNodes != null) {
             TextView pointCounterTextView = (TextView) findViewById(R.id.pointCount);
             pointCounterTextView.setText(addedNodes.size() + " точек");
+
+            if (!addedNodes.isEmpty()) {
+                ScreenMessage.toastTopWarning(this, "Добавьте следующую точку");
+            }
         }
 
         invalidateMap();
@@ -4208,7 +4214,7 @@ public class Main extends FullScreenAppCompatActivity
         View nextPanel = findViewById(R.id.next_panel);
         if (show) {
             ViewGroup.LayoutParams layoutParams = nextPanel.getLayoutParams();
-            layoutParams.height = 120;
+            layoutParams.height = BAR_HEIGHT;
             nextPanel.setLayoutParams(layoutParams);
         } else {
             ViewGroup.LayoutParams layoutParams = nextPanel.getLayoutParams();
@@ -4252,6 +4258,7 @@ public class Main extends FullScreenAppCompatActivity
         Logic logic = App.getLogic();
         if (addedNodes.isEmpty()) {
             Log.e(DEBUG_TAG, "Undo called but nothing to undo");
+            ScreenMessage.toastTopWarning(Main.this, "Поставьте первую точку");
             return;
         }
         Node removedNode = addedNodes.remove(addedNodes.size() - 1);
@@ -4273,31 +4280,33 @@ public class Main extends FullScreenAppCompatActivity
                 if (!w.equals(createdWay)) {
                     UndoStorage undo = logic.getUndo();
                     List<UndoStorage.UndoElement> undoWays = undo.getUndoElements(w);
-                    UndoStorage.UndoElement undoWay = undoWays.get(undoWays.size() - 1);
-                    if (undoWay instanceof UndoStorage.UndoWay) {
-                        if (undoWay.getState() == OsmElement.STATE_UNCHANGED && w.getNodes().equals(((UndoStorage.UndoWay) undoWay).getNodes())) {
-                            undoWay.restore(); // this should just update the state
-                            undo.remove(w);
+                    if (!undoWays.isEmpty()) {
+                        UndoStorage.UndoElement undoWay = undoWays.get(undoWays.size() - 1);
+                        if (undoWay instanceof UndoStorage.UndoWay) {
+                            if (undoWay.getState() == OsmElement.STATE_UNCHANGED && w.getNodes().equals(((UndoStorage.UndoWay) undoWay).getNodes())) {
+                                undoWay.restore(); // this should just update the state
+                                undo.remove(w);
+                            } else {
+                                Log.w(DEBUG_TAG, "Not fixing up " + w);
+                            }
                         } else {
-                            Log.w(DEBUG_TAG, "Not fixing up " + w);
+                            Log.e(DEBUG_TAG, "UndoElement should be an UndoWay " + undoWay.toString());
                         }
-                    } else {
-                        Log.e(DEBUG_TAG, "UndoElement should be an UndoWay " + undoWay.toString());
                     }
                 }
             }
         }
         // exit or select the previous node
         if (addedNodes.isEmpty()) {
-//            logic.setSelectedNode(null);
-            // delete undo checkpoint
-//            if (checkpointName != null) {
-//                logic.rollback();
-//            } else {
-//                Log.e(DEBUG_TAG, "checkpointName is null");
-//            }
+            logic.setSelectedNode(null);
+//             delete undo checkpoint
+            if (checkpointName != null) {
+                logic.rollback();
+            } else {
+                Log.e(DEBUG_TAG, "checkpointName is null");
+            }
 //            // all nodes have been deleted, cancel action mode
-////            getEasyEditManager().finish();
+//            getEasyEditManager().finish();
         } else {
 //            // select last node
             int size = addedNodes.size();
@@ -4314,6 +4323,10 @@ public class Main extends FullScreenAppCompatActivity
         if (addedNodes != null) {
             TextView pointCounterTextView = (TextView) findViewById(R.id.pointCount);
             pointCounterTextView.setText(addedNodes.size() + " точек");
+            if (addedNodes.isEmpty()) {
+                ScreenMessage.toastTopWarning(Main.this, "Поставьте первую точку");
+                showNextPanel(false);
+            }
         }
     }
 
@@ -5013,6 +5026,7 @@ public class Main extends FullScreenAppCompatActivity
                 updateActionbarEditMode();
                 map.invalidate();
                 visibleLockButton();
+                ScreenMessage.toastTopWarning(Main.this, "Поставьте первую точку");
 //                startSupportActionMode(new SimpleActionModeCallback(getEasyEditManager(), SimpleActionModeCallback.SimpleAction.WAY));
             }
         }
@@ -5021,13 +5035,16 @@ public class Main extends FullScreenAppCompatActivity
     public void visibleLockButton() {
         View viewById = findViewById(R.id.unlockButton);
         ViewGroup.LayoutParams layoutParams = viewById.getLayoutParams();
-        layoutParams.height = 120;
+        layoutParams.height = BAR_HEIGHT;
         viewById.setLayoutParams(layoutParams);
         viewById.setOnClickListener(v -> {
             invisibleUnlockButton();
+//            updateActionbarEditMode();
+            App.getLogic().hideCrosshairs();
+            invalidateMap();
+            triggerMenuInvalidation();
+            App.getLogic().deselectAll();
             App.getLogic().setLocked(true);
-            updateActionbarEditMode();
-            map.invalidate();
         });
         hideBottomBar();
     }
@@ -5038,6 +5055,8 @@ public class Main extends FullScreenAppCompatActivity
         layoutParams.height = 0;
         viewById.setLayoutParams(layoutParams);
         showBottomBar();
+        showNextPanel(false);
+//        App.getLogic().rollback();
     }
 
     public void changeBottomBarHeight(int pixel) {
