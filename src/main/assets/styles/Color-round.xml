@@ -5,8 +5,8 @@
     <config type="icon_zoom_limit" zoom="15" />
     <!-- Vespucci internal styles -->
     <feature type="gps_accuracy" updateWidth="false" widthFactor="2.0" color="280000ff" style="FILL_AND_STROKE" cap="ROUND" join="ROUND" strokeWidth="0.0" />
-    <feature type="way_direction" updateWidth="true" widthFactor="0.8" color="ffb9121b" style="STROKE" cap="SQUARE" join="MITER" />
-    <feature type="handle" updateWidth="true" widthFactor="0.8" color="ffb9121b" style="STROKE" cap="SQUARE" join="MITER" />
+    <feature type="way_direction" updateWidth="true" widthFactor="0.8" color="00b9121b" style="STROKE" cap="SQUARE" join="MITER" />
+    <feature type="handle" updateWidth="true" widthFactor="0.8" color="00000000" style="STROKE" cap="SQUARE" join="MITER" />
     <feature type="selected_way" updateWidth="true" widthFactor="2.0" color="fffcfa74" style="STROKE" cap="ROUND" join="ROUND" />
     <feature type="way_tolerance" updateWidth="false" widthFactor="1.0" color="28bd8d46" style="STROKE" cap="BUTT" join="MITER" strokeWidth="40.0" />
     <feature type="way_tolerance_2" updateWidth="false" widthFactor="1.0" color="7fbd8d46" style="STROKE" cap="BUTT" join="MITER" strokeWidth="40.0" />
@@ -19,7 +19,7 @@
     <feature type="gps_pos_follow" updateWidth="false" widthFactor="2.0" color="ff0000ff" style="STROKE" cap="ROUND" join="ROUND" strokeWidth="2.0"/>
     <feature type="dontrender_way" dontrender="true" updateWidth="true" widthFactor="1.0" color="00ffffff" style="STROKE" cap="ROUND" join="ROUND" />
     <!-- OSM node based features currently internal features -->
-    <feature type="node_untagged" updateWidth="true" widthFactor="1.0" color="ffb9121b" style="FILL" cap="ROUND" join="MITER" />
+    <feature type="node_untagged" updateWidth="true" widthFactor="2.0" color="ff000000" style="FILL" cap="ROUND" join="MITER" />
     <feature type="node_tagged" updateWidth="true" widthFactor="1.5" color="ffb9121b" style="FILL" cap="ROUND" join="MITER" />
     <feature type="node_thin" updateWidth="false" widthFactor="1.0" color="ffb9121b" style="STROKE" cap="BUTT" join="MITER" strokeWidth="1.0" typefacestyle="0" textsize="12.0" />
     <feature type="selected_node" updateWidth="true" widthFactor="1.5" color="fff6e497" style="FILL" cap="ROUND" join="MITER" />
@@ -76,7 +76,7 @@
     		<interval length="3.0" />
     	</dash>
     </feature>
-    <feature type="way" tags="landuse" area="true" updateWidth="true" widthFactor="2.0" color="8871BE80" style="STROKE" cap="BUTT" join="MITER" offset="0.50">
+    <feature type="way" tags="landuse" area="true" updateWidth="true" widthFactor="1.0" color="FFFBE922" style="STROKE" cap="BUTT" join="MITER" offset="0.50">
         <feature type="way" tags="landuse=construction" color="88996633" style="FILL_AND_STROKE" pathPattern="" />
         <feature type="way" tags="landuse=residential" minVisibleZoom="10" color="88888888" />
         <feature type="way" tags="landuse=quarry" color="88d8a2a2" />

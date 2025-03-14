@@ -2633,9 +2633,11 @@ public class Main extends FullScreenAppCompatActivity
                 startActivity(new Intent(this, LicenseViewer.class));
                 return true;
             case R.id.logout:
-                prefs.setCgiToken(null);
-                startActivity(new Intent(this, LoginActivity.class));
-                finish();
+//                prefs.setCgiToken(null);
+//                startActivity(new Intent(this, LoginActivity.class));
+//                finish();
+                BottomSheetFragment bottomSheetFragment = new BottomSheetFragment();
+                bottomSheetFragment.show(getSupportFragmentManager(), bottomSheetFragment.getTag());
                 return true;
             case R.id.menu_privacy:
                 HelpViewer.start(this, R.string.help_privacy);
@@ -4318,7 +4320,7 @@ public class Main extends FullScreenAppCompatActivity
             }
         }
 
-        createdWay = logic.getSelectedWay(); // will be null if way was deleted by undo
+//        createdWay = logic.getSelectedWay(); // will be null if way was deleted by undo
         invalidateMap();
         if (addedNodes != null) {
             TextView pointCounterTextView = (TextView) findViewById(R.id.pointCount);
