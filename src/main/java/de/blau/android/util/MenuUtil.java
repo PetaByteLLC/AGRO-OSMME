@@ -89,8 +89,8 @@ public class MenuUtil {
     public static void setupBottomBar(@NonNull Activity activity, @NonNull ActionMenuView bar, boolean fullScreen, boolean light) {
         FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
         if (Screen.isLarge(activity)) {
-            params.width = ViewGroup.LayoutParams.WRAP_CONTENT;
-            params.gravity = Gravity.END;
+            params.width = ViewGroup.LayoutParams.MATCH_PARENT;
+            params.gravity = Gravity.CENTER;
         }
         bar.setLayoutParams(params);
         if (fullScreen) {

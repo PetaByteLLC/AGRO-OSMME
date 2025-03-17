@@ -68,6 +68,7 @@ import android.view.View.OnLongClickListener;
 import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
 import android.view.ViewStub;
+import android.widget.ExpandableListView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.RelativeLayout.LayoutParams;
@@ -1891,6 +1892,10 @@ public class Main extends FullScreenAppCompatActivity
         MenuItem addNewFieldItem = menu.findItem(R.id.add_new_field);
         addNewFieldItem.setActionView(R.layout.agro_button_add_field);
         addNewFieldItem.getActionView().setOnClickListener(new AddNewFieldListener());
+
+        MenuItem allFieldItem = menu.findItem(R.id.all_fields);
+        allFieldItem.setActionView(R.layout.agro_button_fields);
+        allFieldItem.getActionView().setOnClickListener(new AllFieldListener());
 
 //        MenuItem profileItem = menu.findItem(R.id.profile);
 //        profileItem.setActionView(R.layout.agro_button_profile);
@@ -4155,6 +4160,21 @@ public class Main extends FullScreenAppCompatActivity
         bottomSheetFragment.show(getSupportFragmentManager(), bottomSheetFragment.getTag());
     }
 
+    public void editor(Way lastSelectedWay) {
+        final Logic logic = App.getLogic();
+        logic.setSelectedNode(null);
+        logic.setSelectedWay(null);
+        logic.setSelectedRelation(null);
+        logic.setSelectedWay(lastSelectedWay);
+
+        App.getLogic().setLocked(false);
+        updateActionbarEditMode();
+        map.invalidate();
+        visibleLockButton();
+        showNextPanel(true);
+        ScreenMessage.toastTopWarning(Main.this, "Измените положение точек для редактирования");
+    }
+
     protected List<Node> addedNodes             = new ArrayList<>();
     private Node    appendTargetNode;
     private boolean snap    = true;
@@ -5093,6 +5113,15 @@ public class Main extends FullScreenAppCompatActivity
                     way.resetHasProblem(); // remove Validator.OK
                 }
             }, 1000);
+        }
+    }
+
+    private class AllFieldListener implements OnClickListener {
+        @Override
+        public void onClick(View v) {
+            List<Way> ways = App.getLogic().getWays();
+            BottomSheetFragmentAllField bottomSheetFragment = new BottomSheetFragmentAllField(ways, Main.this);
+            bottomSheetFragment.show(getSupportFragmentManager(), bottomSheetFragment.getTag());
         }
     }
 }
