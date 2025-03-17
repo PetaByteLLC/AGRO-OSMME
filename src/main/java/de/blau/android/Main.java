@@ -623,6 +623,14 @@ public class Main extends FullScreenAppCompatActivity
         haveCamera = checkForCamera(); // we recall this in onResume just to be
 
         getOnBackPressedDispatcher().addCallback(this, onBackPressedCallback);
+
+        invisibleUnlockButton();
+        App.getLogic().hideCrosshairs();
+        invalidateMap();
+        triggerMenuInvalidation();
+        App.getLogic().deselectAll();
+        App.getLogic().setLocked(true);
+
         String token = prefs.getCgiToken();
 
         if (token == null) {
@@ -830,7 +838,7 @@ public class Main extends FullScreenAppCompatActivity
             } else {
                 synchronized (setViewBoxLock) {
                     // loadStateFromFile does this above
-                    App.getLogic().loadEditingState(this, setViewBox);
+//                    App.getLogic().loadEditingState(this, setViewBox);
                 }
                 // layer state should still be available if logic is still around, no need to load
                 map.invalidate();
@@ -2633,11 +2641,9 @@ public class Main extends FullScreenAppCompatActivity
                 startActivity(new Intent(this, LicenseViewer.class));
                 return true;
             case R.id.logout:
-//                prefs.setCgiToken(null);
-//                startActivity(new Intent(this, LoginActivity.class));
-//                finish();
-                BottomSheetFragment bottomSheetFragment = new BottomSheetFragment();
-                bottomSheetFragment.show(getSupportFragmentManager(), bottomSheetFragment.getTag());
+                prefs.setCgiToken(null);
+                startActivity(new Intent(this, LoginActivity.class));
+                finish();
                 return true;
             case R.id.menu_privacy:
                 HelpViewer.start(this, R.string.help_privacy);
@@ -4134,9 +4140,19 @@ public class Main extends FullScreenAppCompatActivity
         getEasyEditManager().finish();
         App.getLogic().removeCheckpoint(this, createdWay != null ? R.string.undo_action_moveobjects : R.string.undo_action_movenode);
         if (!addedNodes.isEmpty() && !dontTag) {
-            tagApplicable(lastSelectedNode, lastSelectedWay, false);
+            editor(lastSelectedWay, lastSelectedNode);
+//            tagApplicable(lastSelectedNode, lastSelectedWay, false);
             delayedResetHasProblem(lastSelectedWay);
         }
+    }
+
+    private void editor(@Nullable final Way lastSelectedWay, @Nullable final Node lastSelectedNode) {
+        if (lastSelectedWay == null) {
+            ScreenMessage.toastTopWarning(this, "Не хватает точек");
+            return;
+        }
+        BottomSheetFragment bottomSheetFragment = new BottomSheetFragment(lastSelectedWay, lastSelectedNode, this);
+        bottomSheetFragment.show(getSupportFragmentManager(), bottomSheetFragment.getTag());
     }
 
     protected List<Node> addedNodes             = new ArrayList<>();
@@ -4796,11 +4812,12 @@ public class Main extends FullScreenAppCompatActivity
     @Override
     public ActionMode startSupportActionMode(@NonNull final ActionMode.Callback callback) {
         // Fix for bug https://code.google.com/p/android/issues/detail?id=159527
-        final ActionMode mode = super.startSupportActionMode(callback);
-        if (mode != null) {
-            mode.invalidate();
-        }
-        return mode;
+//        final ActionMode mode = super.startSupportActionMode(callback);
+//        if (mode != null) {
+//            mode.invalidate();
+//        }
+//        return mode;
+        return null;
     }
 
     @Override

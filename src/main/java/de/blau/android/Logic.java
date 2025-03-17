@@ -4193,7 +4193,7 @@ public class Logic {
         EditState editState = new SavingHelper<EditState>().load(main, EDITSTATE_FILENAME, false, false, true);
         if (editState != null) { //
             editState.setMiscState(main, this);
-            editState.setSelected(main, this);
+//            editState.setSelected(main, this);
             if (setViewBox) {
                 editState.setViewBox(this, main.getMap());
             }
