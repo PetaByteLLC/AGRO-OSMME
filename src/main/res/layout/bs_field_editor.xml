@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:tools="http://schemas.android.com/tools"
     android:background="@drawable/radius2"
     android:orientation="vertical">
 
@@ -33,8 +33,7 @@
         android:inputType="text"
         android:textColor="@color/ag_text_color"
         android:textColorHint="@color/ag_text_color"
-        android:textSize="10sp"
-        tools:ignore="SmallSp"/>
+        tools:ignore="SmallSp" />
 
     <Spinner
         android:id="@+id/field2"
@@ -43,8 +42,7 @@
         android:layout_marginHorizontal="20dp"
         android:layout_marginTop="10dp"
         android:background="@drawable/edittext_background"
-        android:choiceMode="singleChoice"
-        android:textSize="10sp" />
+        android:choiceMode="singleChoice" />
 
     <EditText
         android:id="@+id/field3"
@@ -57,7 +55,6 @@
         android:inputType="text"
         android:textColor="@color/ag_text_color"
         android:textColorHint="@color/ag_text_color"
-        android:textSize="10sp"
         tools:ignore="SmallSp" />
 
     <TextView
@@ -85,9 +82,9 @@
         android:background="@drawable/radius"
         android:drawableTop="@drawable/outline_file_upload_24"
         android:paddingVertical="8dp"
+        android:text="Загрузить фото"
         android:textAllCaps="false"
-        android:textColor="#fff"
-        android:text="Загрузить фото" />
+        android:textColor="#fff" />
 
     <TextView
         android:layout_width="match_parent"
@@ -95,7 +92,7 @@
         android:layout_marginTop="20dp"
         android:paddingHorizontal="20dp"
         android:text="Фото"
-        android:textColor="@color/black"/>
+        android:textColor="@color/black" />
 
     <GridView
         android:id="@+id/images"
@@ -103,12 +100,11 @@
         android:layout_height="220dp"
         android:layout_marginHorizontal="20dp"
         android:layout_marginTop="10dp"
-        android:numColumns="2"
-        android:verticalSpacing="16dp"
         android:horizontalSpacing="16dp"
+        android:numColumns="2"
         android:stretchMode="spacingWidth"
-        tools:listitem="@layout/agro_photo"
-        />
+        android:verticalSpacing="16dp"
+        tools:listitem="@layout/agro_photo" />
 
     <Button
         android:id="@+id/btn_save"
@@ -118,8 +114,8 @@
         android:layout_marginTop="10dp"
         android:background="@drawable/radius"
         android:text="@string/Save"
-        android:textColor="#fff"
-        android:textAllCaps="false"/>
+        android:textAllCaps="false"
+        android:textColor="#fff" />
 
 
 </LinearLayout>

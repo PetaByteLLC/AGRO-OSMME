@@ -4119,11 +4119,6 @@ public class Main extends FullScreenAppCompatActivity
             Tip.showDialog(Main.this, R.string.tip_disambiguation_menu_key, R.string.tip_disambiguation_menu);
         }
     }
-    private List<OsmElement> joinableElements = null;
-    private List<Way>        appendableWays   = null;
-    private List<Way>        highways         = new ArrayList<>();
-    protected int               maxWayNodes = App.getDelegator().getMaxWayNodes();
-
 
     private boolean click(float x, float y) {
         Logic logic = App.getLogic();
@@ -4145,15 +4140,7 @@ public class Main extends FullScreenAppCompatActivity
         if (STATE == 2) {
             Node clickedNode = logic.getClickedNode(x, y);
             logic.setSelectedNode(clickedNode);
-            invalidateMap();
-            joinableElements = logic.findJoinableElements(clickedNode);
-            List<Way> ways = logic.getFilteredWaysForNode(clickedNode);
-            appendableWays = findAppendableWays(ways, clickedNode, maxWayNodes);
-            for (Way w : ways) {
-                if (w.hasTagKey(Tags.KEY_HIGHWAY)) {
-                    highways.add(w);
-                }
-            }
+            return true;
         }
 
         return false;
@@ -4171,10 +4158,30 @@ public class Main extends FullScreenAppCompatActivity
 
     protected void finishBuilding() {
         Logic logic = App.getLogic();
-        final Way lastSelectedWay = logic.getSelectedWay();
-        final Node lastSelectedNode = logic.getSelectedNode();
-        finishPath(lastSelectedWay, lastSelectedNode);
-        showNextPanel(false);
+        if (STATE == 1) {
+            final Way lastSelectedWay = logic.getSelectedWay();
+            final Node lastSelectedNode = logic.getSelectedNode();
+            finishPath(lastSelectedWay, lastSelectedNode);
+            showNextPanel(false);
+            return;
+        }
+
+        if (STATE == 2) {
+            Node selectedNode = logic.getSelectedNode();
+            if (selectedNode == null) {
+                ScreenMessage.toastTopWarning(this, "Выберите одну из точек точку");
+                return;
+            }
+            List<Way> node = logic.getWaysForNode(selectedNode);
+            if (node.isEmpty()) return;
+            editData(node.get(0));
+            return;
+        }
+    }
+
+    private void editData(Way way) {
+        BottomSheetFragment bottomSheetFragment = new BottomSheetFragment(way, this, true);
+        bottomSheetFragment.show(getSupportFragmentManager(), bottomSheetFragment.getTag());
     }
 
     protected void finishPath(@Nullable final Way lastSelectedWay, @Nullable final Node lastSelectedNode) {
@@ -4182,7 +4189,7 @@ public class Main extends FullScreenAppCompatActivity
         App.getLogic().removeCheckpoint(this, createdWay != null ? R.string.undo_action_moveobjects : R.string.undo_action_movenode);
         if (!addedNodes.isEmpty() && !dontTag) {
             editor(lastSelectedWay, lastSelectedNode);
-//            tagApplicable(lastSelectedNode, lastSelectedWay, false);
+            tagApplicable(lastSelectedNode, lastSelectedWay, false);
             delayedResetHasProblem(lastSelectedWay);
         }
     }
@@ -4192,7 +4199,7 @@ public class Main extends FullScreenAppCompatActivity
             ScreenMessage.toastTopWarning(this, "Не хватает точек");
             return;
         }
-        BottomSheetFragment bottomSheetFragment = new BottomSheetFragment(lastSelectedWay, lastSelectedNode, this);
+        BottomSheetFragment bottomSheetFragment = new BottomSheetFragment(lastSelectedWay, this, true);
         bottomSheetFragment.show(getSupportFragmentManager(), bottomSheetFragment.getTag());
     }
 
@@ -4201,7 +4208,6 @@ public class Main extends FullScreenAppCompatActivity
         logic.setSelectedNode(null);
         logic.setSelectedWay(null);
         logic.setSelectedRelation(null);
-        logic.setSelectedWay(lastSelectedWay);
 
         App.getLogic().setLocked(false);
         updateActionbarEditMode();
@@ -5122,6 +5128,9 @@ public class Main extends FullScreenAppCompatActivity
             triggerMenuInvalidation();
             App.getLogic().deselectAll();
             App.getLogic().setLocked(true);
+            App.getLogic().setSelectedNode(null);
+            App.getLogic().setSelectedWay(null);
+            App.getLogic().setSelectedRelation(null);
             STATE = 0;
         });
         hideBottomBar();

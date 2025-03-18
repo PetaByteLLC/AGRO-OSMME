@@ -19,6 +19,7 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 import com.google.android.material.textfield.TextInputEditText;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -28,17 +29,16 @@ import de.blau.android.osm.Way;
 public class BottomSheetFragment extends BottomSheetDialogFragment {
 
     private final Way lastSelectedWay;
-    private final Node lastSelectedNode;
     private final Main main;
-    private boolean saved;
+    private boolean edit;
 
     private EditText field1, field3;
     private Spinner field2;
 
-    public BottomSheetFragment(Way lastSelectedWay, Node lastSelectedNode, Main main) {
+    public BottomSheetFragment(Way lastSelectedWay, Main main, boolean edit) {
         this.lastSelectedWay = lastSelectedWay;
-        this.lastSelectedNode = lastSelectedNode;
         this.main = main;
+        this.edit = edit;
     }
 
     @Override
@@ -85,6 +85,13 @@ public class BottomSheetFragment extends BottomSheetDialogFragment {
             save(field1Value, field2Value, field3Value);
         });
 
+        if (edit) {
+            field1.setText(lastSelectedWay.getTagWithKey("name"));
+            field3.setText(lastSelectedWay.getTagWithKey("variety"));
+            try {
+                field2.setSelection(Arrays.asList(data).indexOf(lastSelectedWay.getTagWithKey("culture")));
+            } catch (Exception ignore) {}
+        }
         BottomSheetBehavior<View> bottomSheetBehavior = BottomSheetBehavior.from((View) view.getParent());
         bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
     }
