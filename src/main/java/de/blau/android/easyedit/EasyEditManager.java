@@ -154,10 +154,7 @@ public class EasyEditManager {
      */
     public boolean draggingEnabled() {
         synchronized (actionModeCallbackLock) {
-            return currentActionModeCallback instanceof ElementSelectionActionModeCallback
-                    || currentActionModeCallback instanceof MultiSelectWithGeometryActionModeCallback
-                    || currentActionModeCallback instanceof NewNoteSelectionActionModeCallback
-                    || currentActionModeCallback instanceof RotationActionModeCallback;
+            return main.STATE == 2;
         }
     }
 

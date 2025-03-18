@@ -155,6 +155,7 @@ import de.blau.android.osm.Relation;
 import de.blau.android.osm.Server;
 import de.blau.android.osm.Storage;
 import de.blau.android.osm.StorageDelegator;
+import de.blau.android.osm.Tags;
 import de.blau.android.osm.UndoStorage;
 import de.blau.android.osm.ViewBox;
 import de.blau.android.osm.Way;
@@ -464,6 +465,8 @@ public class Main extends FullScreenAppCompatActivity
     private RecyclerView nearByPois;
 
     private static final float LARGE_FAB_ELEVATION = 16; // used for re-enabling elevation on the FABs
+
+    public int STATE = 0;
 
     public Main() {
         permissions = new LinkedHashMap<>();
@@ -4116,21 +4119,54 @@ public class Main extends FullScreenAppCompatActivity
             Tip.showDialog(Main.this, R.string.tip_disambiguation_menu_key, R.string.tip_disambiguation_menu);
         }
     }
+    private List<OsmElement> joinableElements = null;
+    private List<Way>        appendableWays   = null;
+    private List<Way>        highways         = new ArrayList<>();
+    protected int               maxWayNodes = App.getDelegator().getMaxWayNodes();
+
 
     private boolean click(float x, float y) {
         Logic logic = App.getLogic();
-        if (logic.getClickableElements() != null) { // way follow
-            return false;
+        if (STATE == 1) {
+            if (logic.getClickableElements() != null) { // way follow
+                return false;
+            }
+            try {
+                pathCreateNode(x, y);
+            } catch (StorageException e) {
+                ScreenMessage.toastTopError(this, e.getLocalizedMessage(), true);
+            } catch (OsmIllegalOperationException e) {
+                finishBuilding();
+                ScreenMessage.toastTopError(this, e.getLocalizedMessage(), true);
+            }
+            return true;
         }
-        try {
-            pathCreateNode(x, y);
-        } catch (StorageException e) {
-            ScreenMessage.toastTopError(this, e.getLocalizedMessage(), true);
-        } catch (OsmIllegalOperationException e) {
-            finishBuilding();
-            ScreenMessage.toastTopError(this, e.getLocalizedMessage(), true);
+
+        if (STATE == 2) {
+            Node clickedNode = logic.getClickedNode(x, y);
+            logic.setSelectedNode(clickedNode);
+            invalidateMap();
+            joinableElements = logic.findJoinableElements(clickedNode);
+            List<Way> ways = logic.getFilteredWaysForNode(clickedNode);
+            appendableWays = findAppendableWays(ways, clickedNode, maxWayNodes);
+            for (Way w : ways) {
+                if (w.hasTagKey(Tags.KEY_HIGHWAY)) {
+                    highways.add(w);
+                }
+            }
         }
-        return true;
+
+        return false;
+    }
+
+    private List<Way> findAppendableWays(@NonNull List<Way> ways, @NonNull Node node, int maxWayNodes) {
+        List<Way> result = new ArrayList<>();
+        for (Way w : ways) {
+            if (w.isEndNode(node) && w.nodeCount() < maxWayNodes) {
+                result.add(w);
+            }
+        }
+        return result;
     }
 
     protected void finishBuilding() {
@@ -4172,6 +4208,7 @@ public class Main extends FullScreenAppCompatActivity
         map.invalidate();
         visibleLockButton();
         showNextPanel(true);
+        STATE = 2;
         ScreenMessage.toastTopWarning(Main.this, "Измените положение точек для редактирования");
     }
 
@@ -5061,6 +5098,7 @@ public class Main extends FullScreenAppCompatActivity
             if (!logic.isInEditZoomRange()) {
                 ScreenMessage.toastTopInfo(Main.this, R.string.toast_not_in_edit_range);
             } else {
+                STATE = 1;
                 App.getLogic().setLocked(false);
                 updateActionbarEditMode();
                 map.invalidate();
@@ -5084,6 +5122,7 @@ public class Main extends FullScreenAppCompatActivity
             triggerMenuInvalidation();
             App.getLogic().deselectAll();
             App.getLogic().setLocked(true);
+            STATE = 0;
         });
         hideBottomBar();
     }
