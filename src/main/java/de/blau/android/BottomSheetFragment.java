@@ -90,7 +90,8 @@ public class BottomSheetFragment extends BottomSheetDialogFragment {
             field3.setText(lastSelectedWay.getTagWithKey("variety"));
             try {
                 field2.setSelection(Arrays.asList(data).indexOf(lastSelectedWay.getTagWithKey("culture")));
-            } catch (Exception ignore) {}
+            } catch (Exception ignore) {
+            }
         }
         BottomSheetBehavior<View> bottomSheetBehavior = BottomSheetBehavior.from((View) view.getParent());
         bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
@@ -122,9 +123,7 @@ public class BottomSheetFragment extends BottomSheetDialogFragment {
         main.invalidateMap();
         App.getLogic().deselectAll();
         App.getLogic().setLocked(true);
-        App.getLogic().rollback();
         main.invisibleUnlockButton();
-
         if (getActivity() != null) {
             getActivity().invalidateOptionsMenu(); // Обновляем меню в активности
         }
