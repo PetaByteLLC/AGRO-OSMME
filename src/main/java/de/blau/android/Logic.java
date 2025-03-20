@@ -1798,9 +1798,9 @@ public class Logic {
                     // User clicks an existing Node
                     if (nextNode == lSelectedNode) {
                         // User clicks the last Node -> end here with adding
-                        removeCheckpoint(activity, R.string.undo_action_add);
-                        lSelectedNode = null;
-                        lSelectedWay = null;
+//                        removeCheckpoint(activity, R.string.undo_action_add);
+//                        lSelectedNode = null;
+//                        lSelectedWay = null;
                     } else {
                         // Create a new way with the existing node, which was clicked.
                         if (lSelectedWay == null) {

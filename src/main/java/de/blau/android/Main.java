@@ -3725,8 +3725,8 @@ public class Main extends FullScreenAppCompatActivity
 
             if (isInEditZoomRange) {
                 if (logic.isLocked()) {
-                    ScreenMessage.toastTopInfo(Main.this, R.string.toast_unlock_to_edit);
-                    Tip.showOptionalDialog(Main.this, R.string.tip_locked_mode_key, R.string.tip_locked_mode);
+//                    ScreenMessage.toastTopInfo(Main.this, R.string.toast_unlock_to_edit);
+//                    Tip.showOptionalDialog(Main.this, R.string.tip_locked_mode_key, R.string.tip_locked_mode);
                 } else {
                     if (mode.elementsEditable()) {
                         performEdit(mode, v, x, y);
@@ -3883,7 +3883,7 @@ public class Main extends FullScreenAppCompatActivity
                     case 0:
                         // no elements were touched
                         if (inEasyEditMode) {
-                            getEasyEditManager().nothingTouched(false);
+//                            getEasyEditManager().nothingTouched(false);
                         }
                         break;
                     case 1:
@@ -4037,32 +4037,32 @@ public class Main extends FullScreenAppCompatActivity
                 ElementInfo.showDialog(Main.this, element);
                 return;
             }
-            Mode mode = App.getLogic().getMode();
-            if (mode.elementsGeomEditable()) {
-                if (doubleTap) {
-                    doubleTap = false;
-                    getEasyEditManager().startExtendedSelection(element);
-                } else if (longClick) {
-                    longClick = false;
-                    getEasyEditManager().handleLongClick(null, element);
-                } else {
-                    getEasyEditManager().editElement(element);
-                }
-            } else if (mode.elementsEditable()) {
-                if (doubleTap) {
-                    doubleTap = false;
-//                    startSupportActionMode(new MultiSelectActionModeCallback(getEasyEditManager(), clickedNodesAndWays.get(0)));
-                } else {
-                    performTagEdit(element, null, false, false);
-                }
-            }
+//            Mode mode = App.getLogic().getMode();
+//            if (mode.elementsGeomEditable()) {
+//                if (doubleTap) {
+//                    doubleTap = false;
+//                    getEasyEditManager().startExtendedSelection(element);
+//                } else if (longClick) {
+//                    longClick = false;
+//                    getEasyEditManager().handleLongClick(null, element);
+//                } else {
+//                    getEasyEditManager().editElement(element);
+//                }
+//            } else if (mode.elementsEditable()) {
+//                if (doubleTap) {
+//                    doubleTap = false;
+////                    startSupportActionMode(new MultiSelectActionModeCallback(getEasyEditManager(), clickedNodesAndWays.get(0)));
+//                } else {
+//                    performTagEdit(element, null, false, false);
+//                }
+//            }
         }
 
         @Override
         public void onDoubleTap(View v, float x, float y) {
             final Logic logic = App.getLogic();
             if (logic.isLocked()) {
-                ScreenMessage.toastTopInfo(Main.this, R.string.toast_unlock_to_edit);
+//                ScreenMessage.toastTopInfo(Main.this, R.string.toast_unlock_to_edit);
                 return;
             }
             clickedNodesAndWays = getClickedOsmElements(logic, x, y);
@@ -4070,18 +4070,18 @@ public class Main extends FullScreenAppCompatActivity
             if (clickedCount == 0) {
                 // no elements were touched
                 // short cut to finishing multi-select
-                getEasyEditManager().nothingTouched(true);
+//                getEasyEditManager().nothingTouched(true);
                 return;
             }
             if (!getEasyEditManager().inMultiSelectMode()) {
                 if (clickedCount > 1 && menuRequired()) {
                     // multiple possible elements touched - show menu
                     Log.d(DEBUG_TAG, "onDoubleTap displaying menu");
-                    doubleTap = true; // ugly flag
-                    showDisambiguationMenu(v, x, y);
+//                    doubleTap = true; // ugly flag
+//                    showDisambiguationMenu(v, x, y);
                 } else if (logic.getMode().elementsGeomEditable()) {
                     // menuRequired tells us it's ok to just take the first one
-                    getEasyEditManager().startExtendedSelection(clickedNodesAndWays.get(0));
+//                    getEasyEditManager().startExtendedSelection(clickedNodesAndWays.get(0));
                 } else if (App.getLogic().getMode().elementsEditable()) {
 //                    startSupportActionMode(new MultiSelectActionModeCallback(getEasyEditManager(), clickedNodesAndWays.get(0)));
                 }
@@ -4189,7 +4189,6 @@ public class Main extends FullScreenAppCompatActivity
         App.getLogic().removeCheckpoint(this, createdWay != null ? R.string.undo_action_moveobjects : R.string.undo_action_movenode);
         if (!addedNodes.isEmpty() && !dontTag) {
             editor(lastSelectedWay, lastSelectedNode);
-            tagApplicable(lastSelectedNode, lastSelectedWay, false);
             delayedResetHasProblem(lastSelectedWay);
         }
     }
@@ -4205,9 +4204,8 @@ public class Main extends FullScreenAppCompatActivity
 
     public void editor(Way lastSelectedWay) {
         final Logic logic = App.getLogic();
-        logic.setSelectedNode(null);
-        logic.setSelectedWay(null);
-        logic.setSelectedRelation(null);
+        addedNodes = new ArrayList<>();
+        logic.deselectAll();
 
         App.getLogic().setLocked(false);
         updateActionbarEditMode();
@@ -4246,15 +4244,15 @@ public class Main extends FullScreenAppCompatActivity
                 checkpointName = R.string.undo_action_add;
             }
         }
-        if (logic.getSelectedNode() == null) {
-            // user clicked last node again -> finish adding
-            App.getLogic().removeCheckpoint(this, createdWay != null ? R.string.undo_action_moveobjects : R.string.undo_action_movenode);
-            if (!addedNodes.isEmpty() && !dontTag) {
-                tagApplicable(lastSelectedNode, lastSelectedWay, false);
-                delayedResetHasProblem(lastSelectedWay);
-            }
-            return;
-        }
+//        if (logic.getSelectedNode() == null) {
+//            // user clicked last node again -> finish adding
+//            App.getLogic().removeCheckpoint(this, createdWay != null ? R.string.undo_action_moveobjects : R.string.undo_action_movenode);
+//            if (!addedNodes.isEmpty() && !dontTag) {
+//                tagApplicable(lastSelectedNode, lastSelectedWay, false);
+//                delayedResetHasProblem(lastSelectedWay);
+//            }
+//            return;
+//        }
         // update cache for undo
         createdWay = logic.getSelectedWay();
         if (createdWay == null) {
@@ -4382,7 +4380,7 @@ public class Main extends FullScreenAppCompatActivity
             logic.setSelectedNode(null);
 //             delete undo checkpoint
             if (checkpointName != null) {
-                logic.rollback();
+//                logic.rollback();
             } else {
                 Log.e(DEBUG_TAG, "checkpointName is null");
             }
@@ -4408,6 +4406,16 @@ public class Main extends FullScreenAppCompatActivity
                 ScreenMessage.toastTopWarning(Main.this, "Поставьте первую точку");
                 showNextPanel(false);
             }
+        }
+
+        removeNeedlessNodes();
+    }
+
+    private void removeNeedlessNodes() {
+        Logic logic = App.getLogic();
+        for (Node node : logic.getModifiedNodes()) {
+            List<Way> waysForNode = logic.getWaysForNode(node);
+            if (waysForNode.isEmpty()) App.getDelegator().removeNode(node);
         }
     }
 
@@ -5105,11 +5113,13 @@ public class Main extends FullScreenAppCompatActivity
                 ScreenMessage.toastTopInfo(Main.this, R.string.toast_not_in_edit_range);
             } else {
                 STATE = 1;
+                App.getLogic().deselectAll();
                 App.getLogic().setLocked(false);
                 updateActionbarEditMode();
                 map.invalidate();
                 visibleLockButton();
                 ScreenMessage.toastTopWarning(Main.this, "Поставьте первую точку");
+                addedNodes = new ArrayList<>();
 //                startSupportActionMode(new SimpleActionModeCallback(getEasyEditManager(), SimpleActionModeCallback.SimpleAction.WAY));
             }
         }
@@ -5123,15 +5133,17 @@ public class Main extends FullScreenAppCompatActivity
         viewById.setOnClickListener(v -> {
             invisibleUnlockButton();
 //            updateActionbarEditMode();
-            App.getLogic().hideCrosshairs();
+            Logic logic = App.getLogic();
+            logic.hideCrosshairs();
             invalidateMap();
             triggerMenuInvalidation();
-            App.getLogic().deselectAll();
-            App.getLogic().setLocked(true);
-            App.getLogic().setSelectedNode(null);
-            App.getLogic().setSelectedWay(null);
-            App.getLogic().setSelectedRelation(null);
+            logic.deselectAll();
+            logic.setLocked(true);
+            logic.setSelectedNode(null);
+            logic.setSelectedWay(null);
+            logic.setSelectedRelation(null);
             STATE = 0;
+            removeNeedlessNodes();
         });
         hideBottomBar();
     }
