@@ -1,121 +1,292 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@drawable/radius2"
-    android:orientation="vertical">
+    android:layout_height="match_parent">
 
-    <TextView
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:text="Создание поле"
-        android:textAlignment="center"
-        android:textColor="@color/black"
-        android:textSize="20sp"
-        android:textStyle="bold" />
+        android:layout_height="match_parent"
+        android:background="@drawable/radius2"
+        android:orientation="vertical">
 
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="5dp"
-        android:background="#1A919EAB"
-        android:paddingTop="10dp" />
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:text="Создание поле"
+            android:textAlignment="center"
+            android:textColor="@color/black"
+            android:textSize="20sp"
+            android:textStyle="bold" />
 
-    <EditText
-        android:id="@+id/field1"
-        android:layout_width="match_parent"
-        android:layout_height="40dp"
-        android:layout_marginHorizontal="20dp"
-        android:layout_marginTop="10dp"
-        android:background="@drawable/edittext_background"
-        android:hint="Название *"
-        android:inputType="text"
-        android:textColor="@color/ag_text_color"
-        android:textColorHint="@color/ag_text_color"
-        tools:ignore="SmallSp" />
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="5dp"
+            android:background="#1A919EAB"
+            android:paddingTop="10dp" />
 
-    <Spinner
-        android:id="@+id/field2"
-        android:layout_width="match_parent"
-        android:layout_height="40dp"
-        android:layout_marginHorizontal="20dp"
-        android:layout_marginTop="10dp"
-        android:background="@drawable/edittext_background"
-        android:choiceMode="singleChoice" />
+        <EditText
+            android:id="@+id/region"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:layout_marginHorizontal="20dp"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/edittext_background"
+            android:hint="Область"
+            android:inputType="text"
+            android:textColor="@color/ag_text_color"
+            android:textColorHint="@color/ag_text_color" />
 
-    <EditText
-        android:id="@+id/field3"
-        android:layout_width="match_parent"
-        android:layout_height="40dp"
-        android:layout_marginHorizontal="20dp"
-        android:layout_marginTop="10dp"
-        android:background="@drawable/edittext_background"
-        android:hint="Сорт / гибрид"
-        android:inputType="text"
-        android:textColor="@color/ag_text_color"
-        android:textColorHint="@color/ag_text_color"
-        tools:ignore="SmallSp" />
+        <EditText
+            android:id="@+id/district"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:layout_marginHorizontal="20dp"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/edittext_background"
+            android:hint="Район"
+            android:inputType="text"
+            android:textColor="@color/ag_text_color"
+            android:textColorHint="@color/ag_text_color" />
 
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
-        android:paddingHorizontal="20dp"
-        android:text="Координаты"
-        android:textColor="@color/black"
-        android:textSize="14sp" />
+        <EditText
+            android:id="@+id/aggregator"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:layout_marginHorizontal="20dp"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/edittext_background"
+            android:hint="Агрегатор осуществляющий закупку урожая и поддержку фермера"
+            android:inputType="text"
+            android:textColor="@color/ag_text_color"
+            android:textColorHint="@color/ag_text_color" />
 
-    <ListView
-        android:id="@+id/coordinate_list"
-        android:layout_width="match_parent"
-        android:layout_height="100dp"
-        android:layout_marginHorizontal="20dp"
-        android:layout_marginTop="10dp"
-        tools:listitem="@layout/coordinate_list_item" />
+        <EditText
+            android:id="@+id/farmerName"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:layout_marginHorizontal="20dp"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/edittext_background"
+            android:hint="ФИО земплепользователя"
+            android:inputType="text"
+            android:textColor="@color/ag_text_color"
+            android:textColorHint="@color/ag_text_color" />
 
-    <Button
-        android:id="@+id/btn_upload_image"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginHorizontal="20dp"
-        android:background="@drawable/radius"
-        android:drawableTop="@drawable/outline_file_upload_24"
-        android:paddingVertical="8dp"
-        android:text="Загрузить фото"
-        android:textAllCaps="false"
-        android:textColor="#fff" />
+        <EditText
+            android:id="@+id/farmerMobile"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:layout_marginHorizontal="20dp"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/edittext_background"
+            android:hint="Телефон земплепользователя"
+            android:inputType="text"
+            android:textColor="@color/ag_text_color"
+            android:textColorHint="@color/ag_text_color" />
 
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
-        android:paddingHorizontal="20dp"
-        android:text="Фото"
-        android:textColor="@color/black" />
+        <EditText
+            android:id="@+id/cadastrNumber"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:layout_marginHorizontal="20dp"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/edittext_background"
+            android:hint="Кадастровый номер поля"
+            android:inputType="text"
+            android:textColor="@color/ag_text_color"
+            android:textColorHint="@color/ag_text_color" />
 
-    <GridView
-        android:id="@+id/images"
-        android:layout_width="match_parent"
-        android:layout_height="220dp"
-        android:layout_marginHorizontal="20dp"
-        android:layout_marginTop="10dp"
-        android:horizontalSpacing="16dp"
-        android:numColumns="2"
-        android:stretchMode="spacingWidth"
-        android:verticalSpacing="16dp"
-        tools:listitem="@layout/agro_photo" />
+        <EditText
+            android:id="@+id/year"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:layout_marginHorizontal="20dp"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/edittext_background"
+            android:hint="Текущий год"
+            android:inputType="text"
+            android:textColor="@color/ag_text_color"
+            android:textColorHint="@color/ag_text_color" />
 
-    <Button
-        android:id="@+id/btn_save"
-        android:layout_width="match_parent"
-        android:layout_height="35dp"
-        android:layout_marginHorizontal="20dp"
-        android:layout_marginTop="10dp"
-        android:background="@drawable/radius"
-        android:text="@string/Save"
-        android:textAllCaps="false"
-        android:textColor="#fff" />
+        <Spinner
+            android:id="@+id/culture"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:layout_marginHorizontal="20dp"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/edittext_background"
+            android:choiceMode="singleChoice" />
+
+        <EditText
+            android:id="@+id/cultureVarieties"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:layout_marginHorizontal="20dp"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/edittext_background"
+            android:hint="Название сорта выращиваемой культуры"
+            android:inputType="text"
+            android:textColor="@color/ag_text_color"
+            android:textColorHint="@color/ag_text_color" />
+
+        <Spinner
+            android:id="@+id/technology"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:layout_marginHorizontal="20dp"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/edittext_background"
+            android:choiceMode="singleChoice" />
+
+        <Spinner
+            android:id="@+id/landCategory"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:layout_marginHorizontal="20dp"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/edittext_background"
+            android:choiceMode="singleChoice" />
+
+        <Spinner
+            android:id="@+id/irrigationType"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:layout_marginHorizontal="20dp"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/edittext_background"
+            android:choiceMode="singleChoice" />
+
+        <EditText
+            android:id="@+id/sowingDate"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:layout_marginHorizontal="20dp"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/edittext_background"
+            android:hint="Дата посева"
+            android:inputType="date"
+            android:textColor="@color/ag_text_color"
+            android:textColorHint="@color/ag_text_color" />
+
+        <EditText
+            android:id="@+id/cleaningDate"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:layout_marginHorizontal="20dp"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/edittext_background"
+            android:hint="Дата уборки"
+            android:inputType="date"
+            android:textColor="@color/ag_text_color"
+            android:textColorHint="@color/ag_text_color" />
+
+        <EditText
+            android:id="@+id/productivity"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:layout_marginHorizontal="20dp"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/edittext_background"
+            android:hint="Урожайность"
+            android:inputType="text"
+            android:textColor="@color/ag_text_color"
+            android:textColorHint="@color/ag_text_color" />
+
+        <Spinner
+            android:id="@+id/secondaryCulture"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:layout_marginHorizontal="20dp"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/edittext_background"
+            android:choiceMode="singleChoice" />
+
+        <EditText
+            android:id="@+id/secondarySowingDate"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:layout_marginHorizontal="20dp"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/edittext_background"
+            android:hint="Дата вторичного посева"
+            android:inputType="date"
+            android:textColor="@color/ag_text_color"
+            android:textColorHint="@color/ag_text_color" />
+
+        <EditText
+            android:id="@+id/secondaryCropHarvestDate"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:layout_marginHorizontal="20dp"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/edittext_background"
+            android:hint="Дата уборки вторичного посева"
+            android:inputType="date"
+            android:textColor="@color/ag_text_color"
+            android:textColorHint="@color/ag_text_color" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:paddingHorizontal="20dp"
+            android:text="Координаты"
+            android:textColor="@color/black"
+            android:textSize="14sp" />
+
+        <ListView
+            android:id="@+id/coordinate_list"
+            android:layout_width="match_parent"
+            android:layout_height="100dp"
+            android:layout_marginHorizontal="20dp"
+            android:layout_marginTop="10dp"
+            tools:listitem="@layout/coordinate_list_item" />
+
+        <Button
+            android:id="@+id/btn_upload_image"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="20dp"
+            android:background="@drawable/radius"
+            android:drawableTop="@drawable/outline_file_upload_24"
+            android:paddingVertical="8dp"
+            android:text="Загрузить фото"
+            android:textAllCaps="false"
+            android:textColor="#fff" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:paddingHorizontal="20dp"
+            android:text="Фото"
+            android:textColor="@color/black" />
+
+        <GridView
+            android:id="@+id/images"
+            android:layout_width="match_parent"
+            android:layout_height="220dp"
+            android:layout_marginHorizontal="20dp"
+            android:layout_marginTop="10dp"
+            android:horizontalSpacing="16dp"
+            android:numColumns="2"
+            android:stretchMode="spacingWidth"
+            android:verticalSpacing="16dp"
+            tools:listitem="@layout/agro_photo" />
+
+        <Button
+            android:id="@+id/btn_save"
+            android:layout_width="match_parent"
+            android:layout_height="35dp"
+            android:layout_marginHorizontal="20dp"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/radius"
+            android:text="@string/Save"
+            android:textAllCaps="false"
+            android:textColor="#fff" />
 
 
-</LinearLayout>
+    </LinearLayout>
+</ScrollView>
