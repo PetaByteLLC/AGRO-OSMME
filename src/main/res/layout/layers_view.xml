@@ -48,5 +48,6 @@
         android:src="@drawable/ic_action_new_holo_dark"
         app:backgroundTint="?attr/colorAccent"
         app:fabSize="mini"
-        app:useCompatPadding="true" />
+        app:useCompatPadding="true"
+        android:visibility="invisible"/>
 </RelativeLayout>

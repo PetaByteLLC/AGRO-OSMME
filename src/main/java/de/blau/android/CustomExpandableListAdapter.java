@@ -88,6 +88,12 @@ public class CustomExpandableListAdapter extends BaseExpandableListAdapter {
         return convertView;
     }
 
+    private String getTagValue(Way way, String key) {
+        if (key == null || way == null) return "";
+        String tagWithKey = way.getTagWithKey(key);
+        return tagWithKey == null ? "" : tagWithKey;
+    }
+
     @Override
     public View getChildView(int groupPosition, int childPosition, boolean isLastChild, View convertView, ViewGroup parent) {
         if (convertView == null) {
@@ -97,7 +103,8 @@ public class CustomExpandableListAdapter extends BaseExpandableListAdapter {
         Way way = getChild(groupPosition, childPosition);
 
         TextView title = convertView.findViewById(R.id.title);
-        title.setText(way.getTagWithKey("name") + " - " + way.getTagWithKey("area") + " " + way.getTagWithKey("areaUnit"));
+        String text = getTagValue(way, "name") + " " + getTagValue(way, "area") + " " + getTagValue(way, "areaUnit");
+        title.setText(text.trim());
 
         String cultureData = way.getTagWithKey("culture");
         TextView culture = convertView.findViewById(R.id.culture);
@@ -140,7 +147,7 @@ public class CustomExpandableListAdapter extends BaseExpandableListAdapter {
                 double[] center = box.getCenter();
                 main.invalidateMap();
 //                main.zoomToAndEdit((int) (center[0] * 1E7D), (int) (center[1] * 1E7D), way);
-                App.getLogic().setZoom(main.getMap(), Ui.ZOOM_FOR_ZOOMTO);
+//                App.getLogic().setZoom(main.getMap(), Ui.ZOOM_FOR_ZOOMTO);
                 main.getMap().getViewBox().moveTo(main.getMap(), (int) (center[0] * 1E7D), (int) (center[1] * 1E7D));
                 dismiss();
             }
@@ -154,7 +161,7 @@ public class CustomExpandableListAdapter extends BaseExpandableListAdapter {
                 double[] center = box.getCenter();
                 main.invalidateMap();
 //                main.zoomToAndEdit((int) (center[0] * 1E7D), (int) (center[1] * 1E7D), way);
-                App.getLogic().setZoom(main.getMap(), Ui.ZOOM_FOR_ZOOMTO);
+//                App.getLogic().setZoom(main.getMap(), Ui.ZOOM_FOR_ZOOMTO);
                 main.getMap().getViewBox().moveTo(main.getMap(), (int) (center[0] * 1E7D), (int) (center[1] * 1E7D));
                 main.editor(way);
                 dismiss();

@@ -11,10 +11,10 @@
         android:orientation="vertical">
 
         <TextView
+            android:id="@+id/label"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
-            android:text="Создание поле"
             android:textAlignment="center"
             android:textColor="@color/black"
             android:textSize="20sp"
@@ -25,7 +25,16 @@
             android:layout_height="5dp"
             android:background="#1A919EAB"
             android:paddingTop="10dp" />
-
+        <EditText
+            android:id="@+id/name"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:layout_marginHorizontal="20dp"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/edittext_background"
+            android:inputType="text"
+            android:textColor="@color/ag_text_color"
+            android:textColorHint="@color/ag_text_color" />
         <EditText
             android:id="@+id/region"
             android:layout_width="match_parent"
@@ -51,13 +60,13 @@
             android:textColorHint="@color/ag_text_color" />
 
         <EditText
-            android:id="@+id/aggregator"
+            android:id="@+id/farmerSurName"
             android:layout_width="match_parent"
             android:layout_height="40dp"
             android:layout_marginHorizontal="20dp"
             android:layout_marginTop="10dp"
             android:background="@drawable/edittext_background"
-            android:hint="Агрегатор осуществляющий закупку урожая и поддержку фермера"
+            android:hint="Фамилия землепользователя"
             android:inputType="text"
             android:textColor="@color/ag_text_color"
             android:textColorHint="@color/ag_text_color" />
@@ -69,7 +78,7 @@
             android:layout_marginHorizontal="20dp"
             android:layout_marginTop="10dp"
             android:background="@drawable/edittext_background"
-            android:hint="ФИО земплепользователя"
+            android:hint="Имя земплепользователя"
             android:inputType="text"
             android:textColor="@color/ag_text_color"
             android:textColorHint="@color/ag_text_color" />
@@ -94,6 +103,18 @@
             android:layout_marginTop="10dp"
             android:background="@drawable/edittext_background"
             android:hint="Кадастровый номер поля"
+            android:inputType="text"
+            android:textColor="@color/ag_text_color"
+            android:textColorHint="@color/ag_text_color" />
+
+        <EditText
+            android:id="@+id/aggregator"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:layout_marginHorizontal="20dp"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/edittext_background"
+            android:hint="Агрегатор"
             android:inputType="text"
             android:textColor="@color/ag_text_color"
             android:textColorHint="@color/ag_text_color" />
@@ -126,7 +147,7 @@
             android:layout_marginHorizontal="20dp"
             android:layout_marginTop="10dp"
             android:background="@drawable/edittext_background"
-            android:hint="Название сорта выращиваемой культуры"
+            android:hint="Сорт"
             android:inputType="text"
             android:textColor="@color/ag_text_color"
             android:textColorHint="@color/ag_text_color" />

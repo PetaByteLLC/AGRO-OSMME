@@ -13,13 +13,13 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
-import com.google.android.material.textfield.TextInputEditText;
 
 import java.util.Arrays;
 import java.util.Calendar;
@@ -35,9 +35,10 @@ public class BottomSheetFragment extends BottomSheetDialogFragment {
     private final Main main;
     private boolean edit;
 
-    private EditText region, district, aggregator, farmerName, farmerMobile, cadastrNumber, year,
+    private TextView label;
+    private EditText name, region, district, aggregator, farmerName, farmerMobile, cadastrNumber, year,
             cultureVarieties, sowingDate, cleaningDate, productivity, secondarySowingDate,
-            secondaryCropHarvestDate;
+            secondaryCropHarvestDate, farmerSurName;
     private Spinner culture, technology, landCategory, irrigationType, secondaryCulture;
 
     public BottomSheetFragment(Way lastSelectedWay, Main main, boolean edit) {
@@ -74,10 +75,17 @@ public class BottomSheetFragment extends BottomSheetDialogFragment {
         };
         listView.setAdapter(adapter);
 
+        label = view.findViewById(R.id.label);
+        label.setText("Создание поля");
+
+        name = view.findViewById(R.id.name);
+        name.setText("Поле " + App.getLogic().getWays().size());
+
         region = view.findViewById(R.id.region);
         district = view.findViewById(R.id.district);
         aggregator = view.findViewById(R.id.aggregator);
         farmerName = view.findViewById(R.id.farmerName);
+        farmerSurName = view.findViewById(R.id.farmerSurName);
         farmerMobile = view.findViewById(R.id.farmerMobile);
         cadastrNumber = view.findViewById(R.id.cadastrNumber);
         year = view.findViewById(R.id.year);
@@ -127,10 +135,14 @@ public class BottomSheetFragment extends BottomSheetDialogFragment {
 
         // Обработка кнопки сохранения
         view.findViewById(R.id.btn_save).setOnClickListener(v -> {
+            int size = App.getLogic().getWays().size();
+            String nameValue = name.getText() == null || name.getText().toString().trim().isEmpty()
+                    ? "Поле " + size : name.getText().toString();
             String regionValue = region.getText().toString();
             String districtValue = district.getText().toString();
             String aggregatorValue = aggregator.getText().toString();
             String farmerNameValue = farmerName.getText().toString();
+            String farmerSurNameValue = farmerSurName.getText().toString();
             String farmerMobileValue = farmerMobile.getText().toString();
             String cadastrNumberValue = cadastrNumber.getText().toString();
             String yearValue = year.getText().toString();
@@ -140,24 +152,35 @@ public class BottomSheetFragment extends BottomSheetDialogFragment {
             String productivityValue = productivity.getText().toString();
             String secondarySowingDateValue = secondarySowingDate.getText().toString();
             String secondaryCropHarvestDateValue = secondaryCropHarvestDate.getText().toString();
-            String cultureValue = culture.getSelectedItem().toString();
             String technologyValue = technology.getSelectedItem().toString();
             String landCategoryValue = landCategory.getSelectedItem().toString();
             String irrigationTypeValue = irrigationType.getSelectedItem().toString();
             String secondaryCultureValue = secondaryCulture.getSelectedItem().toString();
 
-            // Сохранение всех значений
-            save(regionValue, districtValue, aggregatorValue, farmerNameValue, farmerMobileValue,
-                    cadastrNumberValue, yearValue, cultureVarietiesValue, sowingDateValue, cleaningDateValue,
-                    productivityValue, secondarySowingDateValue, secondaryCropHarvestDateValue, cultureValue,
-                    technologyValue, landCategoryValue, irrigationTypeValue, secondaryCultureValue);
+            try {
+                if (culture.getSelectedItem() == null) throw new NullPointerException("Выращиваемая культура");
+                String cultureValue = culture.getSelectedItem().toString();
+                if (cultureValue.equals("Выращиваемая культура")) throw new NullPointerException("Выращиваемая культура");
+                // Сохранение всех значений
+                save(nameValue, regionValue, districtValue, aggregatorValue, farmerNameValue, farmerMobileValue,
+                        cadastrNumberValue, yearValue, cultureVarietiesValue, sowingDateValue, cleaningDateValue,
+                        productivityValue, secondarySowingDateValue, secondaryCropHarvestDateValue, cultureValue,
+                        technologyValue, landCategoryValue, irrigationTypeValue, secondaryCultureValue, farmerSurNameValue);
+            } catch (NullPointerException exception) {
+                Toast.makeText(getContext(),
+                        String.format("Поле \"%s\" обязательно для заполнения", exception.getMessage()),
+                        Toast.LENGTH_SHORT).show();
+            }
         });
 
         if (edit) {
+            label.setText("Редактирование поля");
+            name.setText(lastSelectedWay.getTagWithKey("name"));
             region.setText(lastSelectedWay.getTagWithKey("region"));
             district.setText(lastSelectedWay.getTagWithKey("district"));
             aggregator.setText(lastSelectedWay.getTagWithKey("aggregator"));
             farmerName.setText(lastSelectedWay.getTagWithKey("farmerName"));
+            farmerSurName.setText(lastSelectedWay.getTagWithKey("farmerSurName"));
             farmerMobile.setText(lastSelectedWay.getTagWithKey("farmerMobile"));
             cadastrNumber.setText(lastSelectedWay.getTagWithKey("cadastrNumber"));
             year.setText(lastSelectedWay.getTagWithKey("year"));
@@ -173,24 +196,33 @@ public class BottomSheetFragment extends BottomSheetDialogFragment {
                 landCategory.setSelection(Arrays.asList(landCategoryData).indexOf(lastSelectedWay.getTagWithKey("landCategory")));
                 irrigationType.setSelection(Arrays.asList(irrigationTypeData).indexOf(lastSelectedWay.getTagWithKey("irrigationType")));
                 secondaryCulture.setSelection(Arrays.asList(cultureData2).indexOf(lastSelectedWay.getTagWithKey("secondaryCulture")));
-            } catch (NullPointerException ignore) {}
+            } catch (NullPointerException ignore) {
+            }
         }
         BottomSheetBehavior<View> bottomSheetBehavior = BottomSheetBehavior.from((View) view.getParent());
         bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+        bottomSheetBehavior.setDraggable(false);
+
+        if (getDialog() != null) {
+            getDialog().setCancelable(false);
+            getDialog().setCanceledOnTouchOutside(false);
+        }
     }
 
-    private void save(String region, String district, String aggregator, String farmerName, String farmerMobile,
+    private void save(String name, String region, String district, String aggregator, String farmerName, String farmerMobile,
                       String cadastrNumber, String year, String cultureVarieties, String sowingDate,
                       String cleaningDate, String productivity, String secondarySowingDate,
                       String secondaryCropHarvestDate, String culture, String technology, String landCategory,
-                      String irrigationType, String secondaryCulture) {
+                      String irrigationType, String secondaryCulture, String farmerSurName) {
         Map<String, String> tags = new HashMap<>();
         tags.put("landuse", "farmland");
         tags.put("position", getPosition());
+        tags.put("name", name);
         tags.put("region", region);
         tags.put("district", district);
         tags.put("aggregator", aggregator);
         tags.put("farmerName", farmerName);
+        tags.put("farmerSurName", farmerSurName);
         tags.put("farmerMobile", farmerMobile);
         tags.put("cadastrNumber", cadastrNumber);
         tags.put("year", year);

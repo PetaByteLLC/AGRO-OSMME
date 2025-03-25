@@ -1915,12 +1915,12 @@ public class Main extends FullScreenAppCompatActivity
 //            startGPX.setTitle(getString(getTracker().hasTrackPoints() ? R.string.menu_gps_resume : R.string.menu_gps_start));
 //        }
 //        menu.findItem(R.id.menu_gps_pause).setEnabled(haveTracker && getTracker().isTracking() && gpsProviderEnabled);
-//        menu.findItem(R.id.menu_enable_gps_autodownload).setEnabled(haveTracker && locationProviderEnabled && (networkConnected || hasMapSplitSource))
-//                .setChecked(prefs.getAutoDownload());
-//        menu.findItem(R.id.menu_enable_pan_and_zoom_auto_download).setEnabled(networkConnected || hasMapSplitSource)
-//                .setChecked(prefs.getPanAndZoomAutoDownload());
-        menu.findItem(R.id.menu_transfer_bugs_autodownload).setEnabled(haveTracker && locationProviderEnabled && networkConnected)
-                .setChecked(prefs.getBugAutoDownload());
+        menu.findItem(R.id.menu_enable_gps_autodownload).setEnabled(haveTracker && locationProviderEnabled && (networkConnected || hasMapSplitSource))
+                .setChecked(prefs.getAutoDownload());
+        menu.findItem(R.id.menu_enable_pan_and_zoom_auto_download).setEnabled(networkConnected || hasMapSplitSource)
+                .setChecked(prefs.getPanAndZoomAutoDownload());
+//        menu.findItem(R.id.menu_transfer_bugs_autodownload).setEnabled(haveTracker && locationProviderEnabled && networkConnected)
+//                .setChecked(prefs.getBugAutoDownload());
 //
 //        menu.findItem(R.id.menu_gps_clear).setEnabled(haveTracker && (getTracker().hasTrackPoints() || getTracker().hasWayPoints()));
 //
@@ -1937,9 +1937,9 @@ public class Main extends FullScreenAppCompatActivity
 //        menu.findItem(R.id.menu_gps_show_bookmarks).setEnabled(true);
 //
 //        transferItem.setActionView(R.layout.agro_button_fields);
-        LayerDrawable transfer = (LayerDrawable) menu.findItem(R.id.menu_transfer).getIcon();
+//        LayerDrawable transfer = (LayerDrawable) menu.findItem(R.id.menu_transfer).getIcon();
         final StorageDelegator delegator = App.getDelegator();
-        BadgeDrawable.setBadgeWithCount(this, transfer, delegator.getApiElementCount(), prefs.getUploadOkLimit(), prefs.getUploadWarnLimit());
+//        BadgeDrawable.setBadgeWithCount(this, transfer, delegator.getApiElementCount(), prefs.getUploadOkLimit(), prefs.getUploadWarnLimit());
 //
         menu.findItem(R.id.menu_transfer_close_changeset).setVisible(server.hasOpenChangeset());
 //
@@ -1953,22 +1953,22 @@ public class Main extends FullScreenAppCompatActivity
 //        // note: isDirty is not a good indicator of if if there is really
 //        // something to upload
         final boolean hasChanges = !delegator.getApiStorage().isEmpty();
-        menu.findItem(R.id.menu_transfer_upload).setEnabled(networkConnected && hasChanges);
+//        menu.findItem(R.id.menu_transfer_upload).setEnabled(networkConnected && hasChanges);
         menu.findItem(R.id.menu_transfer_review).setEnabled(hasChanges);
-        final boolean hasData = !delegator.getCurrentStorage().isEmpty();
-        menu.findItem(R.id.menu_transfer_update).setEnabled(networkConnected && !hasMapSplitSource && hasData);
-        menu.findItem(R.id.menu_transfer_data_clear).setEnabled(hasData);
-
-        menu.findItem(R.id.menu_transfer_bugs_download_current).setEnabled(networkConnected);
-        menu.findItem(R.id.menu_transfer_bugs_upload).setEnabled(networkConnected && App.getTaskStorage().hasChanges());
+//        final boolean hasData = !delegator.getCurrentStorage().isEmpty();
+//        menu.findItem(R.id.menu_transfer_update).setEnabled(networkConnected && !hasMapSplitSource && hasData);
+//        menu.findItem(R.id.menu_transfer_data_clear).setEnabled(hasData);
+//
+//        menu.findItem(R.id.menu_transfer_bugs_download_current).setEnabled(networkConnected);
+//        menu.findItem(R.id.menu_transfer_bugs_upload).setEnabled(networkConnected && App.getTaskStorage().hasChanges());
 
         // the following depends on us having permission to write to "external"
         // storage
-        boolean storagePermissionGranted = isStoragePermissionGranted();
-        menu.findItem(R.id.menu_transfer_export).setEnabled(storagePermissionGranted);
-        menu.findItem(R.id.menu_transfer_save_file).setEnabled(storagePermissionGranted);
-        menu.findItem(R.id.menu_transfer_save_notes_all).setEnabled(storagePermissionGranted);
-        menu.findItem(R.id.menu_transfer_save_notes_new_and_changed).setEnabled(storagePermissionGranted);
+//        boolean storagePermissionGranted = isStoragePermissionGranted();
+//        menu.findItem(R.id.menu_transfer_export).setEnabled(storagePermissionGranted);
+//        menu.findItem(R.id.menu_transfer_save_file).setEnabled(storagePermissionGranted);
+//        menu.findItem(R.id.menu_transfer_save_notes_all).setEnabled(storagePermissionGranted);
+//        menu.findItem(R.id.menu_transfer_save_notes_new_and_changed).setEnabled(storagePermissionGranted);
 
 //        // main menu items
 //        menu.findItem(R.id.menu_search_objects).setEnabled(!logic.isLocked());
@@ -2649,9 +2649,19 @@ public class Main extends FullScreenAppCompatActivity
                 startActivity(new Intent(this, LicenseViewer.class));
                 return true;
             case R.id.logout:
-                prefs.setCgiToken(null);
-                startActivity(new Intent(this, LoginActivity.class));
-                finish();
+                Runnable reset2 = () -> {
+                    prefs.setCgiToken(null);
+                    delegator.reset(true);
+                    invalidateOptionsMenu();
+                    map.invalidate();
+                    startActivity(new Intent(this, LoginActivity.class));
+                    finish();
+                };
+                if (logic != null && logic.hasChanges()) {
+                    DataLoss.createDialog(this, (dialog, which) -> reset2.run()).show();
+                } else {
+                    reset2.run();
+                }
                 return true;
             case R.id.menu_privacy:
                 HelpViewer.start(this, R.string.help_privacy);
@@ -4198,7 +4208,7 @@ public class Main extends FullScreenAppCompatActivity
             ScreenMessage.toastTopWarning(this, "Не хватает точек");
             return;
         }
-        BottomSheetFragment bottomSheetFragment = new BottomSheetFragment(lastSelectedWay, this, true);
+        BottomSheetFragment bottomSheetFragment = new BottomSheetFragment(lastSelectedWay, this, false);
         bottomSheetFragment.show(getSupportFragmentManager(), bottomSheetFragment.getTag());
     }
 
