@@ -200,11 +200,12 @@ public class Layers extends AbstractConfigurationDialog implements OnUpdateListe
             final Map map = App.getLogic().getMap();
 
             // menu items for adding layers
-            MenuItem item = popup.getMenu().add(R.string.menu_layers_load_geojson);
-            item.setOnMenuItemClickListener(unused -> {
-                addStyleableLayerFromFile(activity, prefs, map, LayerType.GEOJSON);
-                return false;
-            });
+            MenuItem item;
+//            MenuItem item = popup.getMenu().add(R.string.menu_layers_load_geojson);
+//            item.setOnMenuItemClickListener(unused -> {
+//                addStyleableLayerFromFile(activity, prefs, map, LayerType.GEOJSON);
+//                return false;
+//            });
 
             item = popup.getMenu().add(R.string.menu_layers_add_backgroundlayer);
             item.setOnMenuItemClickListener(unused -> {
@@ -213,30 +214,30 @@ public class Layers extends AbstractConfigurationDialog implements OnUpdateListe
                 return true;
             });
 
-            item = popup.getMenu().add(R.string.menu_layers_add_overlaylayer);
-            item.setOnMenuItemClickListener(unused -> {
-                showImagerySelectDialog(null, null, true);
-                Tip.showDialog(activity, R.string.tip_imagery_privacy_key, R.string.tip_imagery_privacy);
-                return true;
-            });
+//            item = popup.getMenu().add(R.string.menu_layers_add_overlaylayer);
+//            item.setOnMenuItemClickListener(unused -> {
+//                showImagerySelectDialog(null, null, true);
+//                Tip.showDialog(activity, R.string.tip_imagery_privacy_key, R.string.tip_imagery_privacy);
+//                return true;
+//            });
 
-            if (map.getTaskLayer() == null) {
-                item = popup.getMenu().add(R.string.menu_layers_add_tasklayer);
-                item.setOnMenuItemClickListener(unused -> {
-                    de.blau.android.layer.Util.addLayer(activity, LayerType.TASKS);
-                    updateDialogAndPrefs(activity, prefs, map);
-                    return true;
-                });
-            }
+//            if (map.getTaskLayer() == null) {
+//                item = popup.getMenu().add(R.string.menu_layers_add_tasklayer);
+//                item.setOnMenuItemClickListener(unused -> {
+//                    de.blau.android.layer.Util.addLayer(activity, LayerType.TASKS);
+//                    updateDialogAndPrefs(activity, prefs, map);
+//                    return true;
+//                });
+//            }
 
-            if (map.getPhotoLayer() == null) {
-                item = popup.getMenu().add(R.string.menu_layers_add_photolayer);
-                item.setOnMenuItemClickListener(unused -> {
-                    de.blau.android.layer.Util.addLayer(activity, LayerType.PHOTO);
-                    updateDialogAndPrefs(activity, prefs, map);
-                    return true;
-                });
-            }
+//            if (map.getPhotoLayer() == null) {
+//                item = popup.getMenu().add(R.string.menu_layers_add_photolayer);
+//                item.setOnMenuItemClickListener(unused -> {
+//                    de.blau.android.layer.Util.addLayer(activity, LayerType.PHOTO);
+//                    updateDialogAndPrefs(activity, prefs, map);
+//                    return true;
+//                });
+//            }
 
             if (map.getLayer(LayerType.SCALE) == null) {
                 String[] scaleValues = activity.getResources().getStringArray(R.array.scale_values);
@@ -251,14 +252,14 @@ public class Layers extends AbstractConfigurationDialog implements OnUpdateListe
                 }
             }
 
-            if (map.getBookmarksLayer() == null) {
-                item = popup.getMenu().add(R.string.menu_layers_enable_bookmarkslayer);
-                item.setOnMenuItemClickListener(unused -> {
-                    de.blau.android.layer.Util.addLayer(activity, LayerType.BOOKMARKS);
-                    updateDialogAndPrefs(activity, prefs, map);
-                    return true;
-                });
-            }
+//            if (map.getBookmarksLayer() == null) {
+//                item = popup.getMenu().add(R.string.menu_layers_enable_bookmarkslayer);
+//                item.setOnMenuItemClickListener(unused -> {
+//                    de.blau.android.layer.Util.addLayer(activity, LayerType.BOOKMARKS);
+//                    updateDialogAndPrefs(activity, prefs, map);
+//                    return true;
+//                });
+//            }
 
             if (map.getLayer(LayerType.MAPILLARY) == null) {
                 try (KeyDatabaseHelper keys = new KeyDatabaseHelper(activity); SQLiteDatabase db = keys.getReadableDatabase()) {
@@ -274,51 +275,51 @@ public class Layers extends AbstractConfigurationDialog implements OnUpdateListe
                 }
             }
 
-            if (map.getLayer(LayerType.PANORAMAX) == null) {
-                item = popup.getMenu().add(R.string.menu_layers_enable_panoramax_layer);
-                item.setOnMenuItemClickListener(unused -> {
-                    de.blau.android.layer.Util.addLayer(activity, LayerType.PANORAMAX);
-                    updateDialogAndPrefs(activity, prefs, map);
-                    Tip.showDialog(activity, R.string.tip_panoramax_privacy_key, R.string.tip_panoramax_privacy);
-                    return true;
-                });
-            }
+//            if (map.getLayer(LayerType.PANORAMAX) == null) {
+//                item = popup.getMenu().add(R.string.menu_layers_enable_panoramax_layer);
+//                item.setOnMenuItemClickListener(unused -> {
+//                    de.blau.android.layer.Util.addLayer(activity, LayerType.PANORAMAX);
+//                    updateDialogAndPrefs(activity, prefs, map);
+//                    Tip.showDialog(activity, R.string.tip_panoramax_privacy_key, R.string.tip_panoramax_privacy);
+//                    return true;
+//                });
+//            }
 
-            item = popup.getMenu().add(R.string.layer_add_gpx);
-            item.setOnMenuItemClickListener(unused -> {
-                addStyleableLayerFromFile(activity, prefs, map, LayerType.GPX);
-                return false;
-            });
+//            item = popup.getMenu().add(R.string.layer_add_gpx);
+//            item.setOnMenuItemClickListener(unused -> {
+//                addStyleableLayerFromFile(activity, prefs, map, LayerType.GPX);
+//                return false;
+//            });
 
-            item = popup.getMenu().add(R.string.layer_download_track);
-            item.setOnMenuItemClickListener(unused -> {
-                downloadGpxTrack(activity, prefs, map);
-                return false;
-            });
+//            item = popup.getMenu().add(R.string.layer_download_track);
+//            item.setOnMenuItemClickListener(unused -> {
+//                downloadGpxTrack(activity, prefs, map);
+//                return false;
+//            });
 
-            item = popup.getMenu().add(R.string.layer_add_custom_imagery);
-            item.setOnMenuItemClickListener(unused -> {
-                TileLayerDialog.showDialog(this, null);
-                return true;
-            });
+//            item = popup.getMenu().add(R.string.layer_add_custom_imagery);
+//            item.setOnMenuItemClickListener(unused -> {
+//                TileLayerDialog.showDialog(this, null);
+//                return true;
+//            });
 
-            item = popup.getMenu().add(R.string.layer_add_layer_from_mvt_style);
-            item.setOnMenuItemClickListener(unused -> {
-                addMVTLayerFromStyle(activity, prefs, map);
-                return true;
-            });
+//            item = popup.getMenu().add(R.string.layer_add_layer_from_mvt_style);
+//            item.setOnMenuItemClickListener(unused -> {
+//                addMVTLayerFromStyle(activity, prefs, map);
+//                return true;
+//            });
 
-            item = popup.getMenu().add(R.string.menu_tools_add_imagery_from_oam);
-            item.setOnMenuItemClickListener(unused -> {
-                OAMCatalogView.showDialog(this, activity instanceof Main ? ((Main) activity).getMap().getViewBox() : null);
-                return true;
-            });
+//            item = popup.getMenu().add(R.string.menu_tools_add_imagery_from_oam);
+//            item.setOnMenuItemClickListener(unused -> {
+//                OAMCatalogView.showDialog(this, activity instanceof Main ? ((Main) activity).getMap().getViewBox() : null);
+//                return true;
+//            });
 
-            item = popup.getMenu().add(R.string.add_imagery_from_wms_endpoint);
-            item.setOnMenuItemClickListener(unused -> {
-                WmsEndpointDatabaseView.showDialog(this);
-                return true;
-            });
+//            item = popup.getMenu().add(R.string.add_imagery_from_wms_endpoint);
+//            item.setOnMenuItemClickListener(unused -> {
+//                WmsEndpointDatabaseView.showDialog(this);
+//                return true;
+//            });
 
             popup.show();
         });
@@ -685,12 +686,12 @@ public class Layers extends AbstractConfigurationDialog implements OnUpdateListe
         visible.setBackgroundColor(Color.TRANSPARENT);
         visible.setPadding(0, 0, Density.dpToPx(context, 5), 0);
         visible.setOnClickListener(v -> {
-            if (layer != null) {
-                setVisibility(context, layer, !layer.isVisible());
-                visible.setImageResource(layer.isVisible() ? visibleId : invisibleId);
-                layer.invalidate();
-                App.getDelegator().setImageryRecorded(false);
-            }
+//            if (layer != null) {
+//                setVisibility(context, layer, !layer.isVisible());
+//                visible.setImageResource(layer.isVisible() ? visibleId : invisibleId);
+//                layer.invalidate();
+//                App.getDelegator().setImageryRecorded(false);
+//            }
         });
         tr.addView(visible);
 
@@ -928,404 +929,404 @@ public class Layers extends AbstractConfigurationDialog implements OnUpdateListe
         public void onClick(View arg0) {
             final FragmentActivity activity = getActivity();
             PopupMenu popup = new PopupMenu(activity, button);
-//            Menu menu = popup.getMenu();
-//            final Map map = App.getLogic().getMap();
-//
-//            // maybe we should use an interface here
-//            if (layer instanceof MapTilesLayer && !(layer instanceof de.blau.android.layer.streetlevel.AbstractImageOverlay)) {
-//                // get MRU list from layer
-//                final String[] tileServerIds = ((MapTilesLayer<?>) layer).getMRU();
-//                final TileLayerSource tileLayerConfiguration = ((MapTilesLayer<?>) layer).getTileLayerConfiguration();
-//                final String currentServerId = tileLayerConfiguration.getId();
-//                for (int i = 0; i < tileServerIds.length; i++) {
-//                    final String id = tileServerIds[i];
-//                    if (!currentServerId.equals(id)) {
-//                        final TileLayerSource tileServer = TileLayerSource.get(activity, id, true);
-//                        if (tileServer != null) {
-//                            MenuItem item = menu.add(tileServer.getName());
-//                            item.setOnMenuItemClickListener(unused -> {
-//                                if (tileServer != null) {
-//                                    TableRow row = (TableRow) button.getTag();
-//                                    setNewImagery(activity, row, (MapTilesLayer<?>) layer, tileServer);
-//                                    dismissDialog();
-//                                    layer.invalidate();
-//                                }
-//                                return true;
-//                            });
-//                        } else {
-//                            ((MapTilesLayer<?>) layer).removeServerFromMRU(id);
-//                        }
-//                    }
-//                    if (i == tileServerIds.length - 1) {
-//                        MenuItem divider = menu.add("");
-//                        divider.setEnabled(false);
-//                    }
-//                }
-//
-//                MenuItem item = menu.add(R.string.layer_select_imagery);
-//                item.setOnMenuItemClickListener(unused -> {
-//                    if (layer != null) {
-//                        if (!TileLayerSource.isFullyPopulated()) {
-//                            // FIXME this is borderline too slow to run on the main thread, maybe run in a thread while
-//                            // the dialog is starting up
-//                            de.blau.android.layer.Util.populateImageryLists(activity);
-//                        }
-//                        showImagerySelectDialog((TableRow) button.getTag(), (MapTilesLayer<?>) layer, layer.getType() == LayerType.OVERLAYIMAGERY);
-//                        Tip.showDialog(activity, R.string.tip_imagery_privacy_key, R.string.tip_imagery_privacy);
-//                    }
-//                    return true;
-//                });
-//
-//                if (TileLayerDatabase.SOURCE_MANUAL.equals(tileLayerConfiguration.getSource())) {
-//                    MenuItem editItem = menu.add(R.string.layer_edit_custom_imagery_configuration);
-//                    editItem.setOnMenuItemClickListener(unused -> {
-//                        try (TileLayerDatabase tlDb = new TileLayerDatabase(activity); SQLiteDatabase db = tlDb.getReadableDatabase()) {
-//                            long rowid = TileLayerDatabase.getLayerRowId(db, currentServerId);
-//                            updateListener = () -> {
-//                                de.blau.android.layer.Util.populateImageryLists(activity);
-//                                map.setUpLayers(activity);
-//
-//                            };
-//                            TileLayerDialog.showDialog(Layers.this, rowid, null);
-//                        } catch (IllegalArgumentException iaex) {
-//                            ScreenMessage.toastTopError(activity, iaex.getMessage());
-//                        }
-//                        return true;
-//                    });
-//                }
-//            }
-//
-//            if (layer instanceof ConfigureInterface && ((ConfigureInterface) layer).enableConfiguration()) {
-//                MenuItem item = menu.add(R.string.menu_layers_configure);
-//                item.setOnMenuItemClickListener(unused -> {
-//                    if (layer != null) {
-//                        ((ConfigureInterface) layer).configure(activity);
-//                    }
-//                    return true;
-//                });
-//            }
-//
-//            if (layer instanceof StyleableInterface) {
-//                MenuItem item = menu.add(R.string.layer_change_style);
-//                item.setOnMenuItemClickListener(unused -> {
-//                    if (layer != null) {
-//                        LayerStyle.showDialog(activity, layer.getIndex());
-//                    }
-//                    return true;
-//                });
-//                final boolean stylingEnabled = ((StyleableInterface) layer).stylingEnabled();
-//                item.setEnabled(stylingEnabled);
-//                item = menu.add(R.string.layer_reset_style);
-//                item.setOnMenuItemClickListener(unused -> {
-//                    if (layer != null) {
-//                        ((StyleableInterface) layer).resetStyling();
-//                        if (layer instanceof StyleableLayer) {
-//                            ((StyleableLayer) layer).dirty();
-//                        }
-//                        if (layer instanceof de.blau.android.layer.mvt.MapOverlay) {
-//                            // tiles need to be re-decoded for auto styling to work
-//                            ((de.blau.android.layer.mvt.MapOverlay) layer).flushTileCache(activity, false);
-//                        }
-//                        layer.invalidate();
-//                    }
-//                    return true;
-//                });
-//                item.setEnabled(stylingEnabled);
-//            }
-//
-//            if (layer instanceof DateRangeInterface) {
-//                MenuItem item = menu.add(R.string.layer_set_date_range);
-//                item.setOnMenuItemClickListener(unused -> {
-//                    if (layer != null) {
-//                        ((DateRangeInterface) layer).selectDateRange(getActivity(), layer.getIndex());
-//                    }
-//                    return true;
-//                });
-//            }
-//
-//            if (layer instanceof de.blau.android.layer.mvt.MapOverlay) {
-//                MenuItem item = menu.add(R.string.layer_load_style);
-//                item.setOnMenuItemClickListener(unused -> {
-//                    if (layer != null) {
-//                        try {
-//                            ((de.blau.android.layer.mvt.MapOverlay) layer).loadStyleFromFile(getActivity());
-//                        } catch (IOException e) {
-//                            ScreenMessage.toastTopInfo(activity, getString(R.string.toast_error_loading_style, e.getLocalizedMessage()));
-//                        }
-//                    }
-//                    return true;
-//                });
-//            }
-//
-//            if (layer instanceof de.blau.android.layer.photos.MapOverlay) {
-//                MenuItem item = menu.add(R.string.layer_photos_reindex);
-//                item.setOnMenuItemClickListener(unused -> {
-//                    if (layer != null) {
-//                        ((de.blau.android.layer.photos.MapOverlay) layer).reIndex();
-//                        layer.invalidate();
-//                    }
-//                    return true;
-//                });
-//            }
-//
-//            if (layer instanceof LayerInfoInterface) {
-//                MenuItem item = menu.add(R.string.menu_information);
-//                item.setOnMenuItemClickListener(unused -> {
-//                    if (layer != null) {
-//                        ((LayerInfoInterface) layer).showInfo(activity);
-//                    }
-//                    return true;
-//                });
-//            }
-//
-//            if (layer instanceof MapTilesLayer) { // these items are less important, show them at the bottom of the menu
-//                MenuItem item = menu.add(R.string.layer_flush_tile_cache);
-//                item.setOnMenuItemClickListener(unused -> {
-//                    if (layer != null) {
-//                        ((MapTilesLayer<?>) layer).flushTileCache(activity, true);
-//                        layer.invalidate();
-//                    }
-//                    return true;
-//                });
-//
-//                if (!(layer instanceof de.blau.android.layer.mvt.MapOverlay)) {
-//                    item = menu.add(R.string.menu_tools_background_properties);
-//                    item.setOnMenuItemClickListener(unused -> {
-//                        if (layer != null) {
-//                            BackgroundProperties.showDialog(activity, layer.getIndex());
-//                        }
-//                        return true;
-//                    });
-//
-//                    item = menu.add(R.string.menu_layers_background_align);
-//                    item.setEnabled(layer.isVisible() && map.isVisible(layer));
-//                    item.setOnMenuItemClickListener(unused -> {
-//                        if (layer != null) {
-//                            try {
-//                                Logic logic = App.getLogic();
-//                                ImageryAlignmentActionModeCallback backgroundAlignmentActionModeCallback = new ImageryAlignmentActionModeCallback(
-//                                        ((Main) activity), logic.getMode() != Mode.MODE_ALIGN_BACKGROUND ? logic.getMode() : Mode.MODE_EASYEDIT,
-//                                        ((MapTilesLayer<?>) layer).getContentId());
-//                                // NOTE needs to be after instance creation, logic.setMode needs to be called -after-
-//                                // this
-//                                ((Main) activity).setImageryAlignmentActionModeCallback(backgroundAlignmentActionModeCallback);
-//                                logic.setMode(((Main) activity), Mode.MODE_ALIGN_BACKGROUND);
-//                                ((Main) activity).startSupportActionMode(backgroundAlignmentActionModeCallback);
-//                            } catch (IllegalStateException isex) {
-//                                Log.e(DEBUG_TAG, isex.getMessage());
-//                            }
-//                            dismissDialog();
-//                        }
-//                        return true;
-//                    });
-//                }
-//
-//                if (!((MapTilesLayer<?>) layer).getTileLayerConfiguration().isLocalFile()) {
-//                    item = menu.add(R.string.layer_test);
-//                    item.setOnMenuItemClickListener(unused -> {
-//                        if (layer != null) {
-//                            TileSourceDiagnostics.showDialog(activity, ((MapTilesLayer<?>) layer).getTileLayerConfiguration(), map.getZoomLevel(),
-//                                    map.getViewBox());
-//                        }
-//                        return true;
-//                    });
-//                }
-//            }
-//            if (layer instanceof de.blau.android.layer.gpx.MapOverlay) {
-//                boolean recordingLayer = activity.getString(R.string.layer_gpx_recording).equals(layer.getContentId());
-//                if (!recordingLayer) {
-//                    MenuItem item = menu.add(R.string.menu_gps_goto_start);
-//                    item.setOnMenuItemClickListener(unused -> {
-//                        if (layer != null && activity instanceof Main) {
-//                            Track track = ((de.blau.android.layer.gpx.MapOverlay) layer).getTrack();
-//                            if (track != null) {
-//                                TrackPoint tp = track.getFirstTrackPoint();
-//                                if (tp != null) {
-//                                    ((Main) activity).gotoTrackPoint(App.getLogic(), tp);
-//                                } else {
-//                                    ScreenMessage.toastTopWarning(activity, R.string.toast_no_track_points);
-//                                }
-//                            }
-//                        }
-//                        dismissDialog();
-//                        return true;
-//                    });
-//                    item = menu.add(R.string.menu_gps_goto_first_waypoint);
-//                    item.setOnMenuItemClickListener(unused -> {
-//                        if (layer != null && activity instanceof Main) {
-//                            Track track = ((de.blau.android.layer.gpx.MapOverlay) layer).getTrack();
-//                            if (track != null) {
-//                                WayPoint wp = track.getFirstWayPoint();
-//                                if (wp != null) {
-//                                    ((Main) activity).gotoTrackPoint(App.getLogic(), wp);
-//                                } else {
-//                                    ScreenMessage.toastTopWarning(activity, R.string.toast_no_way_points);
-//                                }
-//                            }
-//                        }
-//                        dismissDialog();
-//                        return true;
-//                    });
-//                }
-//                MenuItem item = menu.add(R.string.menu_gps_upload);
-//                item.setOnMenuItemClickListener(unused -> {
-//                    if (layer != null) {
-//                        final Server server = App.getLogic().getPrefs().getServer();
-//                        if (Server.checkOsmAuthentication(activity, server, () -> GpxUpload.showDialog(activity, layer.getContentId()))) {
-//                            GpxUpload.showDialog(activity, layer.getContentId());
-//                        }
-//                    }
-//                    return true;
-//                });
-//                item = menu.add(R.string.menu_gps_export);
-//                item.setOnMenuItemClickListener(unused -> {
-//                    SelectFile.save(activity, MimeTypes.GPX, R.string.config_osmPreferredDir_key, new SaveFile() {
-//                        private static final long serialVersionUID = 1L;
-//
-//                        @Override
-//                        public boolean save(FragmentActivity currentActivity, Uri fileUri) {
-//                            // FIXME layer will likely not be valid if the activity has been recreated
-//                            if (layer != null) {
-//                                final Track track = ((de.blau.android.layer.gpx.MapOverlay) layer).getTrack();
-//                                if (track != null) {
-//                                    SavingHelper.asyncExport(currentActivity, track, fileUri);
-//                                    SaveFile.addExtensionIfNeeded(currentActivity, fileUri, FileExtensions.GPX);
-//                                    SelectFile.savePref(App.getLogic().getPrefs(), R.string.config_osmPreferredDir_key, fileUri);
-//                                }
-//                            }
-//                            return true;
-//                        }
-//                    });
-//                    return true;
-//                });
-//                if (activity instanceof Main) {
-//                    item.setEnabled(((Main) activity).isStoragePermissionGranted());
-//                }
-//                if (!recordingLayer) {
-//                    item = menu.add(R.string.layer_start_playback);
-//                    item.setOnMenuItemClickListener(unused -> {
-//                        if (layer != null && (activity instanceof Main)) {
-//                            ((Main) activity).setFollowGPS(true);
-//                            ((de.blau.android.layer.gpx.MapOverlay) layer).startPlayback();
-//                            dismissDialog();
-//                        }
-//                        return true;
-//                    });
-//                    item.setEnabled(!((de.blau.android.layer.gpx.MapOverlay) layer).isPlaying());
-//
-//                    item = menu.add(R.string.layer_pause_playback);
-//                    item.setOnMenuItemClickListener(unused -> {
-//                        if (layer != null) {
-//                            ((de.blau.android.layer.gpx.MapOverlay) layer).pausePlayback();
-//                            dismissDialog();
-//                        }
-//                        return true;
-//                    });
-//                    item.setEnabled(((de.blau.android.layer.gpx.MapOverlay) layer).isPlaying());
-//
-//                    item = menu.add(R.string.layer_stop_playback);
-//                    item.setOnMenuItemClickListener(unused -> {
-//                        if (layer != null) {
-//                            ((de.blau.android.layer.gpx.MapOverlay) layer).stopPlayback();
-//                            dismissDialog();
-//                        }
-//                        return true;
-//                    });
-//                    item.setEnabled(!((de.blau.android.layer.gpx.MapOverlay) layer).isStopped());
-//                }
-//            }
-//            if (layer instanceof de.blau.android.layer.geojson.MapOverlay) {
-//                MenuItem item = menu.add(R.string.menu_layers_convert_geojson_todo);
-//                item.setOnMenuItemClickListener(unused -> {
-//                    Builder builder = new AlertDialog.Builder(activity);
-//                    builder.setTitle(R.string.geojson_todo_title);
-//                    builder.setPositiveButton(R.string.geojson_todo_default_conversion,
-//                            (d, pos) -> convertTodos(activity, map, (de.blau.android.layer.geojson.MapOverlay) layer, null));
-//                    builder.setNegativeButton(R.string.geojson_todo_custom_conversion,
-//                            (d, pos) -> SelectFile.read(activity, R.string.config_osmPreferredDir_key, new ReadFile() {
-//                                private static final long serialVersionUID = 1L;
-//
-//                                @Override
-//                                public boolean read(FragmentActivity activity, Uri fileUri) {
-//                                    try {
-//                                        convertTodos(activity, map, (de.blau.android.layer.geojson.MapOverlay) layer,
-//                                                FileUtil.readToString(new InputStreamReader(activity.getContentResolver().openInputStream(fileUri))));
-//                                    } catch (FileNotFoundException e) {
-//                                        ScreenMessage.toastTopError(activity, activity.getString(R.string.toast_file_not_found, fileUri.toString()));
-//                                        return false;
-//                                    } catch (IOException e) {
-//                                        ScreenMessage.toastTopError(activity, activity.getString(R.string.toast_error_reading, fileUri.toString()));
-//                                        return false;
-//                                    }
-//                                    return true;
-//                                }
-//
-//                            }, false));
-//                    builder.show();
-//                    dismissDialog();
-//                    return true;
-//                });
-//            }
-//
-//            if (layer instanceof PruneableInterface) {
-//                MenuItem item = menu.add(R.string.prune);
-//                item.setOnMenuItemClickListener(unused -> {
-//                    if (layer != null) {
-//                        Logic logic = App.getLogic();
-//                        new ExecutorTask<Void, Void, Void>(logic.getExecutorService(), logic.getHandler()) {
-//                            @Override
-//                            protected void onPreExecute() {
-//                                Progress.showDialog(activity, Progress.PROGRESS_PRUNING);
-//                            }
-//
-//                            @Override
-//                            protected Void doInBackground(Void arg) {
-//                                ((PruneableInterface) layer).prune();
-//                                return null;
-//                            }
-//
-//                            @Override
-//                            protected void onPostExecute(Void result) {
-//                                Progress.dismissDialog(activity, Progress.PROGRESS_PRUNING);
-//                            }
-//                        }.execute();
-//                    }
-//                    return true;
-//                });
-//            }
-//
-//            if (layer instanceof DiscardInterface) {
-//                MenuItem item = menu.add(R.string.discard);
-//                item.setOnMenuItemClickListener(unused -> {
-//                    if (layer != null) {
-//                        try (AdvancedPrefDatabase db = new AdvancedPrefDatabase(activity)) {
-//                            db.deleteLayer(layer.getIndex(), layer.getType());
-//                            ((DiscardInterface) layer).discard(getContext());
-//                            updateDialogAndPrefs(activity, App.getLogic().getPrefs(), map);
-//                        }
-//                    }
-//                    return true;
-//                });
-//            }
-//
-//            MenuItem item = menu.add(R.string.move_up);
-//            item.setOnMenuItemClickListener(unused -> {
-//                if (layer != null) {
-//                    moveEntry(activity, map, layer.getIndex(), layer.getIndex() + 1);
-//                }
-//                return true;
-//            });
-//            try (AdvancedPrefDatabase db = new AdvancedPrefDatabase(activity)) {
-//                item.setEnabled(layer.getIndex() < db.layerCount() - 1);
-//            }
-//            item = menu.add(R.string.move_down);
-//            item.setOnMenuItemClickListener(unused -> {
-//                if (layer != null) {
-//                    moveEntry(activity, map, layer.getIndex(), layer.getIndex() - 1);
-//                }
-//                return true;
-//            });
-//            item.setEnabled(layer.getIndex() > 0);
+            Menu menu = popup.getMenu();
+            final Map map = App.getLogic().getMap();
+
+            // maybe we should use an interface here
+            if (layer instanceof MapTilesLayer && !(layer instanceof de.blau.android.layer.streetlevel.AbstractImageOverlay)) {
+                // get MRU list from layer
+                final String[] tileServerIds = ((MapTilesLayer<?>) layer).getMRU();
+                final TileLayerSource tileLayerConfiguration = ((MapTilesLayer<?>) layer).getTileLayerConfiguration();
+                final String currentServerId = tileLayerConfiguration.getId();
+                for (int i = 0; i < tileServerIds.length; i++) {
+                    final String id = tileServerIds[i];
+                    if (!currentServerId.equals(id)) {
+                        final TileLayerSource tileServer = TileLayerSource.get(activity, id, true);
+                        if (tileServer != null) {
+                            MenuItem item = menu.add(tileServer.getName());
+                            item.setOnMenuItemClickListener(unused -> {
+                                if (tileServer != null) {
+                                    TableRow row = (TableRow) button.getTag();
+                                    setNewImagery(activity, row, (MapTilesLayer<?>) layer, tileServer);
+                                    dismissDialog();
+                                    layer.invalidate();
+                                }
+                                return true;
+                            });
+                        } else {
+                            ((MapTilesLayer<?>) layer).removeServerFromMRU(id);
+                        }
+                    }
+                    if (i == tileServerIds.length - 1) {
+                        MenuItem divider = menu.add("");
+                        divider.setEnabled(false);
+                    }
+                }
+
+                MenuItem item = menu.add(R.string.layer_select_imagery);
+                item.setOnMenuItemClickListener(unused -> {
+                    if (layer != null) {
+                        if (!TileLayerSource.isFullyPopulated()) {
+                            // FIXME this is borderline too slow to run on the main thread, maybe run in a thread while
+                            // the dialog is starting up
+                            de.blau.android.layer.Util.populateImageryLists(activity);
+                        }
+                        showImagerySelectDialog((TableRow) button.getTag(), (MapTilesLayer<?>) layer, layer.getType() == LayerType.OVERLAYIMAGERY);
+                        Tip.showDialog(activity, R.string.tip_imagery_privacy_key, R.string.tip_imagery_privacy);
+                    }
+                    return true;
+                });
+
+                if (TileLayerDatabase.SOURCE_MANUAL.equals(tileLayerConfiguration.getSource())) {
+                    MenuItem editItem = menu.add(R.string.layer_edit_custom_imagery_configuration);
+                    editItem.setOnMenuItemClickListener(unused -> {
+                        try (TileLayerDatabase tlDb = new TileLayerDatabase(activity); SQLiteDatabase db = tlDb.getReadableDatabase()) {
+                            long rowid = TileLayerDatabase.getLayerRowId(db, currentServerId);
+                            updateListener = () -> {
+                                de.blau.android.layer.Util.populateImageryLists(activity);
+                                map.setUpLayers(activity);
+
+                            };
+                            TileLayerDialog.showDialog(Layers.this, rowid, null);
+                        } catch (IllegalArgumentException iaex) {
+                            ScreenMessage.toastTopError(activity, iaex.getMessage());
+                        }
+                        return true;
+                    });
+                }
+            }
+
+            if (layer instanceof ConfigureInterface && ((ConfigureInterface) layer).enableConfiguration()) {
+                MenuItem item = menu.add(R.string.menu_layers_configure);
+                item.setOnMenuItemClickListener(unused -> {
+                    if (layer != null) {
+                        ((ConfigureInterface) layer).configure(activity);
+                    }
+                    return true;
+                });
+            }
+
+            if (layer instanceof StyleableInterface) {
+                MenuItem item = menu.add(R.string.layer_change_style);
+                item.setOnMenuItemClickListener(unused -> {
+                    if (layer != null) {
+                        LayerStyle.showDialog(activity, layer.getIndex());
+                    }
+                    return true;
+                });
+                final boolean stylingEnabled = ((StyleableInterface) layer).stylingEnabled();
+                item.setEnabled(stylingEnabled);
+                item = menu.add(R.string.layer_reset_style);
+                item.setOnMenuItemClickListener(unused -> {
+                    if (layer != null) {
+                        ((StyleableInterface) layer).resetStyling();
+                        if (layer instanceof StyleableLayer) {
+                            ((StyleableLayer) layer).dirty();
+                        }
+                        if (layer instanceof de.blau.android.layer.mvt.MapOverlay) {
+                            // tiles need to be re-decoded for auto styling to work
+                            ((de.blau.android.layer.mvt.MapOverlay) layer).flushTileCache(activity, false);
+                        }
+                        layer.invalidate();
+                    }
+                    return true;
+                });
+                item.setEnabled(stylingEnabled);
+            }
+
+            if (layer instanceof DateRangeInterface) {
+                MenuItem item = menu.add(R.string.layer_set_date_range);
+                item.setOnMenuItemClickListener(unused -> {
+                    if (layer != null) {
+                        ((DateRangeInterface) layer).selectDateRange(getActivity(), layer.getIndex());
+                    }
+                    return true;
+                });
+            }
+
+            if (layer instanceof de.blau.android.layer.mvt.MapOverlay) {
+                MenuItem item = menu.add(R.string.layer_load_style);
+                item.setOnMenuItemClickListener(unused -> {
+                    if (layer != null) {
+                        try {
+                            ((de.blau.android.layer.mvt.MapOverlay) layer).loadStyleFromFile(getActivity());
+                        } catch (IOException e) {
+                            ScreenMessage.toastTopInfo(activity, getString(R.string.toast_error_loading_style, e.getLocalizedMessage()));
+                        }
+                    }
+                    return true;
+                });
+            }
+
+            if (layer instanceof de.blau.android.layer.photos.MapOverlay) {
+                MenuItem item = menu.add(R.string.layer_photos_reindex);
+                item.setOnMenuItemClickListener(unused -> {
+                    if (layer != null) {
+                        ((de.blau.android.layer.photos.MapOverlay) layer).reIndex();
+                        layer.invalidate();
+                    }
+                    return true;
+                });
+            }
+
+            if (layer instanceof LayerInfoInterface) {
+                MenuItem item = menu.add(R.string.menu_information);
+                item.setOnMenuItemClickListener(unused -> {
+                    if (layer != null) {
+                        ((LayerInfoInterface) layer).showInfo(activity);
+                    }
+                    return true;
+                });
+            }
+
+            if (layer instanceof MapTilesLayer) { // these items are less important, show them at the bottom of the menu
+                MenuItem item = menu.add(R.string.layer_flush_tile_cache);
+                item.setOnMenuItemClickListener(unused -> {
+                    if (layer != null) {
+                        ((MapTilesLayer<?>) layer).flushTileCache(activity, true);
+                        layer.invalidate();
+                    }
+                    return true;
+                });
+
+                if (!(layer instanceof de.blau.android.layer.mvt.MapOverlay)) {
+                    item = menu.add(R.string.menu_tools_background_properties);
+                    item.setOnMenuItemClickListener(unused -> {
+                        if (layer != null) {
+                            BackgroundProperties.showDialog(activity, layer.getIndex());
+                        }
+                        return true;
+                    });
+
+                    item = menu.add(R.string.menu_layers_background_align);
+                    item.setEnabled(layer.isVisible() && map.isVisible(layer));
+                    item.setOnMenuItemClickListener(unused -> {
+                        if (layer != null) {
+                            try {
+                                Logic logic = App.getLogic();
+                                ImageryAlignmentActionModeCallback backgroundAlignmentActionModeCallback = new ImageryAlignmentActionModeCallback(
+                                        ((Main) activity), logic.getMode() != Mode.MODE_ALIGN_BACKGROUND ? logic.getMode() : Mode.MODE_EASYEDIT,
+                                        ((MapTilesLayer<?>) layer).getContentId());
+                                // NOTE needs to be after instance creation, logic.setMode needs to be called -after-
+                                // this
+                                ((Main) activity).setImageryAlignmentActionModeCallback(backgroundAlignmentActionModeCallback);
+                                logic.setMode(((Main) activity), Mode.MODE_ALIGN_BACKGROUND);
+                                ((Main) activity).startSupportActionMode(backgroundAlignmentActionModeCallback);
+                            } catch (IllegalStateException isex) {
+                                Log.e(DEBUG_TAG, isex.getMessage());
+                            }
+                            dismissDialog();
+                        }
+                        return true;
+                    });
+                }
+
+                if (!((MapTilesLayer<?>) layer).getTileLayerConfiguration().isLocalFile()) {
+                    item = menu.add(R.string.layer_test);
+                    item.setOnMenuItemClickListener(unused -> {
+                        if (layer != null) {
+                            TileSourceDiagnostics.showDialog(activity, ((MapTilesLayer<?>) layer).getTileLayerConfiguration(), map.getZoomLevel(),
+                                    map.getViewBox());
+                        }
+                        return true;
+                    });
+                }
+            }
+            if (layer instanceof de.blau.android.layer.gpx.MapOverlay) {
+                boolean recordingLayer = activity.getString(R.string.layer_gpx_recording).equals(layer.getContentId());
+                if (!recordingLayer) {
+                    MenuItem item = menu.add(R.string.menu_gps_goto_start);
+                    item.setOnMenuItemClickListener(unused -> {
+                        if (layer != null && activity instanceof Main) {
+                            Track track = ((de.blau.android.layer.gpx.MapOverlay) layer).getTrack();
+                            if (track != null) {
+                                TrackPoint tp = track.getFirstTrackPoint();
+                                if (tp != null) {
+                                    ((Main) activity).gotoTrackPoint(App.getLogic(), tp);
+                                } else {
+                                    ScreenMessage.toastTopWarning(activity, R.string.toast_no_track_points);
+                                }
+                            }
+                        }
+                        dismissDialog();
+                        return true;
+                    });
+                    item = menu.add(R.string.menu_gps_goto_first_waypoint);
+                    item.setOnMenuItemClickListener(unused -> {
+                        if (layer != null && activity instanceof Main) {
+                            Track track = ((de.blau.android.layer.gpx.MapOverlay) layer).getTrack();
+                            if (track != null) {
+                                WayPoint wp = track.getFirstWayPoint();
+                                if (wp != null) {
+                                    ((Main) activity).gotoTrackPoint(App.getLogic(), wp);
+                                } else {
+                                    ScreenMessage.toastTopWarning(activity, R.string.toast_no_way_points);
+                                }
+                            }
+                        }
+                        dismissDialog();
+                        return true;
+                    });
+                }
+                MenuItem item = menu.add(R.string.menu_gps_upload);
+                item.setOnMenuItemClickListener(unused -> {
+                    if (layer != null) {
+                        final Server server = App.getLogic().getPrefs().getServer();
+                        if (Server.checkOsmAuthentication(activity, server, () -> GpxUpload.showDialog(activity, layer.getContentId()))) {
+                            GpxUpload.showDialog(activity, layer.getContentId());
+                        }
+                    }
+                    return true;
+                });
+                item = menu.add(R.string.menu_gps_export);
+                item.setOnMenuItemClickListener(unused -> {
+                    SelectFile.save(activity, MimeTypes.GPX, R.string.config_osmPreferredDir_key, new SaveFile() {
+                        private static final long serialVersionUID = 1L;
+
+                        @Override
+                        public boolean save(FragmentActivity currentActivity, Uri fileUri) {
+                            // FIXME layer will likely not be valid if the activity has been recreated
+                            if (layer != null) {
+                                final Track track = ((de.blau.android.layer.gpx.MapOverlay) layer).getTrack();
+                                if (track != null) {
+                                    SavingHelper.asyncExport(currentActivity, track, fileUri);
+                                    SaveFile.addExtensionIfNeeded(currentActivity, fileUri, FileExtensions.GPX);
+                                    SelectFile.savePref(App.getLogic().getPrefs(), R.string.config_osmPreferredDir_key, fileUri);
+                                }
+                            }
+                            return true;
+                        }
+                    });
+                    return true;
+                });
+                if (activity instanceof Main) {
+                    item.setEnabled(((Main) activity).isStoragePermissionGranted());
+                }
+                if (!recordingLayer) {
+                    item = menu.add(R.string.layer_start_playback);
+                    item.setOnMenuItemClickListener(unused -> {
+                        if (layer != null && (activity instanceof Main)) {
+                            ((Main) activity).setFollowGPS(true);
+                            ((de.blau.android.layer.gpx.MapOverlay) layer).startPlayback();
+                            dismissDialog();
+                        }
+                        return true;
+                    });
+                    item.setEnabled(!((de.blau.android.layer.gpx.MapOverlay) layer).isPlaying());
+
+                    item = menu.add(R.string.layer_pause_playback);
+                    item.setOnMenuItemClickListener(unused -> {
+                        if (layer != null) {
+                            ((de.blau.android.layer.gpx.MapOverlay) layer).pausePlayback();
+                            dismissDialog();
+                        }
+                        return true;
+                    });
+                    item.setEnabled(((de.blau.android.layer.gpx.MapOverlay) layer).isPlaying());
+
+                    item = menu.add(R.string.layer_stop_playback);
+                    item.setOnMenuItemClickListener(unused -> {
+                        if (layer != null) {
+                            ((de.blau.android.layer.gpx.MapOverlay) layer).stopPlayback();
+                            dismissDialog();
+                        }
+                        return true;
+                    });
+                    item.setEnabled(!((de.blau.android.layer.gpx.MapOverlay) layer).isStopped());
+                }
+            }
+            if (layer instanceof de.blau.android.layer.geojson.MapOverlay) {
+                MenuItem item = menu.add(R.string.menu_layers_convert_geojson_todo);
+                item.setOnMenuItemClickListener(unused -> {
+                    Builder builder = new AlertDialog.Builder(activity);
+                    builder.setTitle(R.string.geojson_todo_title);
+                    builder.setPositiveButton(R.string.geojson_todo_default_conversion,
+                            (d, pos) -> convertTodos(activity, map, (de.blau.android.layer.geojson.MapOverlay) layer, null));
+                    builder.setNegativeButton(R.string.geojson_todo_custom_conversion,
+                            (d, pos) -> SelectFile.read(activity, R.string.config_osmPreferredDir_key, new ReadFile() {
+                                private static final long serialVersionUID = 1L;
+
+                                @Override
+                                public boolean read(FragmentActivity activity, Uri fileUri) {
+                                    try {
+                                        convertTodos(activity, map, (de.blau.android.layer.geojson.MapOverlay) layer,
+                                                FileUtil.readToString(new InputStreamReader(activity.getContentResolver().openInputStream(fileUri))));
+                                    } catch (FileNotFoundException e) {
+                                        ScreenMessage.toastTopError(activity, activity.getString(R.string.toast_file_not_found, fileUri.toString()));
+                                        return false;
+                                    } catch (IOException e) {
+                                        ScreenMessage.toastTopError(activity, activity.getString(R.string.toast_error_reading, fileUri.toString()));
+                                        return false;
+                                    }
+                                    return true;
+                                }
+
+                            }, false));
+                    builder.show();
+                    dismissDialog();
+                    return true;
+                });
+            }
+
+            if (layer instanceof PruneableInterface) {
+                MenuItem item = menu.add(R.string.prune);
+                item.setOnMenuItemClickListener(unused -> {
+                    if (layer != null) {
+                        Logic logic = App.getLogic();
+                        new ExecutorTask<Void, Void, Void>(logic.getExecutorService(), logic.getHandler()) {
+                            @Override
+                            protected void onPreExecute() {
+                                Progress.showDialog(activity, Progress.PROGRESS_PRUNING);
+                            }
+
+                            @Override
+                            protected Void doInBackground(Void arg) {
+                                ((PruneableInterface) layer).prune();
+                                return null;
+                            }
+
+                            @Override
+                            protected void onPostExecute(Void result) {
+                                Progress.dismissDialog(activity, Progress.PROGRESS_PRUNING);
+                            }
+                        }.execute();
+                    }
+                    return true;
+                });
+            }
+
+            if (layer instanceof DiscardInterface) {
+                MenuItem item = menu.add(R.string.discard);
+                item.setOnMenuItemClickListener(unused -> {
+                    if (layer != null) {
+                        try (AdvancedPrefDatabase db = new AdvancedPrefDatabase(activity)) {
+                            db.deleteLayer(layer.getIndex(), layer.getType());
+                            ((DiscardInterface) layer).discard(getContext());
+                            updateDialogAndPrefs(activity, App.getLogic().getPrefs(), map);
+                        }
+                    }
+                    return true;
+                });
+            }
+
+            MenuItem item = menu.add(R.string.move_up);
+            item.setOnMenuItemClickListener(unused -> {
+                if (layer != null) {
+                    moveEntry(activity, map, layer.getIndex(), layer.getIndex() + 1);
+                }
+                return true;
+            });
+            try (AdvancedPrefDatabase db = new AdvancedPrefDatabase(activity)) {
+                item.setEnabled(layer.getIndex() < db.layerCount() - 1);
+            }
+            item = menu.add(R.string.move_down);
+            item.setOnMenuItemClickListener(unused -> {
+                if (layer != null) {
+                    moveEntry(activity, map, layer.getIndex(), layer.getIndex() - 1);
+                }
+                return true;
+            });
+            item.setEnabled(layer.getIndex() > 0);
             popup.show();
         }
     }
