@@ -686,13 +686,18 @@ public class Layers extends AbstractConfigurationDialog implements OnUpdateListe
         visible.setBackgroundColor(Color.TRANSPARENT);
         visible.setPadding(0, 0, Density.dpToPx(context, 5), 0);
         visible.setOnClickListener(v -> {
-//            if (layer != null) {
-//                setVisibility(context, layer, !layer.isVisible());
-//                visible.setImageResource(layer.isVisible() ? visibleId : invisibleId);
-//                layer.invalidate();
-//                App.getDelegator().setImageryRecorded(false);
-//            }
+            if (layer != null && !layer.getName().contains("OpenStreetMap")) {
+                setVisibility(context, layer, !layer.isVisible());
+                visible.setImageResource(layer.isVisible() ? visibleId : invisibleId);
+                layer.invalidate();
+                App.getDelegator().setImageryRecorded(false);
+            }
         });
+
+        if (name.contains("OpenStreetMap")) {
+            setVisibility(context, layer, true);
+        }
+
         tr.addView(visible);
 
         if (layer instanceof ExtentInterface) {
