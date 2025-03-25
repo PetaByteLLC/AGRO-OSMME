@@ -35,7 +35,6 @@ public class BottomSheetFragment extends BottomSheetDialogFragment {
     private final Main main;
     private boolean edit;
 
-    private TextView label;
     private EditText name, region, district, aggregator, farmerName, farmerMobile, cadastrNumber, year,
             cultureVarieties, sowingDate, cleaningDate, productivity, secondarySowingDate,
             secondaryCropHarvestDate, farmerSurName;
@@ -75,7 +74,7 @@ public class BottomSheetFragment extends BottomSheetDialogFragment {
         };
         listView.setAdapter(adapter);
 
-        label = view.findViewById(R.id.label);
+        TextView label = view.findViewById(R.id.label);
         label.setText("Создание поля");
 
         name = view.findViewById(R.id.name);

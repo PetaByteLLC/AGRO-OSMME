@@ -21,8 +21,8 @@ import de.blau.android.osm.Way;
 
 public class BottomSheetFragmentAllField extends BottomSheetDialogFragment {
 
-    private List<Way> ways;
-    private Main main;
+    private final List<Way> ways;
+    private final Main main;
 
     public BottomSheetFragmentAllField(List<Way> ways, Main main) {
         this.ways = ways;
@@ -50,7 +50,7 @@ public class BottomSheetFragmentAllField extends BottomSheetDialogFragment {
         ArrayList<String> list = new ArrayList<>();
         for (Way way : ways) {
             String region = way.getTagWithKey("region");
-            if (region != null) {
+            if (region != null && !region.isEmpty()) {
                 list.add(region);
             }
         }
