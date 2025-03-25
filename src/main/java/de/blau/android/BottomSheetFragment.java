@@ -109,27 +109,27 @@ public class BottomSheetFragment extends BottomSheetDialogFragment {
 
 
         String[] cultureData = {"Выращиваемая культура", "Пшеница", "Зерновые", "Ячмень", "Кукуруза", "Хлопок-сырец", "Сахарная свекла"};
-        ArrayAdapter<String> cultureAdapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_spinner_item, cultureData);
+        ArrayAdapter<String> cultureAdapter = new ArrayAdapter<String>(getActivity(), R.layout.agro_simple_spinner_item, cultureData);
         cultureAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         culture.setAdapter(cultureAdapter);
 
-        String[] technologyData = {"яровая", "озимая"};
-        ArrayAdapter<String> technologyAdapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_spinner_item, technologyData);
+        String[] technologyData = {"Технология возделывания", "яровая", "озимая"};
+        ArrayAdapter<String> technologyAdapter = new ArrayAdapter<String>(getActivity(), R.layout.agro_simple_spinner_item, technologyData);
         technologyAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         technology.setAdapter(technologyAdapter);
 
-        String[] landCategoryData = {"орошаемая", "богара"};
-        ArrayAdapter<String> landCategoryAdapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_spinner_item, landCategoryData);
+        String[] landCategoryData = {"Категория угодья", "орошаемая", "богара"};
+        ArrayAdapter<String> landCategoryAdapter = new ArrayAdapter<String>(getActivity(), R.layout.agro_simple_spinner_item, landCategoryData);
         landCategoryAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         landCategory.setAdapter(landCategoryAdapter);
 
-        String[] irrigationTypeData = {"каналы/гравитация", "установки"};
-        ArrayAdapter<String> irrigationTypeAdapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_spinner_item, irrigationTypeData);
+        String[] irrigationTypeData = {"Тип полива", "каналы/гравитация", "установки"};
+        ArrayAdapter<String> irrigationTypeAdapter = new ArrayAdapter<String>(getActivity(), R.layout.agro_simple_spinner_item, irrigationTypeData);
         irrigationTypeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         irrigationType.setAdapter(irrigationTypeAdapter);
 
         String[] cultureData2 = {"Вторичная культура", "Пшеница", "Зерновые", "Ячмень", "Кукуруза", "Хлопок-сырец", "Сахарная свекла"};
-        ArrayAdapter<String> secondaryCultureAdapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_spinner_item, cultureData2);
+        ArrayAdapter<String> secondaryCultureAdapter = new ArrayAdapter<String>(getActivity(), R.layout.agro_simple_spinner_item, cultureData2);
         secondaryCultureAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         secondaryCulture.setAdapter(secondaryCultureAdapter);
 
