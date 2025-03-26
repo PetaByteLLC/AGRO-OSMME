@@ -73,6 +73,7 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.RelativeLayout.LayoutParams;
 import android.widget.TextView;
+
 import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -4218,6 +4219,7 @@ public class Main extends FullScreenAppCompatActivity
         logic.deselectAll();
 
         App.getLogic().setLocked(false);
+        App.getLogic().setSelectedNode(lastSelectedWay.getLastNode());
         updateActionbarEditMode();
         map.invalidate();
         visibleLockButton();
@@ -4226,15 +4228,15 @@ public class Main extends FullScreenAppCompatActivity
         ScreenMessage.toastTopWarning(Main.this, "Измените положение точек для редактирования");
     }
 
-    protected List<Node> addedNodes             = new ArrayList<>();
-    private Node    appendTargetNode;
-    private boolean snap    = true;
+    protected List<Node> addedNodes = new ArrayList<>();
+    private Node appendTargetNode;
+    private boolean snap = true;
     private Integer checkpointName;
-    private Way          createdWay             = null;
+    private Way createdWay = null;
     private boolean dontTag = false;
-    private List<Node>   existingNodes          = new ArrayList<>();
-    private List<Way>    candidatesForFollowing = null;
-    private Node         initialFollowNode      = null;
+    private List<Node> existingNodes = new ArrayList<>();
+    private List<Way> candidatesForFollowing = null;
+    private Node initialFollowNode = null;
 
     private synchronized void pathCreateNode(float x, float y) {
         Logic logic = App.getLogic();

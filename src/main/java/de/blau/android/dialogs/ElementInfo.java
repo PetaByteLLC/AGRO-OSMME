@@ -280,7 +280,7 @@ public class ElementInfo extends InfoDialogFragment {
             });
         }
         if (getArguments().getBoolean(SHOW_EDIT_TAGS_KEY) && OsmElement.STATE_DELETED != element.getState()) {
-            builder.setNegativeButton(R.string.edit_properties, (dialog, which) -> ((Main) activity).performTagEdit(element, null, false, false));
+//            builder.setNegativeButton(R.string.edit_properties, (dialog, which) -> ((Main) activity).performTagEdit(element, null, false, false));
         }
     }
 
