@@ -4215,17 +4215,19 @@ public class Main extends FullScreenAppCompatActivity
 
     public void editor(Way lastSelectedWay) {
         final Logic logic = App.getLogic();
-        addedNodes = new ArrayList<>();
-        logic.deselectAll();
+        if (logic.isInEditZoomRange()) {
+            addedNodes = new ArrayList<>();
+            logic.deselectAll();
 
-        App.getLogic().setLocked(false);
-        App.getLogic().setSelectedNode(lastSelectedWay.getLastNode());
-        updateActionbarEditMode();
-        map.invalidate();
-        visibleLockButton();
-        showNextPanel(true);
-        STATE = 2;
-        ScreenMessage.toastTopWarning(Main.this, "Измените положение точек для редактирования");
+            logic.setLocked(false);
+            logic.setSelectedNode(lastSelectedWay.getLastNode());
+            updateActionbarEditMode();
+            map.invalidate();
+            visibleLockButton();
+            showNextPanel(true);
+            STATE = 2;
+            ScreenMessage.toastTopWarning(Main.this, "Измените положение точек для редактирования");
+        }
     }
 
     protected List<Node> addedNodes = new ArrayList<>();

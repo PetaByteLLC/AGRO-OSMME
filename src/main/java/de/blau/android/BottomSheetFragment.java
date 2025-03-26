@@ -92,19 +92,19 @@ public class BottomSheetFragment extends BottomSheetDialogFragment {
         sowingDate = view.findViewById(R.id.sowingDate);
         cleaningDate = view.findViewById(R.id.cleaningDate);
         productivity = view.findViewById(R.id.productivity);
-        secondarySowingDate = view.findViewById(R.id.secondarySowingDate);
-        secondaryCropHarvestDate = view.findViewById(R.id.secondaryCropHarvestDate);
+//        secondarySowingDate = view.findViewById(R.id.secondarySowingDate);
+//        secondaryCropHarvestDate = view.findViewById(R.id.secondaryCropHarvestDate);
 
         culture = view.findViewById(R.id.culture);
         technology = view.findViewById(R.id.technology);
         landCategory = view.findViewById(R.id.landCategory);
         irrigationType = view.findViewById(R.id.irrigationType);
-        secondaryCulture = view.findViewById(R.id.secondaryCulture);
+//        secondaryCulture = view.findViewById(R.id.secondaryCulture);
 
         setDataPicker(sowingDate);
         setDataPicker(cleaningDate);
-        setDataPicker(secondarySowingDate);
-        setDataPicker(secondaryCropHarvestDate);
+//        setDataPicker(secondarySowingDate);
+//        setDataPicker(secondaryCropHarvestDate);
 
 
         String[] cultureData = {"Выращиваемая культура", "Пшеница", "Зерновые", "Ячмень", "Кукуруза", "Хлопок-сырец", "Сахарная свекла"};
@@ -127,10 +127,10 @@ public class BottomSheetFragment extends BottomSheetDialogFragment {
         irrigationTypeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         irrigationType.setAdapter(irrigationTypeAdapter);
 
-        String[] cultureData2 = {"Вторичная культура", "Пшеница", "Зерновые", "Ячмень", "Кукуруза", "Хлопок-сырец", "Сахарная свекла"};
-        ArrayAdapter<String> secondaryCultureAdapter = new ArrayAdapter<String>(getActivity(), R.layout.agro_simple_spinner_item, cultureData2);
-        secondaryCultureAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        secondaryCulture.setAdapter(secondaryCultureAdapter);
+//        String[] cultureData2 = {"Вторичная культура", "Пшеница", "Зерновые", "Ячмень", "Кукуруза", "Хлопок-сырец", "Сахарная свекла"};
+//        ArrayAdapter<String> secondaryCultureAdapter = new ArrayAdapter<String>(getActivity(), R.layout.agro_simple_spinner_item, cultureData2);
+//        secondaryCultureAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+//        secondaryCulture.setAdapter(secondaryCultureAdapter);
 
         // Обработка кнопки сохранения
         view.findViewById(R.id.btn_save).setOnClickListener(v -> {
@@ -149,12 +149,12 @@ public class BottomSheetFragment extends BottomSheetDialogFragment {
             String sowingDateValue = sowingDate.getText().toString();
             String cleaningDateValue = cleaningDate.getText().toString();
             String productivityValue = productivity.getText().toString();
-            String secondarySowingDateValue = secondarySowingDate.getText().toString();
-            String secondaryCropHarvestDateValue = secondaryCropHarvestDate.getText().toString();
+//            String secondarySowingDateValue = secondarySowingDate.getText().toString();
+//            String secondaryCropHarvestDateValue = secondaryCropHarvestDate.getText().toString();
             String technologyValue = technology.getSelectedItem().toString();
             String landCategoryValue = landCategory.getSelectedItem().toString();
             String irrigationTypeValue = irrigationType.getSelectedItem().toString();
-            String secondaryCultureValue = secondaryCulture.getSelectedItem().toString();
+//            String secondaryCultureValue = secondaryCulture.getSelectedItem().toString();
 
             try {
                 if (culture.getSelectedItem() == null) throw new NullPointerException("Выращиваемая культура");
@@ -163,8 +163,8 @@ public class BottomSheetFragment extends BottomSheetDialogFragment {
                 // Сохранение всех значений
                 save(nameValue, regionValue, districtValue, aggregatorValue, farmerNameValue, farmerMobileValue,
                         cadastrNumberValue, yearValue, cultureVarietiesValue, sowingDateValue, cleaningDateValue,
-                        productivityValue, secondarySowingDateValue, secondaryCropHarvestDateValue, cultureValue,
-                        technologyValue, landCategoryValue, irrigationTypeValue, secondaryCultureValue, farmerSurNameValue);
+                        productivityValue, null, null, cultureValue,
+                        technologyValue, landCategoryValue, irrigationTypeValue, null, farmerSurNameValue);
             } catch (NullPointerException exception) {
                 Toast.makeText(getContext(),
                         String.format("Поле \"%s\" обязательно для заполнения", exception.getMessage()),
@@ -187,14 +187,14 @@ public class BottomSheetFragment extends BottomSheetDialogFragment {
             sowingDate.setText(lastSelectedWay.getTagWithKey("sowingDate"));
             cleaningDate.setText(lastSelectedWay.getTagWithKey("cleaningDate"));
             productivity.setText(lastSelectedWay.getTagWithKey("productivity"));
-            secondarySowingDate.setText(lastSelectedWay.getTagWithKey("secondarySowingDate"));
-            secondaryCropHarvestDate.setText(lastSelectedWay.getTagWithKey("secondaryCropHarvestDate"));
+//            secondarySowingDate.setText(lastSelectedWay.getTagWithKey("secondarySowingDate"));
+//            secondaryCropHarvestDate.setText(lastSelectedWay.getTagWithKey("secondaryCropHarvestDate"));
             try {
                 culture.setSelection(Arrays.asList(cultureData).indexOf(lastSelectedWay.getTagWithKey("culture")));
                 technology.setSelection(Arrays.asList(technologyData).indexOf(lastSelectedWay.getTagWithKey("technology")));
                 landCategory.setSelection(Arrays.asList(landCategoryData).indexOf(lastSelectedWay.getTagWithKey("landCategory")));
                 irrigationType.setSelection(Arrays.asList(irrigationTypeData).indexOf(lastSelectedWay.getTagWithKey("irrigationType")));
-                secondaryCulture.setSelection(Arrays.asList(cultureData2).indexOf(lastSelectedWay.getTagWithKey("secondaryCulture")));
+//                secondaryCulture.setSelection(Arrays.asList(cultureData2).indexOf(lastSelectedWay.getTagWithKey("secondaryCulture")));
             } catch (NullPointerException ignore) {
             }
         }
@@ -229,13 +229,13 @@ public class BottomSheetFragment extends BottomSheetDialogFragment {
         tags.put("sowingDate", sowingDate);
         tags.put("cleaningDate", cleaningDate);
         tags.put("productivity", productivity);
-        tags.put("secondarySowingDate", secondarySowingDate);
-        tags.put("secondaryCropHarvestDate", secondaryCropHarvestDate);
+//        tags.put("secondarySowingDate", secondarySowingDate);
+//        tags.put("secondaryCropHarvestDate", secondaryCropHarvestDate);
         tags.put("culture", culture);
         tags.put("technology", technology);
         tags.put("landCategory", landCategory);
         tags.put("irrigationType", irrigationType);
-        tags.put("secondaryCulture", secondaryCulture);
+//        tags.put("secondaryCulture", secondaryCulture);
         App.getDelegator().setTags(lastSelectedWay, tags);
         dismiss();
     }
