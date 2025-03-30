@@ -640,20 +640,22 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
         Relation seasonRelation = factory.createRelationWithNewId();
         seasonRelation.setTags(season);
 
-        Way cropWay = factory.createWayWithNewId();
-        cropWay.setTags(crop);
-
-        List<Node> cropNodes = new ArrayList<>();
-        for (Node node : way.getNodes()) {
-            Node factoryNodeWithNewId = factory.createNodeWithNewId(node.getLat(), node.getLon());
-            insertElementSafe(factoryNodeWithNewId);
-            if (cropNodes.size() < way.getNodes().size() - 1) {
-                cropNodes.add(factoryNodeWithNewId);
-            }
-        }
-
-        cropWay.addNodes(cropNodes, false);
-        closeWay(cropWay);
+        Relation cropRelation = factory.createRelationWithNewId();
+        cropRelation.setTags(crop);
+//        Way cropWay = factory.createWayWithNewId();
+//        cropWay.setTags(crop);
+//
+//        List<Node> cropNodes = new ArrayList<>();
+//        for (Node node : way.getNodes()) {
+//            Node factoryNodeWithNewId = factory.createNodeWithNewId(node.getLat(), node.getLon());
+//            insertElementSafe(factoryNodeWithNewId);
+//            if (cropNodes.size() < way.getNodes().size() - 1) {
+//                cropNodes.add(factoryNodeWithNewId);
+//            }
+//        }
+//
+//        cropWay.addNodes(cropNodes, false);
+//        closeWay(cropWay);
 
         try {
             lock();
@@ -661,12 +663,12 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
             setStatus(way);
             setStatus(yieldRelation);
             setStatus(seasonRelation);
-            setStatus(cropWay);
+            setStatus(cropRelation);
 
             insertElementUnsafe(way);
             insertElementUnsafe(yieldRelation);
             insertElementUnsafe(seasonRelation);
-            insertElementUnsafe(cropWay);
+            insertElementUnsafe(cropRelation);
 
             RelationMember rm = new RelationMember(Tags.ROLE_OUTER, way);
             yieldRelation.addMember(rm);
@@ -676,14 +678,14 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
             yieldRelation.addMember(rm);
             seasonRelation.addParentRelation(yieldRelation);
 
-            rm = new RelationMember("crop", cropWay);
+            rm = new RelationMember("crop", cropRelation);
             seasonRelation.addMember(rm);
-            cropWay.addParentRelation(seasonRelation);
+            cropRelation.addParentRelation(seasonRelation);
 
             onParentRelationChanged(way);
             onParentRelationChanged(yieldRelation);
             onParentRelationChanged(seasonRelation);
-            onParentRelationChanged(cropWay);
+            onParentRelationChanged(cropRelation);
         } finally {
             unlock();
         }

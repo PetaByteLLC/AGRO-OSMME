@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/radius2">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingHorizontal="15dp"
+        android:paddingVertical="10dp">
+
+        <Spinner
+            android:id="@+id/culture"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/edittext_background"
+            android:choiceMode="singleChoice" />
+
+        <EditText
+            android:id="@+id/cultureVarieties"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/edittext_background"
+            android:hint="Сорт / гибрид"
+            android:inputType="text"
+            android:textColor="@color/ag_text_color"
+            android:textColorHint="@color/ag_text_color" />
+
+        <Spinner
+            android:id="@+id/landCategory"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/edittext_background"
+            android:choiceMode="singleChoice" />
+
+        <Spinner
+            android:id="@+id/irrigationType"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/edittext_background"
+            android:choiceMode="singleChoice" />
+        
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Операции на поле"
+            android:textColor="@color/black"
+            android:textSize="17sp"
+            android:textStyle="bold"
+            android:paddingTop="20dp"/>
+
+        <EditText
+            android:id="@+id/sowingDate"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/edittext_background"
+            android:hint="Дата посева"
+            android:inputType="date"
+            android:textColor="@color/ag_text_color"
+            android:textColorHint="@color/ag_text_color" />
+
+        <EditText
+            android:id="@+id/cleaningDate"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/edittext_background"
+            android:hint="Дата уборки"
+            android:inputType="date"
+            android:textColor="@color/ag_text_color"
+            android:textColorHint="@color/ag_text_color" />
+
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="20dp"/>
+
+        <EditText
+            android:id="@+id/productivity"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/edittext_background"
+            android:hint="Урожайность"
+            android:inputType="text"
+            android:textColor="@color/ag_text_color"
+            android:textColorHint="@color/ag_text_color" />
+
+        <Button
+            android:id="@+id/btn_save"
+            android:layout_width="match_parent"
+            android:layout_height="35dp"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/radius"
+            android:text="@string/Save"
+            android:textAllCaps="false"
+            android:textColor="#fff" />
+
+    </LinearLayout>
+</ScrollView>
