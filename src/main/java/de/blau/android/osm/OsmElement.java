@@ -233,6 +233,13 @@ public abstract class OsmElement implements OsmElementInterface, Serializable, X
         }
     }
 
+    void addTag(String name, String value) {
+        if (this.tags == null) {
+            this.tags = new TreeMap<>();
+        }
+        this.tags.put(name, value);
+    }
+
     /**
      * Set the tags of the element, replacing all existing tags.
      * 

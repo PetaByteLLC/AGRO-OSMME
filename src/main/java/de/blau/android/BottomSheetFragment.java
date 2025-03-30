@@ -21,6 +21,7 @@ import androidx.annotation.Nullable;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 
+import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.HashMap;
@@ -213,30 +214,43 @@ public class BottomSheetFragment extends BottomSheetDialogFragment {
                       String cleaningDate, String productivity, String secondarySowingDate,
                       String secondaryCropHarvestDate, String culture, String technology, String landCategory,
                       String irrigationType, String secondaryCulture, String farmerSurName) {
-        Map<String, String> tags = new HashMap<>();
-        tags.put("landuse", "farmland");
-        tags.put("position", getPosition());
-        tags.put("name", name);
-        tags.put("region", region);
-        tags.put("district", district);
-        tags.put("aggregator", aggregator);
-        tags.put("farmerName", farmerName);
-        tags.put("farmerSurName", farmerSurName);
-        tags.put("farmerMobile", farmerMobile);
-        tags.put("cadastrNumber", cadastrNumber);
-        tags.put("year", year);
-        tags.put("cultureVarieties", cultureVarieties);
-        tags.put("sowingDate", sowingDate);
-        tags.put("cleaningDate", cleaningDate);
-        tags.put("productivity", productivity);
-//        tags.put("secondarySowingDate", secondarySowingDate);
-//        tags.put("secondaryCropHarvestDate", secondaryCropHarvestDate);
-        tags.put("culture", culture);
-        tags.put("technology", technology);
-        tags.put("landCategory", landCategory);
-        tags.put("irrigationType", irrigationType);
-//        tags.put("secondaryCulture", secondaryCulture);
-        App.getDelegator().setTags(lastSelectedWay, tags);
+        Map<String, String> yield = new HashMap<>();
+        yield.put("name", name);
+        yield.put("region", region);
+        yield.put("district", district);
+        yield.put("aggregator", aggregator);
+        yield.put("farmerName", farmerName);
+        yield.put("farmerSurName", farmerSurName);
+        yield.put("farmerMobile", farmerMobile);
+        yield.put("cadastrNumber", cadastrNumber);
+        yield.put("position", getPosition());
+        yield.put("landuse", "farmland");
+        yield.put("type", "multipolygon");
+
+        Map<String, String> season = new HashMap<>();
+        season.put("name", year);
+        season.put("type", "site");
+        season.put("technology", technology);
+        if (year.matches("^\\d{4}$")) {
+            int yearValue = Integer.parseInt(year);
+            season.put("start", LocalDate.of(yearValue, 1, 1).toString());
+            season.put("end", LocalDate.of(yearValue, 12, 31).toString());
+        } else {
+            season.put("start", LocalDate.of(LocalDate.now().getYear(), 1, 1).toString());
+            season.put("end", LocalDate.of(LocalDate.now().getYear(), 12, 31).toString());
+        }
+        Map<String, String> crop = new HashMap<>();
+        crop.put("cultureVarieties", cultureVarieties);
+        crop.put("sowingDate", sowingDate);
+        crop.put("cleaningDate", cleaningDate);
+        crop.put("productivity", productivity);
+        crop.put("culture", culture);
+        crop.put("landCategory", landCategory);
+        crop.put("irrigationType", irrigationType);
+        crop.put("landuse", "farmland");
+        crop.put("name", "Посев 1");
+
+        App.getDelegator().createYield(lastSelectedWay, yield, season, crop);
         dismiss();
     }
 

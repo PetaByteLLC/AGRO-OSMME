@@ -631,6 +631,72 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
         return way;
     }
 
+
+    public void createYield(Way way, Map<String, String> yield, Map<String, String> season, Map<String, String> crop) {
+        dirty = true;
+        Relation yieldRelation = factory.createRelationWithNewId();
+        yieldRelation.setTags(yield);
+
+        Relation seasonRelation = factory.createRelationWithNewId();
+        seasonRelation.setTags(season);
+
+        Way cropWay = factory.createWayWithNewId();
+        cropWay.setTags(crop);
+
+        List<Node> cropNodes = new ArrayList<>();
+        for (Node node : way.getNodes()) {
+            Node factoryNodeWithNewId = factory.createNodeWithNewId(node.getLat(), node.getLon());
+            insertElementSafe(factoryNodeWithNewId);
+            if (cropNodes.size() < way.getNodes().size() - 1) {
+                cropNodes.add(factoryNodeWithNewId);
+            }
+        }
+
+        cropWay.addNodes(cropNodes, false);
+        closeWay(cropWay);
+
+        try {
+            lock();
+
+            setStatus(way);
+            setStatus(yieldRelation);
+            setStatus(seasonRelation);
+            setStatus(cropWay);
+
+            insertElementUnsafe(way);
+            insertElementUnsafe(yieldRelation);
+            insertElementUnsafe(seasonRelation);
+            insertElementUnsafe(cropWay);
+
+            RelationMember rm = new RelationMember(Tags.ROLE_OUTER, way);
+            yieldRelation.addMember(rm);
+            way.addParentRelation(yieldRelation);
+
+            rm = new RelationMember("season", seasonRelation);
+            yieldRelation.addMember(rm);
+            seasonRelation.addParentRelation(yieldRelation);
+
+            rm = new RelationMember("crop", cropWay);
+            seasonRelation.addMember(rm);
+            cropWay.addParentRelation(seasonRelation);
+
+            onParentRelationChanged(way);
+            onParentRelationChanged(yieldRelation);
+            onParentRelationChanged(seasonRelation);
+            onParentRelationChanged(cropWay);
+        } finally {
+            unlock();
+        }
+        onElementChanged(null, way);
+    }
+
+    private void setStatus(OsmElement osmElement) {
+        osmElement.updateState(OsmElement.STATE_CREATED);
+        osmElement.stamp();
+        osmElement.resetHasProblem();
+        onElementChanged(null, osmElement);
+    }
+
     /**
      * Add a node at the end of a way
      * 
