@@ -233,11 +233,40 @@ public class BottomSheetFragment extends BottomSheetDialogFragment {
         season.put("technology", technology);
         if (year.matches("^\\d{4}$")) {
             int yearValue = Integer.parseInt(year);
-            season.put("start", LocalDate.of(yearValue, 1, 1).toString());
-            season.put("end", LocalDate.of(yearValue, 12, 31).toString());
+
+            // Для современных версий Android (API 26 и выше)
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                season.put("start", java.time.LocalDate.of(yearValue, 1, 1).toString());
+                season.put("end", java.time.LocalDate.of(yearValue, 12, 31).toString());
+            } else {
+                // Для старых версий Android
+                Calendar calendarStart = Calendar.getInstance();
+                calendarStart.set(yearValue, Calendar.JANUARY, 1);
+                Calendar calendarEnd = Calendar.getInstance();
+                calendarEnd.set(yearValue, Calendar.DECEMBER, 31);
+
+                // Преобразуем в строку в формате "yyyy-MM-dd"
+                season.put("start", formatCalendarToString(calendarStart));
+                season.put("end", formatCalendarToString(calendarEnd));
+            }
         } else {
-            season.put("start", LocalDate.of(LocalDate.now().getYear(), 1, 1).toString());
-            season.put("end", LocalDate.of(LocalDate.now().getYear(), 12, 31).toString());
+            int currentYear = Calendar.getInstance().get(Calendar.YEAR);
+
+            // Для современных версий Android (API 26 и выше)
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                season.put("start", java.time.LocalDate.of(currentYear, 1, 1).toString());
+                season.put("end", java.time.LocalDate.of(currentYear, 12, 31).toString());
+            } else {
+                // Для старых версий Android
+                Calendar calendarStart = Calendar.getInstance();
+                calendarStart.set(currentYear, Calendar.JANUARY, 1);
+                Calendar calendarEnd = Calendar.getInstance();
+                calendarEnd.set(currentYear, Calendar.DECEMBER, 31);
+
+                // Преобразуем в строку в формате "yyyy-MM-dd"
+                season.put("start", formatCalendarToString(calendarStart));
+                season.put("end", formatCalendarToString(calendarEnd));
+            }
         }
         Map<String, String> crop = new HashMap<>();
         crop.put("cultureVarieties", cultureVarieties);
@@ -252,6 +281,16 @@ public class BottomSheetFragment extends BottomSheetDialogFragment {
 
         App.getDelegator().createYield(lastSelectedWay, yield, season, crop);
         dismiss();
+    }
+
+    private String formatCalendarToString(Calendar calendar) {
+        // Преобразуем календарь в строку в формате "yyyy-MM-dd"
+        int year = calendar.get(Calendar.YEAR);
+        int month = calendar.get(Calendar.MONTH) + 1; // Месяцы начинаются с 0
+        int day = calendar.get(Calendar.DAY_OF_MONTH);
+
+        // Форматируем строку как "yyyy-MM-dd"
+        return String.format("%04d-%02d-%02d", year, month, day);
     }
 
     private String getPosition() {
