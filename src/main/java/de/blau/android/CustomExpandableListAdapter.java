@@ -103,7 +103,7 @@ public class CustomExpandableListAdapter extends BaseExpandableListAdapter {
         Way way = getChild(groupPosition, childPosition);
 
         TextView title = convertView.findViewById(R.id.title);
-        String text = getTagValue(way, "name") + " " + getTagValue(way, "area") + " " + getTagValue(way, "areaUnit");
+        String text = getTagValue(way, "name") + " " + getTagValue(way, "area");
         title.setText(text.trim());
 
         String cultureData = way.getTagWithKey("culture");

@@ -153,6 +153,7 @@ import de.blau.android.osm.BoundingBox;
 import de.blau.android.osm.Node;
 import de.blau.android.osm.OsmElement;
 import de.blau.android.osm.Relation;
+import de.blau.android.osm.RelationMember;
 import de.blau.android.osm.Server;
 import de.blau.android.osm.Storage;
 import de.blau.android.osm.StorageDelegator;
@@ -636,13 +637,13 @@ public class Main extends FullScreenAppCompatActivity
         App.getLogic().deselectAll();
         App.getLogic().setLocked(true);
 
-        String token = prefs.getCgiToken();
-
-        if (token == null) {
-            Intent intent = new Intent(Main.this, LoginActivity.class);
-            startActivity(intent);
-            finish();
-        }
+//        String token = prefs.getCgiToken();
+//
+//        if (token == null) {
+//            Intent intent = new Intent(Main.this, LoginActivity.class);
+//            startActivity(intent);
+//            finish();
+//        }
     }
 
     /**
@@ -883,6 +884,17 @@ public class Main extends FullScreenAppCompatActivity
                 scheduleAutoLock();
             });
         }
+
+//        if (App.getLogic().hasChanges() && isConnected()) {
+//            AlertDialog uploadDataDialog = new AlertDialog.Builder(this)
+//                    .setMessage("Загрузить изминения на сервер?")
+//                    .setCancelable(false)
+//                    .setPositiveButton("Да", (dialog, which) -> {
+//
+//                    })
+//                    .setNegativeButton("Нет", null).create();
+//            uploadDataDialog.show();
+//        }
     }
 
     /**
@@ -4183,16 +4195,36 @@ public class Main extends FullScreenAppCompatActivity
                 ScreenMessage.toastTopWarning(this, "Выберите одну из точек точку");
                 return;
             }
-            List<Way> node = logic.getWaysForNode(selectedNode);
-            if (node.isEmpty()) return;
-            editData(node.get(0));
+//            List<Way> node = logic.getWaysForNode(selectedNode);
+//            if (node.isEmpty()) return;
+            Relation relation = logic.getRelations().get(0);
+            editData(relation);
             return;
         }
     }
 
-    private void editData(Way way) {
-        BottomSheetFragment bottomSheetFragment = new BottomSheetFragment(way, this, true);
-        bottomSheetFragment.show(getSupportFragmentManager(), bottomSheetFragment.getTag());
+    private void editData(Relation relation) {
+//        BottomSheetFragment bottomSheetFragment = new BottomSheetFragment(way, this, true);
+//        bottomSheetFragment.show(getSupportFragmentManager(), bottomSheetFragment.getTag());
+        if (relation == null) return;
+
+        List<RelationMember> seasonMembers = relation.getMembersWithRole("season");
+        List<Relation> seasons = new ArrayList<>();
+        for (RelationMember relationMember : seasonMembers) {
+            seasons.add((Relation) relationMember.getElement());
+        }
+
+        List<RelationMember> cropMembers = new ArrayList<>();
+        for (Relation season : seasons) {
+            cropMembers.addAll(season.getMembers("crop"));
+        }
+        List<Relation> crops = new ArrayList<>();
+        for (RelationMember relationMember : cropMembers) {
+            crops.add((Relation) relationMember.getElement());
+        }
+
+        BsEditYieldFragment bsEditYieldFragment = new BsEditYieldFragment(relation, seasons, crops, this);
+        bsEditYieldFragment.show(getSupportFragmentManager(), bsEditYieldFragment.getTag());
     }
 
     protected void finishPath(@Nullable final Way lastSelectedWay, @Nullable final Node lastSelectedNode) {
