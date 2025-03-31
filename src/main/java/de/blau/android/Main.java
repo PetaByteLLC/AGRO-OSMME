@@ -4221,7 +4221,7 @@ public class Main extends FullScreenAppCompatActivity
 
         List<RelationMember> cropMembers = new ArrayList<>();
         for (Relation season : seasons) {
-            cropMembers.addAll(season.getMembers("crop"));
+            cropMembers.addAll(season.getMembersWithRole("crop"));
         }
         List<Relation> crops = new ArrayList<>();
         for (RelationMember relationMember : cropMembers) {

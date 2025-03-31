@@ -22,7 +22,9 @@ import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
+import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -323,6 +325,32 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
                     // TODO handle OOM
                     Log.e(DEBUG_TAG, "setTags got " + e.getMessage());
                 }
+            }
+        } finally {
+            unlock();
+        }
+    }
+
+    public void updateTags(@NonNull final OsmElement elem, @Nullable final Map<String, String> tags) {
+        try {
+            lock();
+            dirty = true;
+            undo.save(elem);
+            SortedMap<String, String> elemTags = elem.getTags();
+            for (String key : tags.keySet()) {
+                if (Objects.equals(elemTags.get(key), tags.get(key))) continue;
+                elem.addTag(key, tags.get(key));
+            }
+
+            elem.updateState(OsmElement.STATE_MODIFIED);
+            elem.stamp();
+            elem.resetHasProblem();
+            try {
+                apiStorage.insertElementSafe(elem);
+                onElementChanged(null, elem);
+            } catch (StorageException e) {
+                // TODO handle OOM
+                Log.e(DEBUG_TAG, "setTags got " + e.getMessage());
             }
         } finally {
             unlock();
