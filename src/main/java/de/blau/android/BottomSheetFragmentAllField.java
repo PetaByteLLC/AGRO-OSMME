@@ -17,15 +17,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 
-import de.blau.android.osm.Way;
+import de.blau.android.osm.Relation;
 
 public class BottomSheetFragmentAllField extends BottomSheetDialogFragment {
 
-    private final List<Way> ways;
+    private final List<Relation> relations;
     private final Main main;
 
-    public BottomSheetFragmentAllField(List<Way> ways, Main main) {
-        this.ways = ways;
+    public BottomSheetFragmentAllField(List<Relation> relations, Main main) {
+        this.relations = relations;
         this.main = main;
     }
 
@@ -48,8 +48,8 @@ public class BottomSheetFragmentAllField extends BottomSheetDialogFragment {
 
     private List<String> getGroup() {
         ArrayList<String> list = new ArrayList<>();
-        for (Way way : ways) {
-            String region = way.getTagWithKey("region");
+        for (Relation relation : relations) {
+            String region = relation.getTagWithKey("region");
             if (region != null && !region.isEmpty()) {
                 list.add(region);
             }
@@ -58,18 +58,18 @@ public class BottomSheetFragmentAllField extends BottomSheetDialogFragment {
         return list;
     }
 
-    private HashMap<String, List<Way>> getChildren(List<String> groups) {
-        HashMap<String, List<Way>> result = new HashMap<>();
+    private HashMap<String, List<Relation>> getChildren(List<String> groups) {
+        HashMap<String, List<Relation>> result = new HashMap<>();
 
         for (String group : groups) {
-            ArrayList<Way> value = new ArrayList<>();
-            for (Way way : ways) {
-                if (Objects.equals(group, way.getTagWithKey("region"))) value.add(way);
+            ArrayList<Relation> value = new ArrayList<>();
+            for (Relation relation : relations) {
+                if (Objects.equals(group, relation.getTagWithKey("region"))) value.add(relation);
             }
             result.put(group, value);
         }
 
-        result.put("Все", ways);
+        result.put("Все", relations);
         return result;
     }
 

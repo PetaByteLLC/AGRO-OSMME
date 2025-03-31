@@ -11,20 +11,20 @@ import android.widget.TextView;
 import java.util.HashMap;
 import java.util.List;
 
-import de.blau.android.contract.Ui;
 import de.blau.android.osm.BoundingBox;
+import de.blau.android.osm.OsmElement;
+import de.blau.android.osm.Relation;
 import de.blau.android.osm.ViewBox;
-import de.blau.android.osm.Way;
 
 public class CustomExpandableListAdapter extends BaseExpandableListAdapter {
 
     private Context context;
     private List<String> listGroup;
-    private HashMap<String, List<Way>> listChild;
+    private HashMap<String, List<Relation>> listChild;
     private Main main;
     private BottomSheetFragmentAllField bottomSheetFragmentAllField;
 
-    public CustomExpandableListAdapter(Context context, List<String> listGroup, HashMap<String, List<Way>> listChild, Main main, BottomSheetFragmentAllField bottomSheetFragmentAllField) {
+    public CustomExpandableListAdapter(Context context, List<String> listGroup, HashMap<String, List<Relation>> listChild, Main main, BottomSheetFragmentAllField bottomSheetFragmentAllField) {
         this.context = context;
         this.listGroup = listGroup;
         this.listChild = listChild;
@@ -48,7 +48,7 @@ public class CustomExpandableListAdapter extends BaseExpandableListAdapter {
     }
 
     @Override
-    public Way getChild(int groupPosition, int childPosition) {
+    public Relation getChild(int groupPosition, int childPosition) {
         return listChild.get(listGroup.get(groupPosition)).get(childPosition);
     }
 
@@ -88,9 +88,9 @@ public class CustomExpandableListAdapter extends BaseExpandableListAdapter {
         return convertView;
     }
 
-    private String getTagValue(Way way, String key) {
-        if (key == null || way == null) return "";
-        String tagWithKey = way.getTagWithKey(key);
+    private String getTagValue(OsmElement osmElement, String key) {
+        if (key == null || osmElement == null) return "";
+        String tagWithKey = osmElement.getTagWithKey(key);
         return tagWithKey == null ? "" : tagWithKey;
     }
 
@@ -100,13 +100,13 @@ public class CustomExpandableListAdapter extends BaseExpandableListAdapter {
             LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             convertView = inflater.inflate(R.layout.bs_all_field_item, null);
         }
-        Way way = getChild(groupPosition, childPosition);
+        Relation relation = getChild(groupPosition, childPosition);
 
         TextView title = convertView.findViewById(R.id.title);
-        String text = getTagValue(way, "name") + " " + getTagValue(way, "area");
+        String text = getTagValue(relation, "name") + " " + getTagValue(relation, "area");
         title.setText(text.trim());
 
-        String cultureData = way.getTagWithKey("culture");
+        String cultureData = relation.getTagWithKey("culture");
         TextView culture = convertView.findViewById(R.id.culture);
         culture.setText(cultureData);
 
@@ -137,11 +137,11 @@ public class CustomExpandableListAdapter extends BaseExpandableListAdapter {
         }
 
         TextView variety = convertView.findViewById(R.id.variety);
-        variety.setText(way.getTagWithKey("variety"));
+        variety.setText(relation.getTagWithKey("variety"));
 
         ImageView viewOnMap = convertView.findViewById(R.id.viewOnMap);
         viewOnMap.setOnClickListener(v -> {
-            BoundingBox bounds = way.getBounds();
+            BoundingBox bounds = relation.getBounds();
             if (bounds != null) {
                 final ViewBox box = new ViewBox(bounds);
                 double[] center = box.getCenter();
@@ -155,7 +155,7 @@ public class CustomExpandableListAdapter extends BaseExpandableListAdapter {
 
         ImageView edit = convertView.findViewById(R.id.edit);
         edit.setOnClickListener(v -> {
-            BoundingBox bounds = way.getBounds();
+            BoundingBox bounds = relation.getBounds();
             if (bounds != null) {
                 final ViewBox box = new ViewBox(bounds);
                 double[] center = box.getCenter();
@@ -163,7 +163,7 @@ public class CustomExpandableListAdapter extends BaseExpandableListAdapter {
 //                main.zoomToAndEdit((int) (center[0] * 1E7D), (int) (center[1] * 1E7D), way);
 //                App.getLogic().setZoom(main.getMap(), Ui.ZOOM_FOR_ZOOMTO);
                 main.getMap().getViewBox().moveTo(main.getMap(), (int) (center[0] * 1E7D), (int) (center[1] * 1E7D));
-                main.editor(way);
+                main.editor(relation);
                 dismiss();
             }
         });

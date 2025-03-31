@@ -4181,6 +4181,8 @@ public class Main extends FullScreenAppCompatActivity
 
     protected void finishBuilding() {
         Logic logic = App.getLogic();
+        if (logic == null) return;
+
         if (STATE == 1) {
             final Way lastSelectedWay = logic.getSelectedWay();
             final Node lastSelectedNode = logic.getSelectedNode();
@@ -4195,9 +4197,12 @@ public class Main extends FullScreenAppCompatActivity
                 ScreenMessage.toastTopWarning(this, "Выберите одну из точек точку");
                 return;
             }
-//            List<Way> node = logic.getWaysForNode(selectedNode);
-//            if (node.isEmpty()) return;
-            Relation relation = logic.getRelations().get(0);
+            List<Way> ways = logic.getWaysForNode(selectedNode);
+            if (ways.isEmpty()) return;
+            Way way = ways.get(0);
+            List<Relation> parentRelations = way.getParentRelations();
+            if (parentRelations == null || parentRelations.isEmpty()) return;
+            Relation relation = parentRelations.get(0);
             editData(relation);
             return;
         }
@@ -4245,14 +4250,20 @@ public class Main extends FullScreenAppCompatActivity
         bottomSheetFragment.show(getSupportFragmentManager(), bottomSheetFragment.getTag());
     }
 
-    public void editor(Way lastSelectedWay) {
+    public void editor(Relation relation) {
         final Logic logic = App.getLogic();
         if (logic.isInEditZoomRange()) {
             addedNodes = new ArrayList<>();
             logic.deselectAll();
-
             logic.setLocked(false);
-            logic.setSelectedNode(lastSelectedWay.getLastNode());
+
+            List<RelationMember> members = relation.getMembersWithRole(Tags.ROLE_OUTER);
+            if (members.isEmpty()) return;
+            RelationMember relationMember = members.get(0);
+            Way way = (Way) relationMember.getElement();
+            if (way == null) return;
+            logic.setSelectedNode(way.getLastNode());
+
             updateActionbarEditMode();
             map.invalidate();
             visibleLockButton();
@@ -5225,8 +5236,16 @@ public class Main extends FullScreenAppCompatActivity
     private class AllFieldListener implements OnClickListener {
         @Override
         public void onClick(View v) {
-            List<Way> ways = App.getLogic().getWays();
-            BottomSheetFragmentAllField bottomSheetFragment = new BottomSheetFragmentAllField(ways, Main.this);
+            List<Relation> relations = App.getLogic().getRelations();
+            List<Relation> relationList = new ArrayList<>();
+
+            for (Relation relation : relations) {
+                if (relation.getTagWithKey("landuse") != null) {
+                    relationList.add(relation);
+                }
+            }
+
+            BottomSheetFragmentAllField bottomSheetFragment = new BottomSheetFragmentAllField(relationList, Main.this);
             bottomSheetFragment.show(getSupportFragmentManager(), bottomSheetFragment.getTag());
         }
     }
