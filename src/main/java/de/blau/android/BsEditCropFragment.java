@@ -228,11 +228,11 @@ public class BsEditCropFragment extends BottomSheetDialogFragment {
         BottomSheetBehavior<View> bottomSheetBehavior = BottomSheetBehavior.from((View) view.getParent());
         bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
         bottomSheetBehavior.setDraggable(false);
-//
-//        if (getDialog() != null) {
-//            getDialog().setCancelable(false);
-//            getDialog().setCanceledOnTouchOutside(false);
-//        }
+
+        if (getDialog() != null) {
+            getDialog().setCancelable(false);
+            getDialog().setCanceledOnTouchOutside(false);
+        }
     }
 
     @Override
