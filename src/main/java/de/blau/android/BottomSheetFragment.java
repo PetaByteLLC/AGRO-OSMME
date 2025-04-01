@@ -276,7 +276,6 @@ public class BottomSheetFragment extends BottomSheetDialogFragment {
         crop.put("landCategory", landCategory);
         crop.put("irrigationType", irrigationType);
         crop.put("type", "crop");
-        crop.put("name", "Посев 1");
 
         App.getDelegator().createYield(lastSelectedWay, yield, season, crop);
         dismiss();

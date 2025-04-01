@@ -50,10 +50,13 @@ public class BsEditCropFragment extends BottomSheetDialogFragment {
     private EditText cleaningDate;
     private EditText productivity;
 
-    public BsEditCropFragment(Relation crop, List<Relation> seasons, Main main) {
+    private final boolean isNew;
+
+    public BsEditCropFragment(Relation crop, List<Relation> seasons, Main main, boolean isNew) {
         this.crop = crop;
         this.main = main;
         this.seasons = seasons;
+        this.isNew = isNew;
     }
 
     @Override
@@ -186,10 +189,15 @@ public class BsEditCropFragment extends BottomSheetDialogFragment {
                 map.put("productivity", productivityValue);
                 map.put("landCategory", landCategoryValue);
                 map.put("irrigationType", irrigationTypeValue);
+                map.put("type", "crop");
 
                 App.getDelegator().updateTags(crop, map);
-                if (!Objects.equals(seasonValue, crop.getParentRelations().get(0))) {
-                    App.getDelegator().updateSeason(crop, seasonValue);
+                if (isNew) {
+                    App.getDelegator().connectCropToSeason(crop, seasonValue);
+                } else {
+                    if (!Objects.equals(seasonValue, crop.getParentRelations().get(0))) {
+                        App.getDelegator().updateSeason(crop, seasonValue);
+                    }
                 }
             } catch (NullPointerException exception) {
                 Toast.makeText(getContext(),
@@ -200,6 +208,7 @@ public class BsEditCropFragment extends BottomSheetDialogFragment {
 
             if (getParentFragment() instanceof BsEditYieldFragment) {
                 ((BsEditYieldFragment) getParentFragment()).updateCropList();
+                ((BsEditYieldFragment) getParentFragment()).updateCropList(crop);
             }
 
             dismiss();
@@ -208,11 +217,11 @@ public class BsEditCropFragment extends BottomSheetDialogFragment {
         BottomSheetBehavior<View> bottomSheetBehavior = BottomSheetBehavior.from((View) view.getParent());
         bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
         bottomSheetBehavior.setDraggable(false);
-
-        if (getDialog() != null) {
-            getDialog().setCancelable(false);
-            getDialog().setCanceledOnTouchOutside(false);
-        }
+//
+//        if (getDialog() != null) {
+//            getDialog().setCancelable(false);
+//            getDialog().setCanceledOnTouchOutside(false);
+//        }
     }
 
     @Override

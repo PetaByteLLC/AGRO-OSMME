@@ -4399,4 +4399,54 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
             readingLock.unlock();
         }
     }
+
+    public void updateSeason(Relation crop, Relation season) {
+        try {
+            lock();
+            insertElementUnsafe(season);
+
+
+//            apiStorage.insertElementSafe(crop);
+//
+//            Relation seasonRelation = crop.getParentRelations().get(0);
+//            RelationMember member = seasonRelation.getMember(crop);
+//            seasonRelation.removeMember(member);
+//
+//            Relation yieldRelation = seasonRelation.getParentRelations().get(0);
+//            RelationMember fe = new RelationMember("season", season);
+//            yieldRelation.addMember(fe);
+//            season.addParentRelation(yieldRelation);
+//
+//            RelationMember rm = new RelationMember("crop", crop);
+//            season.addMember(rm);
+//            crop.addParentRelation(season);
+//            crop.removeParentRelation(seasonRelation);
+//
+//            if (seasonRelation.getMembers() == null || seasonRelation.getMembers().isEmpty()) {
+//                apiStorage.removeRelation(seasonRelation);
+//                yieldRelation.removeMember(yieldRelation.getMember(seasonRelation));
+//            }
+//            onParentRelationChanged(seasonRelation);
+//            onParentRelationChanged(yieldRelation);
+//            onParentRelationChanged(season);
+//            onParentRelationChanged(crop);
+        } finally {
+            unlock();
+        }
+    }
+
+    public void connectCropToSeason(Relation crop, Relation seasonValue) {
+        try {
+            lock();
+            insertElementUnsafe(crop);
+
+            RelationMember cropMember = new RelationMember("crop", crop);
+            seasonValue.addMember(cropMember);
+            crop.addParentRelation(seasonValue);
+
+            onParentRelationChanged(crop);
+        } finally {
+            unlock();
+        }
+    }
 }

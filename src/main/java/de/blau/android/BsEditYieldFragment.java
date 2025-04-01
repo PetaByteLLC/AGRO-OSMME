@@ -129,13 +129,13 @@ public class BsEditYieldFragment extends BottomSheetDialogFragment {
         cropList.setAdapter(cropAdapter);
         cropList.setOnItemClickListener((p, v, pos, id) -> {
             Relation clickedRelation = (Relation) p.getItemAtPosition(pos);
-            BsEditCropFragment cropFragment = new BsEditCropFragment(clickedRelation, seasons, main);
+            BsEditCropFragment cropFragment = new BsEditCropFragment(clickedRelation, seasons, main, false);
             cropFragment.show(getChildFragmentManager(), cropFragment.getTag());
         });
 
         cropAdd.setOnClickListener(v -> {
             Relation relationWithNewId = App.getDelegator().getFactory().createRelationWithNewId();
-            BsEditCropFragment cropFragment = new BsEditCropFragment(relationWithNewId, seasons, main);
+            BsEditCropFragment cropFragment = new BsEditCropFragment(relationWithNewId, seasons, main, true);
             cropFragment.show(getChildFragmentManager(), cropFragment.getTag());
         });
 
@@ -171,14 +171,19 @@ public class BsEditYieldFragment extends BottomSheetDialogFragment {
         BottomSheetBehavior<View> bottomSheetBehavior = BottomSheetBehavior.from((View) view.getParent());
         bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
         bottomSheetBehavior.setDraggable(false);
-
-        if (getDialog() != null) {
-            getDialog().setCancelable(false);
-            getDialog().setCanceledOnTouchOutside(false);
-        }
+//
+//        if (getDialog() != null) {
+//            getDialog().setCancelable(false);
+//            getDialog().setCanceledOnTouchOutside(false);
+//        }
     }
 
     public void updateCropList() {
+        cropAdapter.notifyDataSetChanged();
+    }
+
+    public void updateCropList(Relation newCrop) {
+        crops.add(newCrop);
         cropAdapter.notifyDataSetChanged();
     }
 

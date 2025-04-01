@@ -1,219 +1,226 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/radius2">
+    android:background="@drawable/radius2"
+    android:orientation="vertical">
 
-    <LinearLayout
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:paddingHorizontal="15dp"
-        android:paddingVertical="10dp">
+        android:layout_height="match_parent">
 
         <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
-
-            <TextView
-                android:id="@+id/label"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/text_values"
-                android:textColor="@color/black"
-                android:textSize="16sp"
-                android:textStyle="bold" />
-
-<!--            <LinearLayout-->
-<!--                android:layout_width="wrap_content"-->
-<!--                android:layout_height="wrap_content"-->
-<!--                android:orientation="horizontal"-->
-<!--                tools:ignore="UseCompoundDrawables">-->
-
-<!--                <ImageView-->
-<!--                    android:id="@+id/cultureIcon"-->
-<!--                    android:layout_width="wrap_content"-->
-<!--                    android:layout_height="wrap_content"-->
-<!--                    android:contentDescription="@string/image_information_title"-->
-<!--                    android:src="@drawable/lucide_wheat" />-->
-
-<!--                <TextView-->
-<!--                    android:id="@+id/culture"-->
-<!--                    android:layout_width="wrap_content"-->
-<!--                    android:layout_height="match_parent"-->
-<!--                    android:layout_marginStart="5dp"-->
-<!--                    android:text="Пшеница"-->
-<!--                    android:textColor="#666666"-->
-<!--                    android:textSize="12sp" />-->
-<!--            </LinearLayout>-->
-        </LinearLayout>
-
-        <Button
-            android:id="@+id/toggleButton"
-            android:layout_width="match_parent"
-            android:layout_height="40dp"
-            android:layout_marginTop="10dp"
-            android:background="#ffffff"
-            android:drawableEnd="@drawable/baseline_arrow_drop_down_24"
-            android:text="Общая информация"
-            android:textAlignment="textStart"
-            android:textAllCaps="false"
-            android:textColor="@color/black"
-            android:textSize="15sp" />
-
-        <LinearLayout
-            android:id="@+id/editTextContainer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:visibility="gone">
+            android:paddingHorizontal="15dp"
+            android:paddingVertical="10dp">
 
-            <EditText
-                android:id="@+id/name"
-                android:layout_width="match_parent"
-                android:layout_height="40dp"
-                android:layout_marginTop="10dp"
-                android:background="@drawable/edittext_background"
-                android:inputType="text"
-                android:textColor="@color/ag_text_color"
-                android:textColorHint="@color/ag_text_color" />
-
-            <EditText
-                android:id="@+id/region"
-                android:layout_width="match_parent"
-                android:layout_height="40dp"
-                android:layout_marginTop="10dp"
-                android:background="@drawable/edittext_background"
-                android:hint="Область"
-                android:inputType="text"
-                android:textColor="@color/ag_text_color"
-                android:textColorHint="@color/ag_text_color" />
-
-            <EditText
-                android:id="@+id/district"
-                android:layout_width="match_parent"
-                android:layout_height="40dp"
-                android:layout_marginTop="10dp"
-                android:background="@drawable/edittext_background"
-                android:hint="Район"
-                android:inputType="text"
-                android:textColor="@color/ag_text_color"
-                android:textColorHint="@color/ag_text_color" />
-
-            <EditText
-                android:id="@+id/farmerSurName"
-                android:layout_width="match_parent"
-                android:layout_height="40dp"
-                android:layout_marginTop="10dp"
-                android:background="@drawable/edittext_background"
-                android:hint="Фамилия землепользователя"
-                android:inputType="text"
-                android:textColor="@color/ag_text_color"
-                android:textColorHint="@color/ag_text_color" />
-
-            <EditText
-                android:id="@+id/farmerName"
-                android:layout_width="match_parent"
-                android:layout_height="40dp"
-                android:layout_marginTop="10dp"
-                android:background="@drawable/edittext_background"
-                android:hint="Имя земплепользователя"
-                android:inputType="text"
-                android:textColor="@color/ag_text_color"
-                android:textColorHint="@color/ag_text_color" />
-
-            <EditText
-                android:id="@+id/farmerMobile"
-                android:layout_width="match_parent"
-                android:layout_height="40dp"
-                android:layout_marginTop="10dp"
-                android:background="@drawable/edittext_background"
-                android:hint="Телефон земплепользователя"
-                android:inputType="text"
-                android:textColor="@color/ag_text_color"
-                android:textColorHint="@color/ag_text_color" />
-
-            <EditText
-                android:id="@+id/cadastrNumber"
-                android:layout_width="match_parent"
-                android:layout_height="40dp"
-                android:layout_marginTop="10dp"
-                android:background="@drawable/edittext_background"
-                android:hint="Кадастровый номер поля"
-                android:inputType="text"
-                android:textColor="@color/ag_text_color"
-                android:textColorHint="@color/ag_text_color" />
-
-            <EditText
-                android:id="@+id/aggregator"
-                android:layout_width="match_parent"
-                android:layout_height="40dp"
-                android:layout_marginTop="10dp"
-                android:background="@drawable/edittext_background"
-                android:hint="Агрегатор"
-                android:inputType="text"
-                android:textColor="@color/ag_text_color"
-                android:textColorHint="@color/ag_text_color" />
-
-            <Spinner
-                android:id="@+id/technology"
-                android:layout_width="match_parent"
-                android:layout_height="40dp"
-                android:layout_marginTop="10dp"
-                android:background="@drawable/edittext_background"
-                android:choiceMode="singleChoice" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
-
-            <TextView
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingVertical="10dp"
-                android:text="Севооборот"
-                android:textColor="@color/black"
-                android:textSize="16sp" />
+                android:orientation="vertical">
 
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="2dp"
-                android:background="#90828282" />
+                <TextView
+                    android:id="@+id/label"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/text_values"
+                    android:textColor="@color/black"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
 
-            <ListView
-                android:id="@+id/crop_list"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:paddingStart="10dp"
-                tools:listitem="@layout/crop_list_item" />
+                <!--            <LinearLayout-->
+                <!--                android:layout_width="wrap_content"-->
+                <!--                android:layout_height="wrap_content"-->
+                <!--                android:orientation="horizontal"-->
+                <!--                tools:ignore="UseCompoundDrawables">-->
+
+                <!--                <ImageView-->
+                <!--                    android:id="@+id/cultureIcon"-->
+                <!--                    android:layout_width="wrap_content"-->
+                <!--                    android:layout_height="wrap_content"-->
+                <!--                    android:contentDescription="@string/image_information_title"-->
+                <!--                    android:src="@drawable/lucide_wheat" />-->
+
+                <!--                <TextView-->
+                <!--                    android:id="@+id/culture"-->
+                <!--                    android:layout_width="wrap_content"-->
+                <!--                    android:layout_height="match_parent"-->
+                <!--                    android:layout_marginStart="5dp"-->
+                <!--                    android:text="Пшеница"-->
+                <!--                    android:textColor="#666666"-->
+                <!--                    android:textSize="12sp" />-->
+                <!--            </LinearLayout>-->
+            </LinearLayout>
 
             <Button
-                android:id="@+id/crop_add"
+                android:id="@+id/toggleButton"
                 android:layout_width="match_parent"
                 android:layout_height="40dp"
-                android:background="#fff"
-                android:drawableStart="@drawable/baseline_add_16"
-                android:paddingHorizontal="10dp"
-                android:text="Добавить культуру"
+                android:layout_marginTop="10dp"
+                android:background="#ffffff"
+                android:drawableEnd="@drawable/baseline_arrow_drop_down_24"
+                android:text="Общая информация"
                 android:textAlignment="textStart"
                 android:textAllCaps="false"
-                android:textColor="#138ce7" />
+                android:textColor="@color/black"
+                android:textSize="15sp" />
+
+            <LinearLayout
+                android:id="@+id/editTextContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="gone">
+
+                <EditText
+                    android:id="@+id/name"
+                    android:layout_width="match_parent"
+                    android:layout_height="40dp"
+                    android:layout_marginTop="10dp"
+                    android:background="@drawable/edittext_background"
+                    android:inputType="text"
+                    android:textColor="@color/ag_text_color"
+                    android:textColorHint="@color/ag_text_color" />
+
+                <EditText
+                    android:id="@+id/region"
+                    android:layout_width="match_parent"
+                    android:layout_height="40dp"
+                    android:layout_marginTop="10dp"
+                    android:background="@drawable/edittext_background"
+                    android:hint="Область"
+                    android:inputType="text"
+                    android:textColor="@color/ag_text_color"
+                    android:textColorHint="@color/ag_text_color" />
+
+                <EditText
+                    android:id="@+id/district"
+                    android:layout_width="match_parent"
+                    android:layout_height="40dp"
+                    android:layout_marginTop="10dp"
+                    android:background="@drawable/edittext_background"
+                    android:hint="Район"
+                    android:inputType="text"
+                    android:textColor="@color/ag_text_color"
+                    android:textColorHint="@color/ag_text_color" />
+
+                <EditText
+                    android:id="@+id/farmerSurName"
+                    android:layout_width="match_parent"
+                    android:layout_height="40dp"
+                    android:layout_marginTop="10dp"
+                    android:background="@drawable/edittext_background"
+                    android:hint="Фамилия землепользователя"
+                    android:inputType="text"
+                    android:textColor="@color/ag_text_color"
+                    android:textColorHint="@color/ag_text_color" />
+
+                <EditText
+                    android:id="@+id/farmerName"
+                    android:layout_width="match_parent"
+                    android:layout_height="40dp"
+                    android:layout_marginTop="10dp"
+                    android:background="@drawable/edittext_background"
+                    android:hint="Имя земплепользователя"
+                    android:inputType="text"
+                    android:textColor="@color/ag_text_color"
+                    android:textColorHint="@color/ag_text_color" />
+
+                <EditText
+                    android:id="@+id/farmerMobile"
+                    android:layout_width="match_parent"
+                    android:layout_height="40dp"
+                    android:layout_marginTop="10dp"
+                    android:background="@drawable/edittext_background"
+                    android:hint="Телефон земплепользователя"
+                    android:inputType="text"
+                    android:textColor="@color/ag_text_color"
+                    android:textColorHint="@color/ag_text_color" />
+
+                <EditText
+                    android:id="@+id/cadastrNumber"
+                    android:layout_width="match_parent"
+                    android:layout_height="40dp"
+                    android:layout_marginTop="10dp"
+                    android:background="@drawable/edittext_background"
+                    android:hint="Кадастровый номер поля"
+                    android:inputType="text"
+                    android:textColor="@color/ag_text_color"
+                    android:textColorHint="@color/ag_text_color" />
+
+                <EditText
+                    android:id="@+id/aggregator"
+                    android:layout_width="match_parent"
+                    android:layout_height="40dp"
+                    android:layout_marginTop="10dp"
+                    android:background="@drawable/edittext_background"
+                    android:hint="Агрегатор"
+                    android:inputType="text"
+                    android:textColor="@color/ag_text_color"
+                    android:textColorHint="@color/ag_text_color" />
+
+                <Spinner
+                    android:id="@+id/technology"
+                    android:layout_width="match_parent"
+                    android:layout_height="40dp"
+                    android:layout_marginTop="10dp"
+                    android:background="@drawable/edittext_background"
+                    android:choiceMode="singleChoice" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingVertical="10dp"
+                    android:text="Севооборот"
+                    android:textColor="@color/black"
+                    android:textSize="16sp" />
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="2dp"
+                    android:background="#90828282" />
+
+                <ListView
+                    android:id="@+id/crop_list"
+                    android:layout_width="match_parent"
+                    android:layout_height="150dp"
+                    android:paddingStart="10dp"
+                    tools:ignore="NestedScrolling"
+                    tools:listitem="@layout/crop_list_item" />
+
+                <Button
+                    android:id="@+id/crop_add"
+                    android:layout_width="match_parent"
+                    android:layout_height="40dp"
+                    android:background="#fff"
+                    android:drawableStart="@drawable/baseline_add_16"
+                    android:paddingHorizontal="10dp"
+                    android:text="Добавить культуру"
+                    android:textAlignment="textStart"
+                    android:textAllCaps="false"
+                    android:textColor="#138ce7" />
+
+            </LinearLayout>
+
+            <Button
+                android:id="@+id/btn_save"
+                android:layout_width="match_parent"
+                android:layout_height="35dp"
+                android:layout_marginTop="10dp"
+                android:background="@drawable/radius"
+                android:text="@string/Save"
+                android:textAllCaps="false"
+                android:textColor="#fff" />
 
         </LinearLayout>
-
-        <Button
-            android:id="@+id/btn_save"
-            android:layout_width="match_parent"
-            android:layout_height="35dp"
-            android:layout_marginTop="10dp"
-            android:background="@drawable/radius"
-            android:text="@string/Save"
-            android:textAllCaps="false"
-            android:textColor="#fff" />
-
-    </LinearLayout>
-</ScrollView>
+    </ScrollView>
+</LinearLayout>
