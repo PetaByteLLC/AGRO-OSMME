@@ -111,6 +111,7 @@ import de.blau.android.dialogs.ConsoleDialog;
 import de.blau.android.dialogs.DataLoss;
 import de.blau.android.dialogs.DownloadCurrentWithChanges;
 import de.blau.android.dialogs.ElementInfo;
+import de.blau.android.dialogs.ErrorAlert;
 import de.blau.android.dialogs.GnssPositionInfo;
 import de.blau.android.dialogs.Layers;
 import de.blau.android.dialogs.NewVersion;
@@ -151,6 +152,7 @@ import de.blau.android.layer.streetlevel.NetworkImageLoader;
 import de.blau.android.layer.streetlevel.SelectImageInterface;
 import de.blau.android.layer.tiles.MapTilesLayer;
 import de.blau.android.listener.UpdateViewListener;
+import de.blau.android.listener.UploadListener;
 import de.blau.android.osm.BoundingBox;
 import de.blau.android.osm.Node;
 import de.blau.android.osm.OsmElement;
@@ -915,14 +917,15 @@ public class Main extends FullScreenAppCompatActivity
         }
 
         if (App.getLogic().hasChanges() && isConnected()) {
-            AlertDialog uploadDataDialog = new AlertDialog.Builder(this)
-                    .setMessage("Загрузить изминения на сервер?")
-                    .setCancelable(false)
-                    .setPositiveButton("Да", (dialog, which) -> {
-                        confirmUpload(null);
-                    })
-                    .setNegativeButton("Нет", null).create();
-            uploadDataDialog.show();
+            upload();
+//            AlertDialog uploadDataDialog = new AlertDialog.Builder(this)
+//                    .setMessage("Загрузить изминения на сервер?")
+//                    .setCancelable(false)
+//                    .setPositiveButton("Да", (dialog, which) -> {
+//                        upload();
+//                    })
+//                    .setNegativeButton("Нет", null).create();
+//            uploadDataDialog.show();
         }
     }
 
@@ -3337,6 +3340,26 @@ public class Main extends FullScreenAppCompatActivity
             ScreenMessage.barInfo(this, R.string.toast_no_changes);
         }
     }
+
+    private void upload() {
+        final Logic logic = App.getLogic();
+        final Server server = logic.getPrefs().getServer();
+        boolean hasDataChanges = logic.hasChanges();
+        boolean hasBugChanges = !App.getTaskStorage().isEmpty() && App.getTaskStorage().hasChanges();
+        if (hasDataChanges || hasBugChanges) {
+            if (hasDataChanges) {
+                UploadListener.UploadArguments arguments = new UploadListener.UploadArguments("", "",
+                        false, false, null, de.blau.android.dialogs.Util.getElementsFromBundle(new Bundle()));
+                logic.upload(this, arguments, () -> logic.checkForMail(this, server));
+            }
+            if (hasBugChanges) {
+                TransferTasks.upload(this, server, null);
+            }
+        } else {
+            ScreenMessage.barInfo(this, R.string.toast_no_changes);
+        }
+    }
+
 
     /**
      * Hide the bottom bar (if any)

@@ -95,7 +95,7 @@ public final class Util {
      * @return return a List of elements or null
      */
     @Nullable
-    static List<OsmElement> getElementsFromBundle(@NonNull Bundle bundle) {
+    public static List<OsmElement> getElementsFromBundle(@NonNull Bundle bundle) {
         List<OsmElement> result = new ArrayList<>();
         List<Long> ids = de.blau.android.util.Util.getSerializeableArrayList(bundle, ELEMENT_IDS_KEY, Long.class);
         List<String> types = bundle.getStringArrayList(ELEMENT_TYPES_KEY);
