@@ -698,32 +698,34 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
             setStatus(seasonRelation);
             setStatus(cropRelation);
 
+            RelationMember wayMember = new RelationMember(Tags.ROLE_OUTER, way);
+
+            seasonRelation.addMember(new RelationMember("crop", cropRelation));
+            cropRelation.addParentRelation(seasonRelation);
+            cropRelation.addMember(wayMember);
+
+            yieldRelation.addMember(wayMember);
+            way.addParentRelation(yieldRelation);
+
+            yieldRelation.addMember(new RelationMember("season", seasonRelation));
+            seasonRelation.addParentRelation(yieldRelation);
+
             insertElementUnsafe(way);
             insertElementUnsafe(yieldRelation);
             insertElementUnsafe(seasonRelation);
             insertElementUnsafe(cropRelation);
 
-            RelationMember rm = new RelationMember(Tags.ROLE_OUTER, way);
-            yieldRelation.addMember(rm);
-            way.addParentRelation(yieldRelation);
-
-            rm = new RelationMember("season", seasonRelation);
-            yieldRelation.addMember(rm);
-            seasonRelation.addParentRelation(yieldRelation);
-
-            rm = new RelationMember("crop", cropRelation);
-            seasonRelation.addMember(rm);
-            cropRelation.addParentRelation(seasonRelation);
-
-            onParentRelationChanged(way);
-            onParentRelationChanged(yieldRelation);
-            onParentRelationChanged(seasonRelation);
             onParentRelationChanged(cropRelation);
+            onParentRelationChanged(way);
+            onParentRelationChanged(seasonRelation);
+            onParentRelationChanged(yieldRelation);
         } finally {
             unlock();
         }
         onElementChanged(null, way);
     }
+
+    public static final String ROLE_SEASON = "site";
 
     private void setStatus(OsmElement osmElement) {
         osmElement.updateState(OsmElement.STATE_CREATED);
@@ -4445,6 +4447,7 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
             if (seasonValue.getParentRelations() == null || seasonValue.getParentRelations().isEmpty()) {
                 yield.addMember(new RelationMember("season", seasonValue));
                 seasonValue.addParentRelation(yield);
+                crop.addMember(new RelationMember(yield.getMembersWithRole(Tags.ROLE_OUTER).get(0)));
             }
 
             seasonValue.addMember(new RelationMember("crop", crop));

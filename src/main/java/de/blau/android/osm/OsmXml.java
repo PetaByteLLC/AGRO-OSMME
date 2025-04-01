@@ -2,6 +2,7 @@ package de.blau.android.osm;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -150,6 +151,147 @@ public final class OsmXml {
                 default:
                     logNotModified(elem);
                     continue;
+                }
+                count++;
+                if (count >= maxChanges) {
+                    break;
+                }
+            }
+        }
+        if (!createdRelations.isEmpty()) {
+            // sort the relations so that children come first, will not handle loops and similar brokenness
+            Collections.sort(createdRelations, relationOrder);
+        }
+        if (!modifiedRelations.isEmpty()) {
+            // sort the relations so that children come first, will not handle loops and similar brokenness
+            Collections.sort(modifiedRelations, relationOrder);
+        }
+        if (!deletedRelations.isEmpty()) {
+            // sort the relations so that parents come first, will not handle loops and similar brokenness
+            Collections.sort(deletedRelations, (r1, r2) -> {
+                if (r1.hasParentRelation(r2)) {
+                    return 1;
+                }
+                if (r2.hasParentRelation(r1)) {
+                    return -1;
+                }
+                return 0;
+            });
+        }
+
+        // NOTE as deleted elements cannot be referenced we need to undelete them in MODIFY elements before we reference
+        // them, this will not always work for relations, see below
+        serializeCreatedElements(serializer, changeSetId, createdNodes);
+        serializeModifiedElements(serializer, changeSetId, modifiedNodes);
+
+        serializeCreatedElements(serializer, changeSetId, createdWays);
+        serializeModifiedElements(serializer, changeSetId, modifiedWays);
+
+        // if a newly created relation references deleted relations, they would need to be undeleted in a separate pass
+        serializeCreatedElements(serializer, changeSetId, createdRelations);
+        serializeModifiedElements(serializer, changeSetId, modifiedRelations);
+
+        // delete in opposite order
+        if (!deletedNodes.isEmpty() || !deletedWays.isEmpty() || !deletedRelations.isEmpty()) {
+            serializer.startTag(null, DELETE);
+            for (OsmElement elem : deletedRelations) {
+                elem.toXml(serializer, changeSetId);
+            }
+            for (OsmElement elem : deletedWays) {
+                elem.toXml(serializer, changeSetId);
+            }
+            for (OsmElement elem : deletedNodes) {
+                elem.toXml(serializer, changeSetId);
+            }
+            serializer.endTag(null, DELETE);
+        }
+
+        serializer.endTag(null, OSM_CHANGE);
+        serializer.endDocument();
+    }
+
+
+    public static void writeOsmChange(@NonNull Storage storage, @NonNull StringWriter outputStream, @Nullable Long changeSetId, int maxChanges,
+                                      @NonNull String generator) throws IllegalArgumentException, IllegalStateException, IOException, XmlPullParserException {
+        int count = 0;
+        Log.d(DEBUG_TAG, "writing osm change with changesetid " + changeSetId);
+        XmlSerializer serializer = XmlPullParserFactory.newInstance().newSerializer();
+        serializer.setOutput(outputStream);
+        serializer.startDocument(UTF_8, null);
+        serializer.startTag(null, OSM_CHANGE);
+        serializer.attribute(null, GENERATOR, generator);
+        serializer.attribute(null, VERSION, VERSION_0_6);
+
+        List<Node> createdNodes = new ArrayList<>();
+        List<Node> modifiedNodes = new ArrayList<>();
+        List<Node> deletedNodes = new ArrayList<>();
+        List<Way> createdWays = new ArrayList<>();
+        List<Way> modifiedWays = new ArrayList<>();
+        List<Way> deletedWays = new ArrayList<>();
+        List<Relation> createdRelations = new ArrayList<>();
+        List<Relation> modifiedRelations = new ArrayList<>();
+        List<Relation> deletedRelations = new ArrayList<>();
+
+        for (Node elem : storage.getNodes()) {
+            Log.d(DEBUG_TAG, "node added to list for upload, id " + elem.getOsmId());
+            switch (elem.state) {
+                case OsmElement.STATE_CREATED:
+                    createdNodes.add(elem);
+                    break;
+                case OsmElement.STATE_MODIFIED:
+                    modifiedNodes.add(elem);
+                    break;
+                case OsmElement.STATE_DELETED:
+                    deletedNodes.add(elem);
+                    break;
+                default:
+                    logNotModified(elem);
+                    continue;
+            }
+            count++;
+            if (count >= maxChanges) {
+                break;
+            }
+        }
+        if (count < maxChanges) {
+            for (Way elem : storage.getWays()) {
+                Log.d(DEBUG_TAG, "way added to list for upload, id " + elem.osmId);
+                switch (elem.state) {
+                    case OsmElement.STATE_CREATED:
+                        createdWays.add(elem);
+                        break;
+                    case OsmElement.STATE_MODIFIED:
+                        modifiedWays.add(elem);
+                        break;
+                    case OsmElement.STATE_DELETED:
+                        deletedWays.add(elem);
+                        break;
+                    default:
+                        logNotModified(elem);
+                        continue;
+                }
+                count++;
+                if (count >= maxChanges) {
+                    break;
+                }
+            }
+        }
+        if (count < maxChanges) {
+            for (Relation elem : storage.getRelations()) {
+                Log.d(DEBUG_TAG, "relation added to list for upload, id " + elem.osmId);
+                switch (elem.state) {
+                    case OsmElement.STATE_CREATED:
+                        createdRelations.add(elem);
+                        break;
+                    case OsmElement.STATE_MODIFIED:
+                        modifiedRelations.add(elem);
+                        break;
+                    case OsmElement.STATE_DELETED:
+                        deletedRelations.add(elem);
+                        break;
+                    default:
+                        logNotModified(elem);
+                        continue;
                 }
                 count++;
                 if (count >= maxChanges) {

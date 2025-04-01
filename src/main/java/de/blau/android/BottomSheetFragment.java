@@ -269,7 +269,7 @@ public class BottomSheetFragment extends BottomSheetDialogFragment {
         yield.put("cadastrNumber", cadastrNumber);
         yield.put("position", getPosition());
         yield.put("landuse", "farmland");
-        yield.put("type", "multipolygon");
+        yield.put("type", "agromap_field");
         yield.put("technology", technology);
 
         Map<String, String> crop = new HashMap<>();
