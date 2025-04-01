@@ -96,13 +96,7 @@ public class BsEditCropFragment extends BottomSheetDialogFragment {
         irrigationTypeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         irrigationType.setAdapter(irrigationTypeAdapter);
 
-        List<Relation> relations = App.getLogic().getRelations();
-        List<Relation> seasons = new ArrayList<>();
-        for (Relation relation : relations) {
-            if (Objects.equals(relation.getTagWithKey("type"), "season")) {
-                seasons.add(relation);
-            }
-        }
+        List<Relation> seasons = main.getUnicalSeason();
 
         ArrayAdapter<Relation> seasonAdapter = new ArrayAdapter<Relation>(getActivity(), R.layout.season_dropdown_item, seasons) {
             @NonNull

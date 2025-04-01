@@ -15,6 +15,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.Queue;
 import java.util.concurrent.TimeUnit;
 
@@ -289,6 +290,28 @@ public class Main extends FullScreenAppCompatActivity
      * Minimum change in azimuth before we redraw
      */
     private static final int MIN_AZIMUT_CHANGE = 5;
+
+    public List<Relation> getUnicalSeason() {
+        List<Relation> relations = App.getLogic().getRelations();
+        List<Relation> seasons = new ArrayList<>();
+        for (Relation relation : relations) {
+            if (Objects.equals(relation.getTagWithKey("type"), "season")) {
+                if (seasons.isEmpty()) {
+                    seasons.add(relation);
+                } else {
+                    boolean notExists = false;
+                    for (Relation s : seasons) {
+                        if (notExists) continue;
+
+                        if (Objects.equals(s.getTagWithKey("name"), relation.getTagWithKey("name")))
+                            notExists = true;
+                    }
+                    if (!notExists) seasons.add(relation);
+                }
+            }
+        }
+        return seasons;
+    }
 
     private class ConnectivityChangedReceiver extends BroadcastReceiver {
         @Override
