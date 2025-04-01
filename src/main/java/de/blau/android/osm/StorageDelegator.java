@@ -4411,12 +4411,23 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
     public void updateSeason(Relation crop, Relation newSeason) {
         try {
             lock();
-
             Relation oldSeasonRelation = crop.getParentRelations().get(0);
+            Relation yieldRelation = oldSeasonRelation.getParentRelations().get(0);
+
+            if (!newSeason.getParentRelations().isEmpty()) {
+                Relation otherYieldRelation = newSeason.getParentRelations().get(0);
+               if (!Objects.equals(yieldRelation.getOsmId(), otherYieldRelation.getOsmId())) {
+                   SortedMap<String, String> tags = newSeason.getTags();
+                   newSeason = factory.createRelationWithNewId();
+                   newSeason.setTags(tags);
+                   insertElementUnsafe(newSeason);
+
+               }
+            }
+
             oldSeasonRelation.removeMember(oldSeasonRelation.getMember(crop));
             crop.removeParentRelation(oldSeasonRelation);
 
-            Relation yieldRelation = oldSeasonRelation.getParentRelations().get(0);
             if (oldSeasonRelation.getMembers().isEmpty()) {
                 yieldRelation.removeMember(yieldRelation.getMember(oldSeasonRelation));
                 oldSeasonRelation.removeParentRelation(yieldRelation);
@@ -4444,6 +4455,13 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
         try {
             lock();
             insertElementUnsafe(crop);
+
+            if (seasonValue.getParentRelations() != null && !seasonValue.getParentRelations().isEmpty()) {
+                SortedMap<String, String> tags = seasonValue.getTags();
+                seasonValue = factory.createRelationWithNewId();
+                seasonValue.setTags(tags);
+                insertElementUnsafe(seasonValue);
+            }
 
             if (seasonValue.getParentRelations() == null || seasonValue.getParentRelations().isEmpty()) {
                 yield.addMember(new RelationMember(StorageDelegator.ROLE_SEASON, seasonValue));
