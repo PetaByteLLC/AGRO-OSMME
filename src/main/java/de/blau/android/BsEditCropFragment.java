@@ -21,11 +21,13 @@ import androidx.annotation.Nullable;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import de.blau.android.osm.OsmElement;
 import de.blau.android.osm.Relation;
@@ -91,6 +93,14 @@ public class BsEditCropFragment extends BottomSheetDialogFragment {
         irrigationTypeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         irrigationType.setAdapter(irrigationTypeAdapter);
 
+        List<Relation> relations = App.getLogic().getRelations();
+        List<Relation> seasons = new ArrayList<>();
+        for (Relation relation : relations) {
+            if (Objects.equals(relation.getTagWithKey("type"), "season")) {
+                seasons.add(relation);
+            }
+        }
+
         ArrayAdapter<Relation> seasonAdapter = new ArrayAdapter<Relation>(getActivity(), R.layout.season_dropdown_item, seasons) {
             @NonNull
             @Override
@@ -123,11 +133,16 @@ public class BsEditCropFragment extends BottomSheetDialogFragment {
             builder.setTitle("Создания сезона")
                     .setView(dialogView)
                     .setPositiveButton("Создать", (dialog, which) -> {
-                        String input1 = name.getText().toString();
-                        String input2 = start.getText().toString();
-                        String input3 = end.getText().toString();
-
-
+                        Map<String, String> values = new HashMap<>();
+                        values.put("name", name.getText().toString());
+                        values.put("start", start.getText().toString());
+                        values.put("end", end.getText().toString());
+                        values.put("type", "season");
+                        Relation newRelationSeason = App.getDelegator().getFactory().createRelationWithNewId();
+                        App.getDelegator().updateTags(newRelationSeason, values);
+                        seasons.add(newRelationSeason);
+                        seasonAdapter.notifyDataSetChanged();
+                        season.setSelection(seasons.size() - 1);
                     })
                     .setNegativeButton("Отмена", null)
                     .create()
@@ -145,6 +160,8 @@ public class BsEditCropFragment extends BottomSheetDialogFragment {
             culture.setSelection(Arrays.asList(cultureData).indexOf(crop.getTagWithKey("culture")));
             landCategory.setSelection(Arrays.asList(landCategoryData).indexOf(crop.getTagWithKey("landCategory")));
             irrigationType.setSelection(Arrays.asList(irrigationTypeData).indexOf(crop.getTagWithKey("irrigationType")));
+            List<Relation> parentRelations = crop.getParentRelations();
+            season.setSelection(seasons.indexOf(parentRelations.get(0)));
         } catch (NullPointerException ignore) {
         }
 
@@ -155,6 +172,7 @@ public class BsEditCropFragment extends BottomSheetDialogFragment {
             String productivityValue = productivity.getText().toString();
             String landCategoryValue = landCategory.getSelectedItem().toString();
             String irrigationTypeValue = irrigationType.getSelectedItem().toString();
+            Relation seasonValue = (Relation) season.getSelectedItem();
             try {
                 if (culture.getSelectedItem() == null) throw new NullPointerException("Выращиваемая культура");
                 String cultureValue = culture.getSelectedItem().toString();
@@ -170,6 +188,9 @@ public class BsEditCropFragment extends BottomSheetDialogFragment {
                 map.put("irrigationType", irrigationTypeValue);
 
                 App.getDelegator().updateTags(crop, map);
+                if (!Objects.equals(seasonValue, crop.getParentRelations().get(0))) {
+                    App.getDelegator().updateSeason(crop, seasonValue);
+                }
             } catch (NullPointerException exception) {
                 Toast.makeText(getContext(),
                         String.format("Поле \"%s\" обязательно для заполнения", exception.getMessage()),

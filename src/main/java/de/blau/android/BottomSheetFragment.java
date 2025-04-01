@@ -21,7 +21,6 @@ import androidx.annotation.Nullable;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 
-import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.HashMap;
@@ -226,11 +225,11 @@ public class BottomSheetFragment extends BottomSheetDialogFragment {
         yield.put("position", getPosition());
         yield.put("landuse", "farmland");
         yield.put("type", "multipolygon");
+        yield.put("technology", technology);
 
         Map<String, String> season = new HashMap<>();
         season.put("name", year);
-        season.put("type", "site");
-        season.put("technology", technology);
+        season.put("type", "season");
         if (year.matches("^\\d{4}$")) {
             int yearValue = Integer.parseInt(year);
 
@@ -276,7 +275,7 @@ public class BottomSheetFragment extends BottomSheetDialogFragment {
         crop.put("culture", culture);
         crop.put("landCategory", landCategory);
         crop.put("irrigationType", irrigationType);
-//        crop.put("landuse", "farmland");
+        crop.put("type", "crop");
         crop.put("name", "Посев 1");
 
         App.getDelegator().createYield(lastSelectedWay, yield, season, crop);

@@ -14,7 +14,6 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -135,7 +134,8 @@ public class BsEditYieldFragment extends BottomSheetDialogFragment {
         });
 
         cropAdd.setOnClickListener(v -> {
-            BsEditCropFragment cropFragment = new BsEditCropFragment(null, seasons, main);
+            Relation relationWithNewId = App.getDelegator().getFactory().createRelationWithNewId();
+            BsEditCropFragment cropFragment = new BsEditCropFragment(relationWithNewId, seasons, main);
             cropFragment.show(getChildFragmentManager(), cropFragment.getTag());
         });
 
