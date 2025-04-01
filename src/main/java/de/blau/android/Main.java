@@ -292,8 +292,14 @@ public class Main extends FullScreenAppCompatActivity
     private static final int MIN_AZIMUT_CHANGE = 5;
 
     public List<Relation> getUnicalSeason() {
-        List<Relation> relations = App.getLogic().getRelations();
         List<Relation> seasons = new ArrayList<>();
+        addAllRelation(App.getLogic().getRelations(), seasons);
+        addAllRelation(App.getLogic().getModifiedRelations(), seasons);
+        return seasons;
+    }
+
+    private void addAllRelation(List<Relation> relations, List<Relation> seasons) {
+        if (relations == null) return;
         for (Relation relation : relations) {
             if (Objects.equals(relation.getTagWithKey("type"), "season") && relation.getState() != OsmElement.STATE_DELETED) {
                 if (seasons.isEmpty()) {
@@ -310,7 +316,6 @@ public class Main extends FullScreenAppCompatActivity
                 }
             }
         }
-        return seasons;
     }
 
     private class ConnectivityChangedReceiver extends BroadcastReceiver {
