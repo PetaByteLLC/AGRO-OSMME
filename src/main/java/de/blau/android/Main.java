@@ -5269,7 +5269,7 @@ public class Main extends FullScreenAppCompatActivity
             List<Relation> relationList = new ArrayList<>();
 
             for (Relation relation : relations) {
-                if (relation.getTagWithKey("landuse") != null) {
+                if (Objects.equals(relation.getTagWithKey("type"), "agromap_field")) {
                     relationList.add(relation);
                 }
             }
