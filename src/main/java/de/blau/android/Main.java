@@ -295,7 +295,7 @@ public class Main extends FullScreenAppCompatActivity
         List<Relation> relations = App.getLogic().getRelations();
         List<Relation> seasons = new ArrayList<>();
         for (Relation relation : relations) {
-            if (Objects.equals(relation.getTagWithKey("type"), "season")) {
+            if (Objects.equals(relation.getTagWithKey("type"), "season") && relation.getState() != OsmElement.STATE_DELETED) {
                 if (seasons.isEmpty()) {
                     seasons.add(relation);
                 } else {

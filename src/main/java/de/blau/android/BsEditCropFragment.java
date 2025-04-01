@@ -35,6 +35,7 @@ import de.blau.android.osm.Relation;
 public class BsEditCropFragment extends BottomSheetDialogFragment {
 
     private final Relation crop;
+    private final Relation yield;
     private final List<Relation> seasons;
     private final Main main;
 
@@ -52,8 +53,9 @@ public class BsEditCropFragment extends BottomSheetDialogFragment {
 
     private final boolean isNew;
 
-    public BsEditCropFragment(Relation crop, List<Relation> seasons, Main main, boolean isNew) {
+    public BsEditCropFragment(Relation crop, Relation yield, List<Relation> seasons, Main main, boolean isNew) {
         this.crop = crop;
+        this.yield = yield;
         this.main = main;
         this.seasons = seasons;
         this.isNew = isNew;
@@ -203,7 +205,7 @@ public class BsEditCropFragment extends BottomSheetDialogFragment {
 
                 App.getDelegator().updateTags(crop, map);
                 if (isNew) {
-                    App.getDelegator().connectCropToSeason(crop, seasonValue);
+                    App.getDelegator().connectCropToSeason(crop, yield, seasonValue);
                     if (getParentFragment() instanceof BsEditYieldFragment) {
                         ((BsEditYieldFragment) getParentFragment()).updateCropList(crop);
                     }

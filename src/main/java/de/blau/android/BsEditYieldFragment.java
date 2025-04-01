@@ -129,13 +129,13 @@ public class BsEditYieldFragment extends BottomSheetDialogFragment {
         cropList.setAdapter(cropAdapter);
         cropList.setOnItemClickListener((p, v, pos, id) -> {
             Relation clickedRelation = (Relation) p.getItemAtPosition(pos);
-            BsEditCropFragment cropFragment = new BsEditCropFragment(clickedRelation, seasons, main, false);
+            BsEditCropFragment cropFragment = new BsEditCropFragment(clickedRelation, yield, seasons, main, false);
             cropFragment.show(getChildFragmentManager(), cropFragment.getTag());
         });
 
         cropAdd.setOnClickListener(v -> {
             Relation relationWithNewId = App.getDelegator().getFactory().createRelationWithNewId();
-            BsEditCropFragment cropFragment = new BsEditCropFragment(relationWithNewId, seasons, main, true);
+            BsEditCropFragment cropFragment = new BsEditCropFragment(relationWithNewId, yield, seasons, main, true);
             cropFragment.show(getChildFragmentManager(), cropFragment.getTag());
         });
 
