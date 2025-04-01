@@ -164,6 +164,10 @@ public class BsEditYieldFragment extends BottomSheetDialogFragment {
             map.put("cadastrNumber", cadastrNumber.getText().toString());
             map.put("technology", technology.getSelectedItem().toString());
 
+            if (getParentFragment() instanceof BottomSheetFragmentAllField) {
+                ((BottomSheetFragmentAllField) getParentFragment()).updateList();
+            }
+
             App.getDelegator().updateTags(yield, map);
             dismiss();
         });

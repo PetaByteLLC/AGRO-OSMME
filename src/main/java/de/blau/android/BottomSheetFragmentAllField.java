@@ -23,6 +23,7 @@ public class BottomSheetFragmentAllField extends BottomSheetDialogFragment {
 
     private final List<Relation> relations;
     private final Main main;
+    private CustomExpandableListAdapter newAdapter;
 
     public BottomSheetFragmentAllField(List<Relation> relations, Main main) {
         this.relations = relations;
@@ -39,7 +40,7 @@ public class BottomSheetFragmentAllField extends BottomSheetDialogFragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         List<String> groups = getGroup();
-        CustomExpandableListAdapter newAdapter = new CustomExpandableListAdapter(getContext(), groups, getChildren(groups), main, this);
+        newAdapter = new CustomExpandableListAdapter(getContext(), groups, getChildren(groups), main, this);
         ExpandableListView expandableListView = view.findViewById(R.id.expandableList);
         expandableListView.setAdapter(newAdapter);
         expandableListView.setOnChildClickListener((ExpandableListView parent, View v, int groupPosition, int childPosition, long id) -> {
@@ -49,6 +50,10 @@ public class BottomSheetFragmentAllField extends BottomSheetDialogFragment {
         });
         BottomSheetBehavior<View> bottomSheetBehavior = BottomSheetBehavior.from((View) view.getParent());
         bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+    }
+
+    public void updateList() {
+        newAdapter.notifyDataSetChanged();
     }
 
     private List<String> getGroup() {
