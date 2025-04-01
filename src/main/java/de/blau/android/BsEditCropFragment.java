@@ -194,9 +194,15 @@ public class BsEditCropFragment extends BottomSheetDialogFragment {
                 App.getDelegator().updateTags(crop, map);
                 if (isNew) {
                     App.getDelegator().connectCropToSeason(crop, seasonValue);
+                    if (getParentFragment() instanceof BsEditYieldFragment) {
+                        ((BsEditYieldFragment) getParentFragment()).updateCropList(crop);
+                    }
                 } else {
                     if (!Objects.equals(seasonValue, crop.getParentRelations().get(0))) {
                         App.getDelegator().updateSeason(crop, seasonValue);
+                    }
+                    if (getParentFragment() instanceof BsEditYieldFragment) {
+                        ((BsEditYieldFragment) getParentFragment()).updateCropList();
                     }
                 }
             } catch (NullPointerException exception) {
@@ -204,11 +210,6 @@ public class BsEditCropFragment extends BottomSheetDialogFragment {
                         String.format("Поле \"%s\" обязательно для заполнения", exception.getMessage()),
                         Toast.LENGTH_SHORT).show();
                 return;
-            }
-
-            if (getParentFragment() instanceof BsEditYieldFragment) {
-                ((BsEditYieldFragment) getParentFragment()).updateCropList();
-                ((BsEditYieldFragment) getParentFragment()).updateCropList(crop);
             }
 
             dismiss();

@@ -88,6 +88,7 @@ import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
 import androidx.core.view.MenuCompat;
 import androidx.fragment.app.FragmentActivity;
+import androidx.fragment.app.FragmentManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.work.PeriodicWorkRequest;
 import androidx.work.WorkManager;
@@ -4208,17 +4209,13 @@ public class Main extends FullScreenAppCompatActivity
         }
     }
 
-    private void editData(Relation relation) {
-//        BottomSheetFragment bottomSheetFragment = new BottomSheetFragment(way, this, true);
-//        bottomSheetFragment.show(getSupportFragmentManager(), bottomSheetFragment.getTag());
-        if (relation == null) return;
 
-        List<RelationMember> seasonMembers = relation.getMembersWithRole("season");
+    public void editYield(Relation clickedRelation, FragmentManager fragmentManager) {
+        List<RelationMember> seasonMembers = clickedRelation.getMembersWithRole("season");
         List<Relation> seasons = new ArrayList<>();
         for (RelationMember relationMember : seasonMembers) {
             seasons.add((Relation) relationMember.getElement());
         }
-
         List<RelationMember> cropMembers = new ArrayList<>();
         for (Relation season : seasons) {
             cropMembers.addAll(season.getMembersWithRole("crop"));
@@ -4227,9 +4224,13 @@ public class Main extends FullScreenAppCompatActivity
         for (RelationMember relationMember : cropMembers) {
             crops.add((Relation) relationMember.getElement());
         }
+        BsEditYieldFragment bsEditYieldFragment = new BsEditYieldFragment(clickedRelation, seasons, crops, this);
+        bsEditYieldFragment.show(fragmentManager, bsEditYieldFragment.getTag());
+    }
 
-        BsEditYieldFragment bsEditYieldFragment = new BsEditYieldFragment(relation, seasons, crops, this);
-        bsEditYieldFragment.show(getSupportFragmentManager(), bsEditYieldFragment.getTag());
+    private void editData(Relation relation) {
+        if (relation == null) return;
+        editYield(relation, getSupportFragmentManager());
     }
 
     protected void finishPath(@Nullable final Way lastSelectedWay, @Nullable final Node lastSelectedNode) {

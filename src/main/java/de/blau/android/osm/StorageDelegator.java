@@ -4403,7 +4403,6 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
     public void updateSeason(Relation crop, Relation season) {
         try {
             lock();
-            insertElementUnsafe(season);
 
 
 //            apiStorage.insertElementSafe(crop);

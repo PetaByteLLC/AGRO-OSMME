@@ -42,6 +42,11 @@ public class BottomSheetFragmentAllField extends BottomSheetDialogFragment {
         CustomExpandableListAdapter newAdapter = new CustomExpandableListAdapter(getContext(), groups, getChildren(groups), main, this);
         ExpandableListView expandableListView = view.findViewById(R.id.expandableList);
         expandableListView.setAdapter(newAdapter);
+        expandableListView.setOnChildClickListener((ExpandableListView parent, View v, int groupPosition, int childPosition, long id) -> {
+            Relation clickedRelation = (Relation) parent.getExpandableListAdapter().getChild(groupPosition, childPosition);
+            main.editYield(clickedRelation, getChildFragmentManager());
+            return true;
+        });
         BottomSheetBehavior<View> bottomSheetBehavior = BottomSheetBehavior.from((View) view.getParent());
         bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
     }
