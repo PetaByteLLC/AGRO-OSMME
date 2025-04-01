@@ -4405,35 +4405,31 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
         }
     }
 
-    public void updateSeason(Relation crop, Relation season) {
+    public void updateSeason(Relation crop, Relation newSeason) {
         try {
             lock();
 
+            Relation oldSeasonRelation = crop.getParentRelations().get(0);
+            oldSeasonRelation.removeMember(oldSeasonRelation.getMember(crop));
+            crop.removeParentRelation(oldSeasonRelation);
 
-//            apiStorage.insertElementSafe(crop);
-//
-//            Relation seasonRelation = crop.getParentRelations().get(0);
-//            RelationMember member = seasonRelation.getMember(crop);
-//            seasonRelation.removeMember(member);
-//
-//            Relation yieldRelation = seasonRelation.getParentRelations().get(0);
-//            RelationMember fe = new RelationMember("season", season);
-//            yieldRelation.addMember(fe);
-//            season.addParentRelation(yieldRelation);
-//
-//            RelationMember rm = new RelationMember("crop", crop);
-//            season.addMember(rm);
-//            crop.addParentRelation(season);
-//            crop.removeParentRelation(seasonRelation);
-//
-//            if (seasonRelation.getMembers() == null || seasonRelation.getMembers().isEmpty()) {
-//                apiStorage.removeRelation(seasonRelation);
-//                yieldRelation.removeMember(yieldRelation.getMember(seasonRelation));
-//            }
-//            onParentRelationChanged(seasonRelation);
-//            onParentRelationChanged(yieldRelation);
-//            onParentRelationChanged(season);
-//            onParentRelationChanged(crop);
+            Relation yieldRelation = oldSeasonRelation.getParentRelations().get(0);
+            if (oldSeasonRelation.getMembers().isEmpty()) {
+                yieldRelation.removeMember(yieldRelation.getMember(oldSeasonRelation));
+                oldSeasonRelation.removeParentRelation(yieldRelation);
+                apiStorage.removeRelation(oldSeasonRelation);
+            }
+
+            RelationMember newRelationMemberSeason = new RelationMember("season", newSeason);
+            yieldRelation.addMember(newRelationMemberSeason);
+            newSeason.addParentRelation(yieldRelation);
+
+            newSeason.addMember(new RelationMember("crop", crop));
+            crop.addParentRelation(newSeason);
+
+            onParentRelationChanged(crop);
+            onParentRelationChanged(newSeason);
+            onParentRelationChanged(yieldRelation);
         } finally {
             unlock();
         }
