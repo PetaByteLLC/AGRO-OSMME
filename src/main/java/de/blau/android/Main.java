@@ -301,7 +301,7 @@ public class Main extends FullScreenAppCompatActivity
     private void addAllRelation(List<Relation> relations, List<Relation> seasons) {
         if (relations == null) return;
         for (Relation relation : relations) {
-            if (Objects.equals(relation.getTagWithKey("type"), "season") && relation.getState() != OsmElement.STATE_DELETED) {
+            if (Objects.equals(relation.getTagWithKey("type"), StorageDelegator.ROLE_SEASON) && relation.getState() != OsmElement.STATE_DELETED) {
                 if (seasons.isEmpty()) {
                     seasons.add(relation);
                 } else {
@@ -4239,14 +4239,14 @@ public class Main extends FullScreenAppCompatActivity
 
 
     public void editYield(Relation clickedRelation, FragmentManager fragmentManager) {
-        List<RelationMember> seasonMembers = clickedRelation.getMembersWithRole("season");
+        List<RelationMember> seasonMembers = clickedRelation.getMembersWithRole(StorageDelegator.ROLE_SEASON);
         List<Relation> seasons = new ArrayList<>();
         for (RelationMember relationMember : seasonMembers) {
             seasons.add((Relation) relationMember.getElement());
         }
         List<RelationMember> cropMembers = new ArrayList<>();
         for (Relation season : seasons) {
-            cropMembers.addAll(season.getMembersWithRole("crop"));
+            cropMembers.addAll(season.getMembersWithRole(StorageDelegator.ROLE_CROP));
         }
         List<Relation> crops = new ArrayList<>();
         for (RelationMember relationMember : cropMembers) {

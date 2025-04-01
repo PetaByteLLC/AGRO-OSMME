@@ -700,14 +700,14 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
 
             RelationMember wayMember = new RelationMember(Tags.ROLE_OUTER, way);
 
-            seasonRelation.addMember(new RelationMember("crop", cropRelation));
+            seasonRelation.addMember(new RelationMember(StorageDelegator.ROLE_CROP, cropRelation));
             cropRelation.addParentRelation(seasonRelation);
             cropRelation.addMember(wayMember);
 
             yieldRelation.addMember(wayMember);
             way.addParentRelation(yieldRelation);
 
-            yieldRelation.addMember(new RelationMember("season", seasonRelation));
+            yieldRelation.addMember(new RelationMember(StorageDelegator.ROLE_SEASON, seasonRelation));
             seasonRelation.addParentRelation(yieldRelation);
 
             insertElementUnsafe(way);
@@ -725,7 +725,8 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
         onElementChanged(null, way);
     }
 
-    public static final String ROLE_SEASON = "site";
+    public static final String ROLE_SEASON = "season";
+    public static final String ROLE_CROP = "crop";
 
     private void setStatus(OsmElement osmElement) {
         osmElement.updateState(OsmElement.STATE_CREATED);
@@ -4423,12 +4424,12 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
             }
 
             if (newSeason.getParentRelations() == null || newSeason.getParentRelations().isEmpty()) {
-                RelationMember newRelationMemberSeason = new RelationMember("season", newSeason);
+                RelationMember newRelationMemberSeason = new RelationMember(StorageDelegator.ROLE_SEASON, newSeason);
                 yieldRelation.addMember(newRelationMemberSeason);
                 newSeason.addParentRelation(yieldRelation);
             }
 
-            newSeason.addMember(new RelationMember("crop", crop));
+            newSeason.addMember(new RelationMember(StorageDelegator.ROLE_CROP, crop));
             crop.addParentRelation(newSeason);
 
 //            onParentRelationChanged(crop);
@@ -4445,12 +4446,12 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
             insertElementUnsafe(crop);
 
             if (seasonValue.getParentRelations() == null || seasonValue.getParentRelations().isEmpty()) {
-                yield.addMember(new RelationMember("season", seasonValue));
+                yield.addMember(new RelationMember(StorageDelegator.ROLE_SEASON, seasonValue));
                 seasonValue.addParentRelation(yield);
                 crop.addMember(new RelationMember(yield.getMembersWithRole(Tags.ROLE_OUTER).get(0)));
             }
 
-            seasonValue.addMember(new RelationMember("crop", crop));
+            seasonValue.addMember(new RelationMember(StorageDelegator.ROLE_CROP, crop));
             crop.addParentRelation(seasonValue);
 
             onParentRelationChanged(crop);

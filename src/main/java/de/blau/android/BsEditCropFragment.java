@@ -31,6 +31,7 @@ import java.util.Objects;
 
 import de.blau.android.osm.OsmElement;
 import de.blau.android.osm.Relation;
+import de.blau.android.osm.StorageDelegator;
 
 public class BsEditCropFragment extends BottomSheetDialogFragment {
 
@@ -137,7 +138,7 @@ public class BsEditCropFragment extends BottomSheetDialogFragment {
                         values.put("name", nameValue);
                         values.put("start", start.getText().toString());
                         values.put("end", end.getText().toString());
-                        values.put("type", "season");
+                        values.put("type", StorageDelegator.ROLE_SEASON);
 
                         if (nameValue.matches("^\\d{4}$") && start.getText().length() == 0 && end.getText().length() == 0) {
                             int yearValue = Integer.parseInt(nameValue);
@@ -201,7 +202,7 @@ public class BsEditCropFragment extends BottomSheetDialogFragment {
                 map.put("productivity", productivityValue);
                 map.put("landCategory", landCategoryValue);
                 map.put("irrigationType", irrigationTypeValue);
-                map.put("type", "crop");
+                map.put("type", StorageDelegator.ROLE_CROP);
 
                 App.getDelegator().updateTags(crop, map);
                 if (isNew) {

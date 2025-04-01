@@ -33,6 +33,7 @@ import java.util.Objects;
 import de.blau.android.osm.Node;
 import de.blau.android.osm.OsmElement;
 import de.blau.android.osm.Relation;
+import de.blau.android.osm.StorageDelegator;
 import de.blau.android.osm.Way;
 
 public class BottomSheetFragment extends BottomSheetDialogFragment {
@@ -151,7 +152,7 @@ public class BottomSheetFragment extends BottomSheetDialogFragment {
                         values.put("name", nameValue);
                         values.put("start", start.getText().toString());
                         values.put("end", end.getText().toString());
-                        values.put("type", "season");
+                        values.put("type", StorageDelegator.ROLE_SEASON);
 
                         if (nameValue.matches("^\\d{4}$") && start.getText().length() == 0 && end.getText().length() == 0) {
                             int yearValue = Integer.parseInt(nameValue);
@@ -268,7 +269,7 @@ public class BottomSheetFragment extends BottomSheetDialogFragment {
         yield.put("farmerMobile", farmerMobile);
         yield.put("cadastrNumber", cadastrNumber);
         yield.put("position", getPosition());
-        yield.put("landuse", "farmland");
+//        yield.put("landuse", "farmland");
         yield.put("type", "agromap_field");
         yield.put("technology", technology);
 
@@ -280,7 +281,7 @@ public class BottomSheetFragment extends BottomSheetDialogFragment {
         crop.put("culture", culture);
         crop.put("landCategory", landCategory);
         crop.put("irrigationType", irrigationType);
-        crop.put("type", "crop");
+        crop.put("type", StorageDelegator.ROLE_CROP);
 
         App.getDelegator().createYield(lastSelectedWay, yield, season, crop);
         dismiss();
