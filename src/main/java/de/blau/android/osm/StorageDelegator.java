@@ -660,13 +660,18 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
     }
 
 
-    public void createYield(Way way, Map<String, String> yield, Map<String, String> season, Map<String, String> crop) {
+    public void createYield(Way way, Map<String, String> yield, Relation season, Map<String, String> crop) {
         dirty = true;
         Relation yieldRelation = factory.createRelationWithNewId();
         yieldRelation.setTags(yield);
 
-        Relation seasonRelation = factory.createRelationWithNewId();
-        seasonRelation.setTags(season);
+        Relation seasonRelation;
+        if (season.getMembers() == null || season.getMembers().isEmpty()) {
+            seasonRelation = season;
+        } else {
+            seasonRelation = factory.createRelationWithNewId();
+            seasonRelation.setTags(season.tags);
+        }
 
         Relation cropRelation = factory.createRelationWithNewId();
         cropRelation.setTags(crop);

@@ -2,13 +2,14 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@drawable/radius2">
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@drawable/radius2"
-        android:orientation="vertical">
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginHorizontal="10dp">
 
         <TextView
             android:id="@+id/label"
@@ -29,7 +30,6 @@
             android:id="@+id/name"
             android:layout_width="match_parent"
             android:layout_height="40dp"
-            android:layout_marginHorizontal="20dp"
             android:layout_marginTop="10dp"
             android:background="@drawable/edittext_background"
             android:inputType="text"
@@ -39,7 +39,6 @@
             android:id="@+id/region"
             android:layout_width="match_parent"
             android:layout_height="40dp"
-            android:layout_marginHorizontal="20dp"
             android:layout_marginTop="10dp"
             android:background="@drawable/edittext_background"
             android:hint="Область"
@@ -51,7 +50,6 @@
             android:id="@+id/district"
             android:layout_width="match_parent"
             android:layout_height="40dp"
-            android:layout_marginHorizontal="20dp"
             android:layout_marginTop="10dp"
             android:background="@drawable/edittext_background"
             android:hint="Район"
@@ -63,7 +61,6 @@
             android:id="@+id/farmerSurName"
             android:layout_width="match_parent"
             android:layout_height="40dp"
-            android:layout_marginHorizontal="20dp"
             android:layout_marginTop="10dp"
             android:background="@drawable/edittext_background"
             android:hint="Фамилия землепользователя"
@@ -75,7 +72,6 @@
             android:id="@+id/farmerName"
             android:layout_width="match_parent"
             android:layout_height="40dp"
-            android:layout_marginHorizontal="20dp"
             android:layout_marginTop="10dp"
             android:background="@drawable/edittext_background"
             android:hint="Имя земплепользователя"
@@ -87,7 +83,6 @@
             android:id="@+id/farmerMobile"
             android:layout_width="match_parent"
             android:layout_height="40dp"
-            android:layout_marginHorizontal="20dp"
             android:layout_marginTop="10dp"
             android:background="@drawable/edittext_background"
             android:hint="Телефон земплепользователя"
@@ -99,7 +94,6 @@
             android:id="@+id/cadastrNumber"
             android:layout_width="match_parent"
             android:layout_height="40dp"
-            android:layout_marginHorizontal="20dp"
             android:layout_marginTop="10dp"
             android:background="@drawable/edittext_background"
             android:hint="Кадастровый номер поля"
@@ -111,7 +105,6 @@
             android:id="@+id/aggregator"
             android:layout_width="match_parent"
             android:layout_height="40dp"
-            android:layout_marginHorizontal="20dp"
             android:layout_marginTop="10dp"
             android:background="@drawable/edittext_background"
             android:hint="Агрегатор"
@@ -119,23 +112,29 @@
             android:textColor="@color/ag_text_color"
             android:textColorHint="@color/ag_text_color" />
 
-        <EditText
-            android:id="@+id/year"
+        <LinearLayout
+            android:layout_marginTop="10dp"
             android:layout_width="match_parent"
             android:layout_height="40dp"
-            android:layout_marginHorizontal="20dp"
-            android:layout_marginTop="10dp"
-            android:background="@drawable/edittext_background"
-            android:hint="Текущий год"
-            android:inputType="text"
-            android:textColor="@color/ag_text_color"
-            android:textColorHint="@color/ag_text_color" />
+            android:orientation="horizontal">
+            <Spinner
+                android:id="@+id/season"
+                android:layout_width="350dp"
+                android:layout_height="match_parent"
+                android:background="@drawable/edittext_background"
+                android:choiceMode="singleChoice" />
+            <ImageView
+                android:id="@+id/add_season"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:src="@drawable/ic_add_black_36dp"
+                />
+        </LinearLayout>
 
         <Spinner
             android:id="@+id/culture"
             android:layout_width="match_parent"
             android:layout_height="40dp"
-            android:layout_marginHorizontal="20dp"
             android:layout_marginTop="10dp"
             android:background="@drawable/edittext_background"
             android:choiceMode="singleChoice" />
@@ -144,7 +143,6 @@
             android:id="@+id/cultureVarieties"
             android:layout_width="match_parent"
             android:layout_height="40dp"
-            android:layout_marginHorizontal="20dp"
             android:layout_marginTop="10dp"
             android:background="@drawable/edittext_background"
             android:hint="Сорт"
@@ -156,7 +154,6 @@
             android:id="@+id/technology"
             android:layout_width="match_parent"
             android:layout_height="40dp"
-            android:layout_marginHorizontal="20dp"
             android:layout_marginTop="10dp"
             android:background="@drawable/edittext_background"
             android:choiceMode="singleChoice" />
@@ -165,7 +162,6 @@
             android:id="@+id/landCategory"
             android:layout_width="match_parent"
             android:layout_height="40dp"
-            android:layout_marginHorizontal="20dp"
             android:layout_marginTop="10dp"
             android:background="@drawable/edittext_background"
             android:choiceMode="singleChoice" />
@@ -174,7 +170,6 @@
             android:id="@+id/irrigationType"
             android:layout_width="match_parent"
             android:layout_height="40dp"
-            android:layout_marginHorizontal="20dp"
             android:layout_marginTop="10dp"
             android:background="@drawable/edittext_background"
             android:choiceMode="singleChoice" />
@@ -183,7 +178,6 @@
             android:id="@+id/sowingDate"
             android:layout_width="match_parent"
             android:layout_height="40dp"
-            android:layout_marginHorizontal="20dp"
             android:layout_marginTop="10dp"
             android:background="@drawable/edittext_background"
             android:hint="Дата посева"
@@ -195,7 +189,6 @@
             android:id="@+id/cleaningDate"
             android:layout_width="match_parent"
             android:layout_height="40dp"
-            android:layout_marginHorizontal="20dp"
             android:layout_marginTop="10dp"
             android:background="@drawable/edittext_background"
             android:hint="Дата уборки"
@@ -207,7 +200,6 @@
             android:id="@+id/productivity"
             android:layout_width="match_parent"
             android:layout_height="40dp"
-            android:layout_marginHorizontal="20dp"
             android:layout_marginTop="10dp"
             android:background="@drawable/edittext_background"
             android:hint="Урожайность"
@@ -261,7 +253,6 @@
             android:id="@+id/coordinate_list"
             android:layout_width="match_parent"
             android:layout_height="100dp"
-            android:layout_marginHorizontal="20dp"
             android:layout_marginTop="10dp"
             tools:listitem="@layout/coordinate_list_item" />
 
@@ -269,7 +260,6 @@
             android:id="@+id/btn_upload_image"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginHorizontal="20dp"
             android:background="@drawable/radius"
             android:drawableTop="@drawable/outline_file_upload_24"
             android:paddingVertical="8dp"
@@ -289,7 +279,6 @@
             android:id="@+id/images"
             android:layout_width="match_parent"
             android:layout_height="220dp"
-            android:layout_marginHorizontal="20dp"
             android:layout_marginTop="10dp"
             android:horizontalSpacing="16dp"
             android:numColumns="2"
@@ -301,13 +290,11 @@
             android:id="@+id/btn_save"
             android:layout_width="match_parent"
             android:layout_height="35dp"
-            android:layout_marginHorizontal="20dp"
             android:layout_marginTop="10dp"
             android:background="@drawable/radius"
             android:text="@string/Save"
             android:textAllCaps="false"
             android:textColor="#fff" />
-
 
     </LinearLayout>
 </ScrollView>

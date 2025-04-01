@@ -1,5 +1,6 @@
 package de.blau.android;
 
+import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.content.DialogInterface;
 import android.location.Location;
@@ -10,6 +11,7 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -21,12 +23,16 @@ import androidx.annotation.Nullable;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import de.blau.android.osm.Node;
+import de.blau.android.osm.OsmElement;
+import de.blau.android.osm.Relation;
 import de.blau.android.osm.Way;
 
 public class BottomSheetFragment extends BottomSheetDialogFragment {
@@ -35,10 +41,11 @@ public class BottomSheetFragment extends BottomSheetDialogFragment {
     private final Main main;
     private boolean edit;
 
-    private EditText name, region, district, aggregator, farmerName, farmerMobile, cadastrNumber, year,
-            cultureVarieties, sowingDate, cleaningDate, productivity, secondarySowingDate,
-            secondaryCropHarvestDate, farmerSurName;
-    private Spinner culture, technology, landCategory, irrigationType, secondaryCulture;
+    private EditText name, region, district, aggregator, farmerName, farmerMobile, cadastrNumber,
+            cultureVarieties, sowingDate, cleaningDate, productivity, farmerSurName;
+    private Spinner culture, technology, landCategory, irrigationType, season;
+
+    private ImageView addSeason;
 
     public BottomSheetFragment(Way lastSelectedWay, Main main, boolean edit) {
         this.lastSelectedWay = lastSelectedWay;
@@ -80,6 +87,7 @@ public class BottomSheetFragment extends BottomSheetDialogFragment {
         name = view.findViewById(R.id.name);
         name.setText("Поле " + App.getLogic().getWays().size());
 
+        addSeason = view.findViewById(R.id.add_season);
         region = view.findViewById(R.id.region);
         district = view.findViewById(R.id.district);
         aggregator = view.findViewById(R.id.aggregator);
@@ -87,7 +95,7 @@ public class BottomSheetFragment extends BottomSheetDialogFragment {
         farmerSurName = view.findViewById(R.id.farmerSurName);
         farmerMobile = view.findViewById(R.id.farmerMobile);
         cadastrNumber = view.findViewById(R.id.cadastrNumber);
-        year = view.findViewById(R.id.year);
+        season = view.findViewById(R.id.season);
         cultureVarieties = view.findViewById(R.id.cultureVarieties);
         sowingDate = view.findViewById(R.id.sowingDate);
         cleaningDate = view.findViewById(R.id.cleaningDate);
@@ -103,8 +111,78 @@ public class BottomSheetFragment extends BottomSheetDialogFragment {
 
         setDataPicker(sowingDate);
         setDataPicker(cleaningDate);
-//        setDataPicker(secondarySowingDate);
-//        setDataPicker(secondaryCropHarvestDate);
+
+        List<Relation> relations = App.getLogic().getRelations();
+        List<Relation> seasons = new ArrayList<>();
+        for (Relation relation : relations) {
+            if (Objects.equals(relation.getTagWithKey("type"), "season")) {
+                seasons.add(relation);
+            }
+        }
+
+        ArrayAdapter<Relation> seasonAdapter = new ArrayAdapter<Relation>(getActivity(), R.layout.season_dropdown_item, seasons) {
+            @NonNull
+            @Override
+            public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
+                if (convertView == null) {
+                    convertView = LayoutInflater.from(getContext()).inflate(R.layout.season_dropdown_item, parent, false);
+                }
+                Relation relation = getItem(position);
+                TextView name = convertView.findViewById(R.id.text1);
+                name.setText("Сезон " + getTagValue(relation, "name"));
+
+                TextView date = convertView.findViewById(R.id.text2);
+                date.setText(getTagValue(relation, "start") + " - " + getTagValue(relation, "end"));
+                return convertView;
+            }
+        };
+        seasonAdapter.setDropDownViewResource(R.layout.agro_simple_spinner_item);
+        season.setAdapter(seasonAdapter);
+
+        addSeason.setOnClickListener(v -> {
+            LayoutInflater inflater = getLayoutInflater();
+            View dialogView = inflater.inflate(R.layout.season_create_diaglog, null);
+            final EditText name = dialogView.findViewById(R.id.name);
+            final EditText start = dialogView.findViewById(R.id.start);
+            final EditText end = dialogView.findViewById(R.id.end);
+
+            setDataPicker(start);
+            setDataPicker(end);
+            AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+            builder.setTitle("Создания сезона")
+                    .setView(dialogView)
+                    .setPositiveButton("Создать", (dialog, which) -> {
+                        Map<String, String> values = new HashMap<>();
+                        String nameValue = name.getText().toString();
+                        values.put("name", nameValue);
+                        values.put("start", start.getText().toString());
+                        values.put("end", end.getText().toString());
+                        values.put("type", "season");
+
+                        if (nameValue.matches("^\\d{4}$") && start.getText().length() == 0 && end.getText().length() == 0) {
+                            int yearValue = Integer.parseInt(nameValue);
+                            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                                values.put("start", java.time.LocalDate.of(yearValue, 1, 1).toString());
+                                values.put("end", java.time.LocalDate.of(yearValue, 12, 31).toString());
+                            } else {
+                                Calendar calendarStart = Calendar.getInstance();
+                                calendarStart.set(yearValue, Calendar.JANUARY, 1);
+                                Calendar calendarEnd = Calendar.getInstance();
+                                calendarEnd.set(yearValue, Calendar.DECEMBER, 31);
+                                values.put("start", formatCalendarToString(calendarStart));
+                                values.put("end", formatCalendarToString(calendarEnd));
+                            }
+                        }
+                        Relation newRelationSeason = App.getDelegator().getFactory().createRelationWithNewId();
+                        App.getDelegator().updateTags(newRelationSeason, values);
+                        seasons.add(newRelationSeason);
+                        seasonAdapter.notifyDataSetChanged();
+                        season.setSelection(seasons.size() - 1);
+                    })
+                    .setNegativeButton("Отмена", null)
+                    .create()
+                    .show();
+        });
 
 
         String[] cultureData = {"Выращиваемая культура", "Пшеница", "Зерновые", "Ячмень", "Кукуруза", "Хлопок-сырец", "Сахарная свекла"};
@@ -144,7 +222,7 @@ public class BottomSheetFragment extends BottomSheetDialogFragment {
             String farmerSurNameValue = farmerSurName.getText().toString();
             String farmerMobileValue = farmerMobile.getText().toString();
             String cadastrNumberValue = cadastrNumber.getText().toString();
-            String yearValue = year.getText().toString();
+            Relation seasonValue = (Relation) season.getSelectedItem();
             String cultureVarietiesValue = cultureVarieties.getText().toString();
             String sowingDateValue = sowingDate.getText().toString();
             String cleaningDateValue = cleaningDate.getText().toString();
@@ -162,9 +240,9 @@ public class BottomSheetFragment extends BottomSheetDialogFragment {
                 if (cultureValue.equals("Выращиваемая культура")) throw new NullPointerException("Выращиваемая культура");
                 // Сохранение всех значений
                 save(nameValue, regionValue, districtValue, aggregatorValue, farmerNameValue, farmerMobileValue,
-                        cadastrNumberValue, yearValue, cultureVarietiesValue, sowingDateValue, cleaningDateValue,
-                        productivityValue, null, null, cultureValue,
-                        technologyValue, landCategoryValue, irrigationTypeValue, null, farmerSurNameValue);
+                        cadastrNumberValue, seasonValue, cultureVarietiesValue, sowingDateValue, cleaningDateValue,
+                        productivityValue, cultureValue, technologyValue, landCategoryValue, irrigationTypeValue,
+                        farmerSurNameValue);
             } catch (NullPointerException exception) {
                 Toast.makeText(getContext(),
                         String.format("Поле \"%s\" обязательно для заполнения", exception.getMessage()),
@@ -172,32 +250,6 @@ public class BottomSheetFragment extends BottomSheetDialogFragment {
             }
         });
 
-        if (edit) {
-            label.setText("Редактирование поля");
-            name.setText(lastSelectedWay.getTagWithKey("name"));
-            region.setText(lastSelectedWay.getTagWithKey("region"));
-            district.setText(lastSelectedWay.getTagWithKey("district"));
-            aggregator.setText(lastSelectedWay.getTagWithKey("aggregator"));
-            farmerName.setText(lastSelectedWay.getTagWithKey("farmerName"));
-            farmerSurName.setText(lastSelectedWay.getTagWithKey("farmerSurName"));
-            farmerMobile.setText(lastSelectedWay.getTagWithKey("farmerMobile"));
-            cadastrNumber.setText(lastSelectedWay.getTagWithKey("cadastrNumber"));
-            year.setText(lastSelectedWay.getTagWithKey("year"));
-            cultureVarieties.setText(lastSelectedWay.getTagWithKey("cultureVarieties"));
-            sowingDate.setText(lastSelectedWay.getTagWithKey("sowingDate"));
-            cleaningDate.setText(lastSelectedWay.getTagWithKey("cleaningDate"));
-            productivity.setText(lastSelectedWay.getTagWithKey("productivity"));
-//            secondarySowingDate.setText(lastSelectedWay.getTagWithKey("secondarySowingDate"));
-//            secondaryCropHarvestDate.setText(lastSelectedWay.getTagWithKey("secondaryCropHarvestDate"));
-            try {
-                culture.setSelection(Arrays.asList(cultureData).indexOf(lastSelectedWay.getTagWithKey("culture")));
-                technology.setSelection(Arrays.asList(technologyData).indexOf(lastSelectedWay.getTagWithKey("technology")));
-                landCategory.setSelection(Arrays.asList(landCategoryData).indexOf(lastSelectedWay.getTagWithKey("landCategory")));
-                irrigationType.setSelection(Arrays.asList(irrigationTypeData).indexOf(lastSelectedWay.getTagWithKey("irrigationType")));
-//                secondaryCulture.setSelection(Arrays.asList(cultureData2).indexOf(lastSelectedWay.getTagWithKey("secondaryCulture")));
-            } catch (NullPointerException ignore) {
-            }
-        }
         BottomSheetBehavior<View> bottomSheetBehavior = BottomSheetBehavior.from((View) view.getParent());
         bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
         bottomSheetBehavior.setDraggable(false);
@@ -209,10 +261,9 @@ public class BottomSheetFragment extends BottomSheetDialogFragment {
     }
 
     private void save(String name, String region, String district, String aggregator, String farmerName, String farmerMobile,
-                      String cadastrNumber, String year, String cultureVarieties, String sowingDate,
-                      String cleaningDate, String productivity, String secondarySowingDate,
-                      String secondaryCropHarvestDate, String culture, String technology, String landCategory,
-                      String irrigationType, String secondaryCulture, String farmerSurName) {
+                      String cadastrNumber, Relation season, String cultureVarieties, String sowingDate,
+                      String cleaningDate, String productivity, String culture, String technology, String landCategory,
+                      String irrigationType, String farmerSurName) {
         Map<String, String> yield = new HashMap<>();
         yield.put("name", name);
         yield.put("region", region);
@@ -227,46 +278,6 @@ public class BottomSheetFragment extends BottomSheetDialogFragment {
         yield.put("type", "multipolygon");
         yield.put("technology", technology);
 
-        Map<String, String> season = new HashMap<>();
-        season.put("name", year);
-        season.put("type", "season");
-        if (year.matches("^\\d{4}$")) {
-            int yearValue = Integer.parseInt(year);
-
-            // Для современных версий Android (API 26 и выше)
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-                season.put("start", java.time.LocalDate.of(yearValue, 1, 1).toString());
-                season.put("end", java.time.LocalDate.of(yearValue, 12, 31).toString());
-            } else {
-                // Для старых версий Android
-                Calendar calendarStart = Calendar.getInstance();
-                calendarStart.set(yearValue, Calendar.JANUARY, 1);
-                Calendar calendarEnd = Calendar.getInstance();
-                calendarEnd.set(yearValue, Calendar.DECEMBER, 31);
-
-                // Преобразуем в строку в формате "yyyy-MM-dd"
-                season.put("start", formatCalendarToString(calendarStart));
-                season.put("end", formatCalendarToString(calendarEnd));
-            }
-        } else {
-            int currentYear = Calendar.getInstance().get(Calendar.YEAR);
-
-            // Для современных версий Android (API 26 и выше)
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-                season.put("start", java.time.LocalDate.of(currentYear, 1, 1).toString());
-                season.put("end", java.time.LocalDate.of(currentYear, 12, 31).toString());
-            } else {
-                // Для старых версий Android
-                Calendar calendarStart = Calendar.getInstance();
-                calendarStart.set(currentYear, Calendar.JANUARY, 1);
-                Calendar calendarEnd = Calendar.getInstance();
-                calendarEnd.set(currentYear, Calendar.DECEMBER, 31);
-
-                // Преобразуем в строку в формате "yyyy-MM-dd"
-                season.put("start", formatCalendarToString(calendarStart));
-                season.put("end", formatCalendarToString(calendarEnd));
-            }
-        }
         Map<String, String> crop = new HashMap<>();
         crop.put("cultureVarieties", cultureVarieties);
         crop.put("sowingDate", sowingDate);
@@ -334,5 +345,11 @@ public class BottomSheetFragment extends BottomSheetDialogFragment {
                     year, month, day);
             datePickerDialog.show();
         });
+    }
+
+    private String getTagValue(OsmElement osmElement, String key) {
+        if (key == null || osmElement == null) return "";
+        String tagWithKey = osmElement.getTagWithKey(key);
+        return tagWithKey == null ? "" : tagWithKey;
     }
 }

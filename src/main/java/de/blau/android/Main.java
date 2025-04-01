@@ -638,13 +638,13 @@ public class Main extends FullScreenAppCompatActivity
         App.getLogic().deselectAll();
         App.getLogic().setLocked(true);
 
-//        String token = prefs.getCgiToken();
-//
-//        if (token == null) {
-//            Intent intent = new Intent(Main.this, LoginActivity.class);
-//            startActivity(intent);
-//            finish();
-//        }
+        String token = prefs.getCgiToken();
+
+        if (token == null) {
+            Intent intent = new Intent(Main.this, LoginActivity.class);
+            startActivity(intent);
+            finish();
+        }
     }
 
     /**
@@ -886,16 +886,16 @@ public class Main extends FullScreenAppCompatActivity
             });
         }
 
-//        if (App.getLogic().hasChanges() && isConnected()) {
-//            AlertDialog uploadDataDialog = new AlertDialog.Builder(this)
-//                    .setMessage("Загрузить изминения на сервер?")
-//                    .setCancelable(false)
-//                    .setPositiveButton("Да", (dialog, which) -> {
-//
-//                    })
-//                    .setNegativeButton("Нет", null).create();
-//            uploadDataDialog.show();
-//        }
+        if (App.getLogic().hasChanges() && isConnected()) {
+            AlertDialog uploadDataDialog = new AlertDialog.Builder(this)
+                    .setMessage("Загрузить изминения на сервер?")
+                    .setCancelable(false)
+                    .setPositiveButton("Да", (dialog, which) -> {
+                        confirmUpload(null);
+                    })
+                    .setNegativeButton("Нет", null).create();
+            uploadDataDialog.show();
+        }
     }
 
     /**

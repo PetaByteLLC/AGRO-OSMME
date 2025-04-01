@@ -137,10 +137,26 @@ public class BsEditCropFragment extends BottomSheetDialogFragment {
                     .setView(dialogView)
                     .setPositiveButton("Создать", (dialog, which) -> {
                         Map<String, String> values = new HashMap<>();
-                        values.put("name", name.getText().toString());
+                        String nameValue = name.getText().toString();
+                        values.put("name", nameValue);
                         values.put("start", start.getText().toString());
                         values.put("end", end.getText().toString());
                         values.put("type", "season");
+
+                        if (nameValue.matches("^\\d{4}$") && start.getText().length() == 0 && end.getText().length() == 0) {
+                            int yearValue = Integer.parseInt(nameValue);
+                            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                                values.put("start", java.time.LocalDate.of(yearValue, 1, 1).toString());
+                                values.put("end", java.time.LocalDate.of(yearValue, 12, 31).toString());
+                            } else {
+                                Calendar calendarStart = Calendar.getInstance();
+                                calendarStart.set(yearValue, Calendar.JANUARY, 1);
+                                Calendar calendarEnd = Calendar.getInstance();
+                                calendarEnd.set(yearValue, Calendar.DECEMBER, 31);
+                                values.put("start", formatCalendarToString(calendarStart));
+                                values.put("end", formatCalendarToString(calendarEnd));
+                            }
+                        }
                         Relation newRelationSeason = App.getDelegator().getFactory().createRelationWithNewId();
                         App.getDelegator().updateTags(newRelationSeason, values);
                         seasons.add(newRelationSeason);
@@ -241,6 +257,16 @@ public class BsEditCropFragment extends BottomSheetDialogFragment {
         if (key == null || osmElement == null) return "";
         String tagWithKey = osmElement.getTagWithKey(key);
         return tagWithKey == null ? "" : tagWithKey;
+    }
+
+    private String formatCalendarToString(Calendar calendar) {
+        // Преобразуем календарь в строку в формате "yyyy-MM-dd"
+        int year = calendar.get(Calendar.YEAR);
+        int month = calendar.get(Calendar.MONTH) + 1; // Месяцы начинаются с 0
+        int day = calendar.get(Calendar.DAY_OF_MONTH);
+
+        // Форматируем строку как "yyyy-MM-dd"
+        return String.format("%04d-%02d-%02d", year, month, day);
     }
 
     private void setDataPicker(EditText editText) {
