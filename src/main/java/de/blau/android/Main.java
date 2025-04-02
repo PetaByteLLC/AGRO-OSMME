@@ -919,16 +919,16 @@ public class Main extends FullScreenAppCompatActivity
         }
 
         if (App.getLogic().hasChanges() && isConnected()) {
-            upload();
-            StringWriter stringWriter = new StringWriter();
-            try {
-                OsmXml.writeOsmChange(App.getDelegator().getCurrentStorage(), stringWriter, 1L, 10000, App.getUserAgent());
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            } catch (XmlPullParserException e) {
-                throw new RuntimeException(e);
-            }
-            Log.d(DEBUG_TAG, stringWriter.toString());
+//            upload();
+//            StringWriter stringWriter = new StringWriter();
+//            try {
+//                OsmXml.writeOsmChange(App.getDelegator().getCurrentStorage(), stringWriter, 1L, 10000, App.getUserAgent());
+//            } catch (IOException e) {
+//                throw new RuntimeException(e);
+//            } catch (XmlPullParserException e) {
+//                throw new RuntimeException(e);
+//            }
+//            Log.d(DEBUG_TAG, stringWriter.toString());
         }
     }
 
