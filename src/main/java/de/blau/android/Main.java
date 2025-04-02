@@ -7,6 +7,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Deque;
@@ -156,6 +157,7 @@ import de.blau.android.listener.UploadListener;
 import de.blau.android.osm.BoundingBox;
 import de.blau.android.osm.Node;
 import de.blau.android.osm.OsmElement;
+import de.blau.android.osm.OsmXml;
 import de.blau.android.osm.Relation;
 import de.blau.android.osm.RelationMember;
 import de.blau.android.osm.Server;
@@ -918,14 +920,15 @@ public class Main extends FullScreenAppCompatActivity
 
         if (App.getLogic().hasChanges() && isConnected()) {
             upload();
-//            AlertDialog uploadDataDialog = new AlertDialog.Builder(this)
-//                    .setMessage("Загрузить изминения на сервер?")
-//                    .setCancelable(false)
-//                    .setPositiveButton("Да", (dialog, which) -> {
-//                        upload();
-//                    })
-//                    .setNegativeButton("Нет", null).create();
-//            uploadDataDialog.show();
+            StringWriter stringWriter = new StringWriter();
+            try {
+                OsmXml.writeOsmChange(App.getDelegator().getCurrentStorage(), stringWriter, 1L, 10000, App.getUserAgent());
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            } catch (XmlPullParserException e) {
+                throw new RuntimeException(e);
+            }
+            Log.d(DEBUG_TAG, stringWriter.toString());
         }
     }
 
@@ -3349,7 +3352,7 @@ public class Main extends FullScreenAppCompatActivity
         if (hasDataChanges || hasBugChanges) {
             if (hasDataChanges) {
                 UploadListener.UploadArguments arguments = new UploadListener.UploadArguments("", "",
-                        false, false, null, de.blau.android.dialogs.Util.getElementsFromBundle(new Bundle()));
+                        false, true, null, de.blau.android.dialogs.Util.getElementsFromBundle(new Bundle()));
                 logic.upload(this, arguments, () -> logic.checkForMail(this, server));
             }
             if (hasBugChanges) {

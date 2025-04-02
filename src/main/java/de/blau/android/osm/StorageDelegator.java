@@ -342,7 +342,7 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
                 elem.addTag(key, tags.get(key));
             }
 
-            elem.updateState(OsmElement.STATE_MODIFIED);
+            elem.updateState(OsmElement.STATE_CREATED);
             elem.stamp();
             elem.resetHasProblem();
             try {
@@ -693,6 +693,11 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
         try {
             lock();
 
+            insertElementUnsafe(way);
+            insertElementUnsafe(yieldRelation);
+            insertElementUnsafe(seasonRelation);
+            insertElementUnsafe(cropRelation);
+
             setStatus(way);
             setStatus(yieldRelation);
             setStatus(seasonRelation);
@@ -710,11 +715,6 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
             yieldRelation.addMember(new RelationMember(StorageDelegator.ROLE_SEASON, seasonRelation));
             seasonRelation.addParentRelation(yieldRelation);
 
-            insertElementUnsafe(way);
-            insertElementUnsafe(yieldRelation);
-            insertElementUnsafe(seasonRelation);
-            insertElementUnsafe(cropRelation);
-
             onParentRelationChanged(cropRelation);
             onParentRelationChanged(way);
             onParentRelationChanged(seasonRelation);
@@ -729,7 +729,11 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
     public static final String ROLE_CROP = "crop";
 
     private void setStatus(OsmElement osmElement) {
-        osmElement.updateState(OsmElement.STATE_CREATED);
+        if (osmElement.getOsmId() < 0) {
+            osmElement.updateState(OsmElement.STATE_CREATED);
+        } else {
+            osmElement.updateState(OsmElement.STATE_MODIFIED);
+        }
         osmElement.stamp();
         osmElement.resetHasProblem();
         onElementChanged(null, osmElement);
@@ -4421,7 +4425,7 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
                    newSeason = factory.createRelationWithNewId();
                    newSeason.setTags(tags);
                    insertElementUnsafe(newSeason);
-
+                   setStatus(newSeason);
                }
             }
 
@@ -4455,12 +4459,15 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
         try {
             lock();
             insertElementUnsafe(crop);
-
+            setStatus(crop);
             if (seasonValue.getParentRelations() != null && !seasonValue.getParentRelations().isEmpty()) {
-                SortedMap<String, String> tags = seasonValue.getTags();
-                seasonValue = factory.createRelationWithNewId();
-                seasonValue.setTags(tags);
-                insertElementUnsafe(seasonValue);
+                if (!Objects.equals(seasonValue.getParentRelations().get(0).getOsmId(), yield.getOsmId())) {
+                    SortedMap<String, String> tags = seasonValue.getTags();
+                    seasonValue = factory.createRelationWithNewId();
+                    seasonValue.setTags(tags);
+                    insertElementUnsafe(seasonValue);
+                    setStatus(seasonValue);
+                }
             }
 
             if (seasonValue.getParentRelations() == null || seasonValue.getParentRelations().isEmpty()) {
@@ -4473,6 +4480,8 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
             crop.addParentRelation(seasonValue);
 
             onParentRelationChanged(crop);
+            onParentRelationChanged(yield);
+            onParentRelationChanged(seasonValue);
         } finally {
             unlock();
         }
