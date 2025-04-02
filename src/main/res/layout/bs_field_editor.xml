@@ -269,6 +269,7 @@
             android:layout_height="wrap_content"
             android:background="@drawable/radius"
             android:drawableTop="@drawable/outline_file_upload_24"
+            android:layout_marginTop="10dp"
             android:paddingVertical="8dp"
             android:text="Загрузить фото"
             android:textAllCaps="false"
@@ -277,8 +278,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            android:paddingHorizontal="20dp"
+            android:layout_marginTop="5dp"
             android:text="Фото"
             android:textColor="@color/black" />
 
