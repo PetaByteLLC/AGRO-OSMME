@@ -1375,12 +1375,13 @@ public class Server {
     @NonNull
     private URL getCapabilitiesUrl(@NonNull String url) throws MalformedURLException {
         // need to strip version from serverURL
-        int apiPos = url.indexOf(SERVER_API_PATH);
-        if (apiPos > 0) {
-            String noVersionURL = getReadWriteUrl().substring(0, apiPos) + SERVER_API_PATH;
-            return new URL(noVersionURL + "capabilities");
-        }
-        throw new MalformedURLException("Invalid API URL: " + getReadWriteUrl());
+//        int apiPos = url.indexOf(SERVER_API_PATH);
+//        if (apiPos > 0) {
+//            String noVersionURL = getReadWriteUrl().substring(0, apiPos) + SERVER_API_PATH;
+//            return new URL(noVersionURL + "capabilities");
+//        }
+//        throw new MalformedURLException("Invalid API URL: " + getReadWriteUrl());
+        return new URL("https://www.openstreetmap.org/api/capabilities");
     }
 
     /**
