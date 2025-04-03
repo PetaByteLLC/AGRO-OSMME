@@ -233,7 +233,7 @@ public class Map extends SurfaceView implements IMapView {
                                     layer = new de.blau.android.layer.mvt.MapOverlay(this, new VectorTileRenderer(), false);
                                     ((MapTilesOverlayLayer<?>) layer).setRendererInfo(backgroundSource);
                                 } else {
-                                    layer = new MapTilesLayer<Bitmap>(this, backgroundSource, null, new MapTilesLayer.BitmapTileRenderer(hardwareLayerType));
+//                                    layer = new MapTilesLayer<Bitmap>(this, backgroundSource, null, new MapTilesLayer.BitmapTileRenderer(hardwareLayerType));
                                 }
                             }
                             break;

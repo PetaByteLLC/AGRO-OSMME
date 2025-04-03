@@ -588,7 +588,7 @@ public class AdvancedPrefDatabase extends SQLiteOpenHelper implements AutoClosea
         }
         int autopresetPosition = activePresets.length - 1;
         try {
-            AutoPreset.readAutoPreset(context, activePresets, autopresetPosition);
+//            AutoPreset.readAutoPreset(context, activePresets, autopresetPosition);
         } catch (Exception e) {
             Log.e(DEBUG_TAG, "Failed to find auto-preset, creating", e);
             createEmptyAutoPreset(context, activePresets, autopresetPosition);
