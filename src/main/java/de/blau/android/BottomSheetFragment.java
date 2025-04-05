@@ -23,12 +23,10 @@ import androidx.annotation.Nullable;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 import de.blau.android.osm.Node;
 import de.blau.android.osm.OsmElement;
@@ -40,7 +38,6 @@ public class BottomSheetFragment extends BottomSheetDialogFragment {
 
     private final Way lastSelectedWay;
     private final Main main;
-    private boolean edit;
 
     private EditText name, region, district, aggregator, farmerName, farmerMobile, cadastrNumber,
             cultureVarieties, sowingDate, cleaningDate, productivity, farmerSurName;
@@ -48,10 +45,9 @@ public class BottomSheetFragment extends BottomSheetDialogFragment {
 
     private ImageView addSeason;
 
-    public BottomSheetFragment(Way lastSelectedWay, Main main, boolean edit) {
+    public BottomSheetFragment(Way lastSelectedWay, Main main) {
         this.lastSelectedWay = lastSelectedWay;
         this.main = main;
-        this.edit = edit;
     }
 
     @Override
@@ -101,14 +97,10 @@ public class BottomSheetFragment extends BottomSheetDialogFragment {
         sowingDate = view.findViewById(R.id.sowingDate);
         cleaningDate = view.findViewById(R.id.cleaningDate);
         productivity = view.findViewById(R.id.productivity);
-//        secondarySowingDate = view.findViewById(R.id.secondarySowingDate);
-//        secondaryCropHarvestDate = view.findViewById(R.id.secondaryCropHarvestDate);
-
         culture = view.findViewById(R.id.culture);
         technology = view.findViewById(R.id.technology);
         landCategory = view.findViewById(R.id.landCategory);
         irrigationType = view.findViewById(R.id.irrigationType);
-//        secondaryCulture = view.findViewById(R.id.secondaryCulture);
 
         setDataPicker(sowingDate);
         setDataPicker(cleaningDate);
@@ -152,7 +144,7 @@ public class BottomSheetFragment extends BottomSheetDialogFragment {
                         values.put("name", nameValue);
                         values.put("start", start.getText().toString());
                         values.put("end", end.getText().toString());
-                        values.put("type", StorageDelegator.ROLE_SEASON);
+                        values.put("type", StorageDelegator.TYPE_SEASON);
 
                         if (nameValue.matches("^\\d{4}$") && start.getText().length() == 0 && end.getText().length() == 0) {
                             int yearValue = Integer.parseInt(nameValue);
@@ -169,7 +161,8 @@ public class BottomSheetFragment extends BottomSheetDialogFragment {
                             }
                         }
                         Relation newRelationSeason = App.getDelegator().getFactory().createRelationWithNewId();
-                        App.getDelegator().updateTags(newRelationSeason, values);
+                        newRelationSeason.addTags(values);
+                        App.getDelegator().setElementCreatedStatus(newRelationSeason);
                         seasons.add(newRelationSeason);
                         seasonAdapter.notifyDataSetChanged();
                         season.setSelection(seasons.size() - 1);
@@ -200,12 +193,6 @@ public class BottomSheetFragment extends BottomSheetDialogFragment {
         irrigationTypeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         irrigationType.setAdapter(irrigationTypeAdapter);
 
-//        String[] cultureData2 = {"Вторичная культура", "Пшеница", "Зерновые", "Ячмень", "Кукуруза", "Хлопок-сырец", "Сахарная свекла"};
-//        ArrayAdapter<String> secondaryCultureAdapter = new ArrayAdapter<String>(getActivity(), R.layout.agro_simple_spinner_item, cultureData2);
-//        secondaryCultureAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-//        secondaryCulture.setAdapter(secondaryCultureAdapter);
-
-        // Обработка кнопки сохранения
         view.findViewById(R.id.btn_save).setOnClickListener(v -> {
             int size = App.getLogic().getWays().size();
             String nameValue = name.getText() == null || name.getText().toString().trim().isEmpty()
@@ -222,18 +209,14 @@ public class BottomSheetFragment extends BottomSheetDialogFragment {
             String sowingDateValue = sowingDate.getText().toString();
             String cleaningDateValue = cleaningDate.getText().toString();
             String productivityValue = productivity.getText().toString();
-//            String secondarySowingDateValue = secondarySowingDate.getText().toString();
-//            String secondaryCropHarvestDateValue = secondaryCropHarvestDate.getText().toString();
             String technologyValue = technology.getSelectedItem().toString();
             String landCategoryValue = landCategory.getSelectedItem().toString();
             String irrigationTypeValue = irrigationType.getSelectedItem().toString();
-//            String secondaryCultureValue = secondaryCulture.getSelectedItem().toString();
 
             try {
                 if (culture.getSelectedItem() == null) throw new NullPointerException("Выращиваемая культура");
                 String cultureValue = culture.getSelectedItem().toString();
                 if (cultureValue.equals("Выращиваемая культура")) throw new NullPointerException("Выращиваемая культура");
-                // Сохранение всех значений
                 save(nameValue, regionValue, districtValue, aggregatorValue, farmerNameValue, farmerMobileValue,
                         cadastrNumberValue, seasonValue, cultureVarietiesValue, sowingDateValue, cleaningDateValue,
                         productivityValue, cultureValue, technologyValue, landCategoryValue, irrigationTypeValue,
@@ -269,8 +252,7 @@ public class BottomSheetFragment extends BottomSheetDialogFragment {
         yield.put("farmerMobile", farmerMobile);
         yield.put("cadastrNumber", cadastrNumber);
         yield.put("position", getPosition());
-//        yield.put("landuse", "farmland");
-        yield.put("type", "agromap_field");
+        yield.put("type", StorageDelegator.TYPE_FIELD);
         yield.put("technology", technology);
 
         Map<String, String> crop = new HashMap<>();
@@ -281,9 +263,9 @@ public class BottomSheetFragment extends BottomSheetDialogFragment {
         crop.put("culture", culture);
         crop.put("landCategory", landCategory);
         crop.put("irrigationType", irrigationType);
-        crop.put("type", StorageDelegator.ROLE_CROP);
+        crop.put("type", StorageDelegator.TYPE_CROP);
 
-        App.getDelegator().createYield(lastSelectedWay, yield, season, crop);
+        App.getDelegator().createNewYieldWithCrop(lastSelectedWay, yield, season, crop);
         dismiss();
     }
 

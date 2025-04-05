@@ -32,8 +32,10 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.res.Resources;
 import android.util.Log;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+
 import de.blau.android.App;
 import de.blau.android.Logic;
 import de.blau.android.R;
@@ -65,19 +67,19 @@ import de.blau.android.validation.BaseValidator;
 
 public class StorageDelegator implements Serializable, Exportable, DataStorage {
 
-    private static final int    TAG_LEN   = Math.min(LOG_TAG_LEN, StorageDelegator.class.getSimpleName().length());
+    private static final int TAG_LEN = Math.min(LOG_TAG_LEN, StorageDelegator.class.getSimpleName().length());
     private static final String DEBUG_TAG = StorageDelegator.class.getSimpleName().substring(0, TAG_LEN);
 
     private static final long serialVersionUID = 11L;
 
-    public static final int  MIN_NODES_CIRCLE            = 3;
+    public static final int MIN_NODES_CIRCLE = 3;
     private static final int MINIMUN_NODES_FOR_WAY_SPLIT = 3;
 
     private static final int MAX_CLIPBOARDS = 5;
 
-    private static final String LAST_STATE      = "lastActivity";
-    public static final String  FILENAME        = LAST_STATE + "." + FileExtensions.RES;
-    public static final String  BACKUP_FILENAME = FILENAME + ".backup";
+    private static final String LAST_STATE = "lastActivity";
+    public static final String FILENAME = LAST_STATE + "." + FileExtensions.RES;
+    public static final String BACKUP_FILENAME = FILENAME + ".backup";
 
     private Storage currentStorage;
 
@@ -125,11 +127,11 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
 
     /**
      * Reset this instance to empty state
-     * 
+     * <p>
      * This maintains the clipboard as the user may want to keep it over data reloads etc
-     * 
+     *
      * @param dirty if true mark the (empty) contents as dirty (this is useful because if true old state files will be
-     *            overwritten)
+     *              overwritten)
      */
     public void reset(boolean dirty) {
         try {
@@ -147,7 +149,7 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
 
     /**
      * Replace the current Storage object with a new one and api storage will be reset
-     * 
+     *
      * @param currentStorage the new Storage object to set
      */
     public void setCurrentStorage(@NonNull final Storage currentStorage) {
@@ -164,11 +166,11 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
 
     /**
      * Replace the current and api Storage, including in undo
-     * 
+     * <p>
      * Note: caller is responsible for setting dirty and locking
-     * 
+     *
      * @param currentStorage the new Storage object to set
-     * @param apiStorage the new Storage object to set
+     * @param apiStorage     the new Storage object to set
      */
     void setStorage(@NonNull final Storage currentStorage, @NonNull final Storage apiStorage) {
         this.apiStorage = apiStorage;
@@ -179,7 +181,7 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
 
     /**
      * Check if the Storage is dirty and needs to be saved
-     * 
+     *
      * @return true if dirty
      */
     public boolean isDirty() {
@@ -196,7 +198,7 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
 
     /**
      * Get the current undo instance. For immediate use only - DO NOT CACHE THIS.
-     * 
+     *
      * @return the UndoStorage, allowing operations like creation of checkpoints and undo/redo.
      */
     public UndoStorage getUndo() {
@@ -232,7 +234,7 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
     /**
      * Get the current OsmElementFactory instance used by this delegator. Use only the factory returned by this to
      * create new element IDs for insertion into this delegator! For immediate use only - DO NOT CACHE THIS.
-     * 
+     *
      * @return the OsmElementFactory for creating nodes/ways with new IDs
      */
     public OsmElementFactory getFactory() {
@@ -241,7 +243,7 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
 
     /**
      * Checks if a serialized {@link StorageDelegator} file is available.
-     * 
+     *
      * @param context an Android context
      * @return true, when the file is available, otherwise false.
      */
@@ -255,9 +257,9 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
 
     /**
      * Insert a new element in to storage
-     * 
+     * <p>
      * Uses methods that are nops if the element already is present
-     * 
+     *
      * @param elem the element to insert
      */
     public void insertElementSafe(@NonNull final OsmElement elem) {
@@ -280,7 +282,7 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
 
     /**
      * Insert a new element in to storage
-     * 
+     *
      * @param elem the element to insert
      */
     private void insertElementUnsafe(@NonNull final OsmElement elem) {
@@ -303,7 +305,7 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
 
     /**
      * Sets the tags of the element, replacing all existing ones
-     * 
+     *
      * @param elem the element to tag
      * @param tags the new tags
      */
@@ -331,40 +333,36 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
         }
     }
 
-    public void updateTags(@NonNull final OsmElement elem, @Nullable final Map<String, String> tags) {
-        try {
-            lock();
-            dirty = true;
-            undo.save(elem);
-            SortedMap<String, String> elemTags = elem.getTags();
-            for (String key : tags.keySet()) {
-                if (Objects.equals(elemTags.get(key), tags.get(key))) continue;
-                elem.addTag(key, tags.get(key));
-            }
-
-            elem.updateState(OsmElement.STATE_CREATED);
-            elem.stamp();
-            elem.resetHasProblem();
-            try {
-                apiStorage.insertElementSafe(elem);
-                onElementChanged(null, elem);
-            } catch (StorageException e) {
-                // TODO handle OOM
-                Log.e(DEBUG_TAG, "setTags got " + e.getMessage());
-            }
-        } finally {
-            unlock();
-        }
-    }
+//    public void updateTags(@NonNull final OsmElement elem, @Nullable final Map<String, String> tags) {
+//        try {
+//            lock();
+//            dirty = true;
+//            undo.save(elem);
+//            SortedMap<String, String> elemTags = elem.getTags();
+//            for (String key : tags.keySet()) {
+//                if (Objects.equals(elemTags.get(key), tags.get(key))) continue;
+//                elem.addTag(key, tags.get(key));
+//            }
+//            setStatus(elem);
+//            try {
+//                apiStorage.insertElementSafe(elem);
+//                onElementChanged(null, elem);
+//            } catch (StorageException e) {
+//                // TODO handle OOM
+//                Log.e(DEBUG_TAG, "setTags got " + e.getMessage());
+//            }
+//        } finally {
+//            unlock();
+//        }
+//    }
 
     /**
      * Called after an element has been changed
-     * 
+     * <p>
      * As it may be fairly expensive to determine all changes pre and/or post may be null
-     * 
+     *
      * @param <T>
-     * 
-     * @param pre list of changed elements before the operation or null
+     * @param pre  list of changed elements before the operation or null
      * @param post list of changed elements after the operation or null
      */
     <T extends OsmElement> void onElementChanged(@Nullable List<T> pre, @Nullable List<T> post) {
@@ -401,11 +399,11 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
 
     /**
      * Called after an element has been changed
-     * 
+     * <p>
      * As it may be fairly expensive to determine all changes pre and/or post may be null Don't call this if just the
      * node positions have changed
-     * 
-     * @param pre changed element before the operation or null
+     *
+     * @param pre  changed element before the operation or null
      * @param post changed element after the operation or null
      */
     void onElementChanged(@Nullable OsmElement pre, @Nullable OsmElement post) {
@@ -425,7 +423,7 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
 
     /**
      * Way geometry has to be invalidated -before- nodes are moved
-     * 
+     *
      * @param nodes List of nodes that are going to change
      */
     private void invalidateWayBoundingBox(@NonNull Collection<Node> nodes) {
@@ -461,7 +459,7 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
 
     /**
      * Invalidate way bounding box, and if it is a highway its problem status
-     * 
+     *
      * @param w the way to operate on
      */
     private void invalidateWay(@NonNull Way w) {
@@ -474,7 +472,7 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
 
     /**
      * Way geometry has to be invalidated -before- nodes are moved
-     * 
+     *
      * @param node node that is going to change
      */
     private void invalidateWayBoundingBox(@NonNull Node node) {
@@ -485,7 +483,7 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
 
     /**
      * Store the currently used imagery
-     * 
+     *
      * @param map the current Map instance
      */
     public void recordImagery(@Nullable de.blau.android.Map map) {
@@ -508,7 +506,7 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
 
     /**
      * Set the imageryRecorded flag
-     * 
+     *
      * @param recorded the new state of the flag
      */
     public void setImageryRecorded(boolean recorded) {
@@ -581,7 +579,7 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
 
     /**
      * Create relation with a list of OsmElements as members
-     * 
+     *
      * @param members members to add without role
      * @return the new relation
      */
@@ -610,7 +608,7 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
 
     /**
      * Create relation with a list of RelationMembers as members
-     * 
+     *
      * @param members RelationMembers to add
      * @return the new relation
      */
@@ -641,7 +639,7 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
 
     /**
      * Create a new way with one node
-     * 
+     *
      * @param firstWayNode the first node
      * @return the new way
      */
@@ -659,93 +657,13 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
         return way;
     }
 
-
-    public void createYield(Way way, Map<String, String> yield, Relation season, Map<String, String> crop) {
-        dirty = true;
-        Relation yieldRelation = factory.createRelationWithNewId();
-        yieldRelation.setTags(yield);
-
-        Relation seasonRelation;
-        if (season.getMembers() == null || season.getMembers().isEmpty()) {
-            seasonRelation = season;
-        } else {
-            seasonRelation = factory.createRelationWithNewId();
-            seasonRelation.setTags(season.tags);
-        }
-
-        Relation cropRelation = factory.createRelationWithNewId();
-        cropRelation.setTags(crop);
-//        Way cropWay = factory.createWayWithNewId();
-//        cropWay.setTags(crop);
-//
-//        List<Node> cropNodes = new ArrayList<>();
-//        for (Node node : way.getNodes()) {
-//            Node factoryNodeWithNewId = factory.createNodeWithNewId(node.getLat(), node.getLon());
-//            insertElementSafe(factoryNodeWithNewId);
-//            if (cropNodes.size() < way.getNodes().size() - 1) {
-//                cropNodes.add(factoryNodeWithNewId);
-//            }
-//        }
-//
-//        cropWay.addNodes(cropNodes, false);
-//        closeWay(cropWay);
-
-        try {
-            lock();
-
-            insertElementUnsafe(way);
-            insertElementUnsafe(yieldRelation);
-            insertElementUnsafe(seasonRelation);
-            insertElementUnsafe(cropRelation);
-
-            setStatus(way);
-            setStatus(yieldRelation);
-            setStatus(seasonRelation);
-            setStatus(cropRelation);
-
-            RelationMember wayMember = new RelationMember(Tags.ROLE_OUTER, way);
-
-            seasonRelation.addMember(new RelationMember(StorageDelegator.ROLE_CROP, cropRelation));
-            cropRelation.addParentRelation(seasonRelation);
-            cropRelation.addMember(wayMember);
-
-            yieldRelation.addMember(wayMember);
-            way.addParentRelation(yieldRelation);
-
-            yieldRelation.addMember(new RelationMember(StorageDelegator.ROLE_SEASON, seasonRelation));
-            seasonRelation.addParentRelation(yieldRelation);
-
-            onParentRelationChanged(cropRelation);
-            onParentRelationChanged(way);
-            onParentRelationChanged(seasonRelation);
-            onParentRelationChanged(yieldRelation);
-        } finally {
-            unlock();
-        }
-        onElementChanged(null, way);
-    }
-
-    public static final String ROLE_SEASON = "season";
-    public static final String ROLE_CROP = "crop";
-
-    private void setStatus(OsmElement osmElement) {
-        if (osmElement.getOsmId() < 0) {
-            osmElement.updateState(OsmElement.STATE_CREATED);
-        } else {
-            osmElement.updateState(OsmElement.STATE_MODIFIED);
-        }
-        osmElement.stamp();
-        osmElement.resetHasProblem();
-        onElementChanged(null, osmElement);
-    }
-
     /**
      * Add a node at the end of a way
-     * 
+     *
      * @param node the node to add
-     * @param way the way to add the node to
+     * @param way  the way to add the node to
      * @throws OsmIllegalOperationException if the operation would result in an object violating an OSM specific
-     *             constraint
+     *                                      constraint
      */
     public void addNodeToWay(@NonNull final Node node, @NonNull final Way way) {
         dirty = true;
@@ -764,11 +682,11 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
 
     /**
      * Add nodes at the end of a way
-     * 
+     *
      * @param nodes the nodes to add
-     * @param way the way to add the node to
+     * @param way   the way to add the node to
      * @throws OsmIllegalOperationException if the operation would result in an object violating an OSM specific
-     *             constraint
+     *                                      constraint
      */
     public void addNodesToWay(@NonNull final List<Node> nodes, @NonNull final Way way) {
         dirty = true;
@@ -787,11 +705,11 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
 
     /**
      * Replace the current nodes with new ones
-     * 
+     *
      * @param nodes the new nodes
-     * @param way the way to add the node to
+     * @param way   the way to add the node to
      * @throws OsmIllegalOperationException if the operation would result in an object violating an OSM specific
-     *             constraint
+     *                                      constraint
      */
     public void replaceWayNodes(@NonNull final List<Node> nodes, @NonNull final Way way) {
         dirty = true;
@@ -811,7 +729,7 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
 
     /**
      * Check the future node count against the maximum supported by the current API
-     * 
+     *
      * @param newCount the node count we would like to have
      * @throws OsmIllegalOperationException if the count is larger than the maximum supported
      */
@@ -823,7 +741,7 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
 
     /**
      * Get the current max number of nodes in a way
-     * 
+     *
      * @return the max number of nodes in a way, the default value if current is not available
      */
     public int getMaxWayNodes() {
@@ -839,12 +757,12 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
 
     /**
      * Add a node to a way after a specified node
-     * 
+     *
      * @param nodeBeforeIndex index of existing way node the new node is to be added after
-     * @param newNode the new way node
-     * @param way the way to perform the operation on
+     * @param newNode         the new way node
+     * @param way             the way to perform the operation on
      * @throws OsmIllegalOperationException if the operation would result in an object violating an OSM specific
-     *             constraint
+     *                                      constraint
      */
     public void addNodeToWayAfter(final int nodeBeforeIndex, @NonNull final Node newNode, @NonNull final Way way) throws OsmIllegalOperationException {
         dirty = true;
@@ -863,12 +781,12 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
 
     /**
      * Append or prepend a node to a way depending of if refNode is the last or first element of the way
-     * 
-     * @param refNode last or first way node
+     *
+     * @param refNode  last or first way node
      * @param nextNode the new node to add
-     * @param way the way to perform the operation on
+     * @param way      the way to perform the operation on
      * @throws OsmIllegalOperationException if the operation would result in an object violating an OSM specific
-     *             constraint
+     *                                      constraint
      */
     public void appendNodeToWay(@NonNull final Node refNode, @NonNull final Node nextNode, @NonNull final Way way) throws OsmIllegalOperationException {
         dirty = true;
@@ -887,8 +805,8 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
 
     /**
      * Move a node to a new position
-     * 
-     * @param node the node to move
+     *
+     * @param node  the node to move
      * @param latE7 the new latitude (E7)
      * @param lonE7 the new longitude (E7)
      */
@@ -908,8 +826,8 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
 
     /**
      * Update the position of a Node
-     * 
-     * @param node the Node to update
+     *
+     * @param node  the Node to update
      * @param latE7 new WGS84*1E7 latitude
      * @param lonE7 new WGS84*1E7 longitude
      */
@@ -923,8 +841,8 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
     /**
      * Move all nodes in a way, since the nodes keep their ids, the way itself doesn't change and doesn't need to be
      * saved apply translation only once to every node
-     * 
-     * @param way way containing the nodes
+     *
+     * @param way        way containing the nodes
      * @param deltaLatE7 the delta to move the latitude (E7)
      * @param deltaLonE7 the delta to move the longitude (E7)
      */
@@ -950,7 +868,7 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
 
     /**
      * Log and throw an OsmIllegalOperationException
-     * 
+     *
      * @param msg the message
      */
     private void logAndThrow(final String msg) {
@@ -960,8 +878,8 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
 
     /**
      * Move a list of nodes, apply translation only once
-     * 
-     * @param allNodes the list of nodes
+     *
+     * @param allNodes   the list of nodes
      * @param deltaLatE7 the delta to move the latitude (WGS84*1E7)
      * @param deltaLonE7 the delta to move the longitude (WGS84*1E7)
      */
@@ -987,12 +905,12 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
 
     /**
      * Arrange way nodes in a circle, adding extra nodes
-     * 
-     * @param map current map view
-     * @param minNodes minimum number of nodes the circle should have
+     *
+     * @param map              current map view
+     * @param minNodes         minimum number of nodes the circle should have
      * @param maxSegmentLength max. segment length between two circle nodes
      * @param minSegmentLength min. segment length between two circle nodes
-     * @param way way to circulize
+     * @param way              way to circulize
      */
     public void circulizeWay(@NonNull final de.blau.android.Map map, int minNodes, double maxSegmentLength, double minSegmentLength, @NonNull final Way way) {
         undo.save(way);
@@ -1010,16 +928,16 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
 
     /**
      * Create a circle from at least 3 nodes
-     * 
-     * @param map current map view
-     * @param minNodes minimum number of nodes the circle should have
+     *
+     * @param map              current map view
+     * @param minNodes         minimum number of nodes the circle should have
      * @param maxSegmentLength max. segment length between two circle nodes
      * @param minSegmentLength min. segment length between two circle nodes
-     * @param nodes list of at least 3 unique nodes
+     * @param nodes            list of at least 3 unique nodes
      */
     @NonNull
     public Way createCircle(@NonNull final de.blau.android.Map map, int minNodes, double maxSegmentLength, double minSegmentLength,
-            @NonNull final List<Node> nodes) {
+                            @NonNull final List<Node> nodes) {
         List<Node> circleNodes = addNodesToCircle(nodes, minNodes, maxSegmentLength, minSegmentLength, getMaxWayNodes());
         Way circle = factory.createWayWithNewId();
         circle.addNodes(circleNodes, false);
@@ -1030,12 +948,12 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
 
     /**
      * Arrange the Nodes in nodes in a circle and add additional ones
-     * 
-     * @param nodes the initial nodes
-     * @param minNodes minimum number of nodes the circle should have
+     *
+     * @param nodes            the initial nodes
+     * @param minNodes         minimum number of nodes the circle should have
      * @param maxSegmentLength max. segment length between two circle nodes
      * @param minSegmentLength min. segment length between two circle nodes
-     * @param maxWayNodes max. number of nodes in a way, the resulting circle will not have more nodes than this
+     * @param maxWayNodes      max. number of nodes in a way, the resulting circle will not have more nodes than this
      * @return a List of Nodes suitable for creating a Way with nodes arranged in a circle
      */
     @NonNull
@@ -1137,9 +1055,9 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
 
     /**
      * Build groups of ways that have common nodes
-     * 
+     * <p>
      * There must be a better way to do this, but they likely all fall afoul of our current data model
-     * 
+     *
      * @param ways the ways to group
      * @return a list of list of ways with common nodes
      */
@@ -1193,10 +1111,10 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
      * "square" a way/polygon, based on the algorithm used by iD and before that by P2, originally written by Matt Amos
      * If multiple ways are selected the ways are grouped in groups that share nodes and the groups individually
      * squared.
-     * 
+     * <p>
      * This function converts to and then operates on screen coordinates.
-     * 
-     * @param ways List of Way to square
+     *
+     * @param ways      List of Way to square
      * @param threshold maximum difference to 90°/180° to process
      */
     public void orthogonalizeWay(@NonNull List<Way> ways, final int threshold) {
@@ -1247,7 +1165,7 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
             Coordinates q;
 
             double loopEpsilon = epsilon * (totalNodes / 4D); // NOTE the original algorithm didn't take the number
-                                                              // of corners in to account
+            // of corners in to account
             // iterate until score is low enough
             for (int iteration = 0; iteration < 1000; iteration++) {
                 // calculate position changes and score
@@ -1315,8 +1233,8 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
 
     /**
      * Compare an input value to upper and lower bounds
-     * 
-     * @param in input value
+     *
+     * @param in    input value
      * @param lower lower bound
      * @param upper upper bound
      * @return the input value or 0 if out of bounds
@@ -1327,18 +1245,18 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
 
     /**
      * Rotate all nodes in a list around a pivot. Rotation is done in screen coords
-     * 
-     * @param nodes Nodes to rotate
-     * @param angle angle to rotate
+     *
+     * @param nodes     Nodes to rotate
+     * @param angle     angle to rotate
      * @param direction rotation direction
-     * @param pivotX screen X coordinate of the pivot point
-     * @param pivotY screen Y coordinate of the pivot point
-     * @param w screen width
-     * @param h screen height
-     * @param v screen viewbox
+     * @param pivotX    screen X coordinate of the pivot point
+     * @param pivotY    screen Y coordinate of the pivot point
+     * @param w         screen width
+     * @param h         screen height
+     * @param v         screen viewbox
      */
     public void rotateNodes(@NonNull final List<Node> nodes, final float angle, final int direction, final float pivotX, final float pivotY, int w, int h,
-            @NonNull ViewBox v) {
+                            @NonNull ViewBox v) {
         if (Float.isNaN(angle)) {
             Log.e(DEBUG_TAG, "rotateWay angle is NaN");
             return;
@@ -1361,10 +1279,10 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
 
     /**
      * Delete a node
-     * 
+     * <p>
      * The operation will remove it from any ways and relations relations it is a member of, ways that contain just 1 or
      * less nodes after the deletion will be deleted too
-     * 
+     *
      * @param node the node to remove
      */
     public void removeNode(@NonNull final Node node) {
@@ -1394,10 +1312,10 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
 
     /**
      * Split a closed way at two points
-     * 
-     * @param way way to split
-     * @param node1 first node to split at
-     * @param node2 second node to split at
+     *
+     * @param way            way to split
+     * @param node1          first node to split at
+     * @param node2          second node to split at
      * @param createPolygons split in to two polygons
      * @return the original Way in the 1st Result, the new Way in the 2nd Result, issues if not successful
      */
@@ -1513,9 +1431,9 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
 
     /**
      * Add way nodes from two end segments of a (formerly) existing way to a way
-     * 
-     * @param way the Way
-     * @param nodesEndSegment1 nodes from 1st segment
+     *
+     * @param way                 the Way
+     * @param nodesEndSegment1    nodes from 1st segment
      * @param nodesForEndSegment2 nodes from 2nd segment
      */
     private void addEndSegmentsToWay(@NonNull Way way, @NonNull List<Node> nodesEndSegment1, @NonNull List<Node> nodesForEndSegment2) {
@@ -1538,7 +1456,7 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
 
     /**
      * Close a way by adding the 1st node to the end
-     * 
+     *
      * @param way the Way
      */
     private void closeWay(@NonNull Way way) {
@@ -1549,9 +1467,9 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
 
     /**
      * Split way at node with relation support
-     * 
-     * @param way way to split
-     * @param node node to split at
+     *
+     * @param way     way to split
+     * @param node    node to split at
      * @param fromEnd use nodes after node for the new way
      * @return the new Way in the first Result
      */
@@ -1612,8 +1530,8 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
 
     /**
      * Returnn the length of the way is thaere are metric keys
-     * 
-     * @param way the way
+     *
+     * @param way        the way
      * @param metricKeys a list of relevant keys
      * @return the length
      */
@@ -1628,7 +1546,7 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
 
     /**
      * Get a list of length dependent keys that thw Way has
-     * 
+     *
      * @param way the Way
      * @return a list of keys
      */
@@ -1646,9 +1564,9 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
 
     /**
      * Get nodes for the split of way keeping the initial ones
-     * 
-     * @param way the Way
-     * @param node the Node to split at
+     *
+     * @param way     the Way
+     * @param node    the Node to split at
      * @param fromEnd get Nodes from end of way
      * @return a List of Nodes for the new Way
      */
@@ -1656,7 +1574,7 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
         List<Node> nodesForNewWay = new LinkedList<>();
         boolean found = false;
         boolean first = true; // node to split at can't be the first one
-        for (Iterator<Node> it = way.getNodeIterator(); it.hasNext();) {
+        for (Iterator<Node> it = way.getNodeIterator(); it.hasNext(); ) {
             Node wayNode = it.next();
             if (wayNode.getOsmId() == node.getOsmId() && !first) {
                 found = true;
@@ -1672,10 +1590,10 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
 
     /**
      * Change the value of the tag with key proportionally to the length of the way relative to originalLength
-     * 
-     * @param key the tag key
+     *
+     * @param key            the tag key
      * @param originalLength the original length of the way
-     * @param way the way
+     * @param way            the way
      */
     private void distributeMetric(@NonNull String key, double originalLength, @NonNull Way way) {
         String value = way.getTagWithKey(key);
@@ -1697,10 +1615,10 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
 
     /**
      * Given the existing relation membership of a way, add a split off way to the same ones
-     * 
-     * @param way the existing Way
-     * @param wasClosed indicate if the existing way was closed
-     * @param newWay the new Way
+     *
+     * @param way             the existing Way
+     * @param wasClosed       indicate if the existing way was closed
+     * @param newWay          the new Way
      * @param changedElements add changed Relations to this
      * @return a Set containing any issues
      */
@@ -1776,7 +1694,7 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
                      * We need to determine if to insert the new way before or after the existing member If the new way
                      * has a common node with the previous member or if the existing way has a common node with the
                      * following member we insert before, otherwise we insert after the existing member.
-                     * 
+                     *
                      * FIXME To do this really properly we would have to download the previous and next elements for
                      * routes
                      */
@@ -1808,9 +1726,9 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
 
     /**
      * Check if a way relation member has a common node with a way
-     * 
+     *
      * @param member the RelationMember
-     * @param way the Way
+     * @param way    the Way
      * @return true if there is a common node
      */
     private boolean hasCommonNode(@Nullable RelationMember member, @NonNull Way way) {
@@ -1819,10 +1737,10 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
 
     /**
      * Replace a member way with a different one
-     * 
-     * @param r the Relation
-     * @param rm the original ReleationMember
-     * @param way original member way
+     *
+     * @param r      the Relation
+     * @param rm     the original ReleationMember
+     * @param way    original member way
      * @param newWay new member way
      */
     private void replaceMemberWay(@NonNull Relation r, @NonNull RelationMember rm, @NonNull final Way way, @NonNull Way newWay) {
@@ -1835,11 +1753,11 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
 
     /**
      * Remove node from specified way
-     * 
+     * <p>
      * If the node is untagged and not a member of any other way it will be deleted. If the way is closed and the end
      * node is being removed it will try to re-close.
-     * 
-     * @param way the Way
+     *
+     * @param way  the Way
      * @param node the Node
      */
     public void removeNodeFromWay(@NonNull Way way, @NonNull Node node) {
@@ -1869,12 +1787,12 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
 
     /**
      * Remove last node from specified way
-     * 
+     * <p>
      * If the node is untagged and not a member of any other node it will be deleted. If the result Way has less than 2
      * Nodes it will be deleted.
-     * 
-     * @param fromEnd if true remove last node else first
-     * @param way the Way
+     *
+     * @param fromEnd    if true remove last node else first
+     * @param way        the Way
      * @param deleteNode delete the node after removing it from the way
      */
     public void removeEndNodeFromWay(boolean fromEnd, @NonNull Way way, boolean deleteNode) {
@@ -1900,7 +1818,7 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
 
     /**
      * Unjoin all ways connected at the given node.
-     * 
+     *
      * @param node The node connecting ways that are to be unjoined.
      */
     public void unjoinWays(@NonNull final Node node) {
@@ -1921,9 +1839,9 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
 
     /**
      * Unjoin a way by replacing shared nodes with new ones
-     * 
-     * @param ctx Android Context
-     * @param way the Way to unjoin
+     *
+     * @param ctx           Android Context
+     * @param way           the Way to unjoin
      * @param ignoreSimilar don't unjoin from ways with the same primary key if true, but replace the node in them too
      */
     public void unjoinWay(@Nullable Context ctx, @NonNull final Way way, boolean ignoreSimilar) {
@@ -1967,9 +1885,9 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
 
     /**
      * Replace a Node in a way with a new one
-     * 
+     *
      * @param node the node to replace
-     * @param way the Way
+     * @param way  the Way
      * @return the new Node
      */
     @NonNull
@@ -2034,7 +1952,7 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
 
     /**
      * Replace the given node in any ways it is member of.
-     * 
+     *
      * @param node The node to be replaced.
      * @return null if node was not member of a way, the replacement node if it was
      */
@@ -2055,7 +1973,7 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
 
     /**
      * Reverses a way (reverses the order of its nodes)
-     * 
+     *
      * @param way to reverse
      * @return a List of Results, if not empty something had to be reversed
      */
@@ -2102,7 +2020,7 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
 
     /**
      * Reverse any direction dependent tags on the way nodes
-     * 
+     *
      * @param nodes List of nodes
      * @return a List of results from the operation, if empty nothing had to be done
      */
@@ -2131,10 +2049,10 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
 
     /**
      * Replace an existing way Node with a new one
-     * 
+     *
      * @param existingNode the existing Node
-     * @param newNode the new Node
-     * @param way the Way to exchange the Node in
+     * @param newNode      the new Node
+     * @param way          the Way to exchange the Node in
      */
     void replaceNodeInWay(@NonNull final Node existingNode, @NonNull final Node newNode, @NonNull final Way way) {
         dirty = true;
@@ -2153,9 +2071,9 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
 
     /**
      * Remove a node from all ways in storage, deleting ways with just one node in the process
-     * 
+     * <p>
      * If the first/last node of a closed way is deleted the way is re-closed
-     * 
+     *
      * @param node Node to delete
      * @return count of how many ways node was deleted from
      */
@@ -2168,11 +2086,11 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
         for (Way way : ways) {
             undo.save(way);
             if (way.isClosed() && way.isEndNode(node) && way.getNodes().size() > 1) { // note protection against
-                                                                                      // degenerate closed ways
+                // degenerate closed ways
                 way.removeNode(node);
                 if (way.getNodes().size() > 1 && !way.isClosed()) {
                     way.addNode(way.getFirstNode()); // re-close the way, except if it is already closed, which
-                                                     // means it is degenerate
+                    // means it is degenerate
                 } else {
                     Log.e(DEBUG_TAG, "Way " + way.getOsmId() + " way already closed!");
                 }
@@ -2199,9 +2117,9 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
 
     /**
      * Deletes a way
-     * 
+     * <p>
      * Removes it from any relations it is a member of
-     * 
+     *
      * @param way way to delete
      */
     public void removeWay(@NonNull final Way way) {
@@ -2227,9 +2145,9 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
 
     /**
      * Delete a relation
-     * 
+     * <p>
      * Note this will only remove backlinks from elements in storage
-     * 
+     *
      * @param relation relation to remove
      */
     public void removeRelation(@NonNull final Relation relation) {
@@ -2255,7 +2173,7 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
 
     /**
      * Remove backlinks in elements
-     * 
+     *
      * @param relation to remove from members
      */
     private void removeRelationFromMembers(@NonNull final Relation relation) {
@@ -2271,10 +2189,10 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
 
     /**
      * Remove downloaded element from any relations it is a member of
-     * 
+     * <p>
      * Note the element does not need to have its state changed or be stored in the API storage since the parent
      * relation back link is just internal.
-     * 
+     *
      * @param element to remove from any relations it is a member of
      */
     private void removeElementFromRelations(@NonNull final OsmElement element) {
@@ -2300,12 +2218,12 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
 
     /**
      * Remove members from a relation
-     * 
+     * <p>
      * Note the potentially present elements do not need to have their state changed or be stored in the API storage
      * since the parent relation back link is just internal.
-     * 
+     *
      * @param members members to remove
-     * @param r relation to remove the element from
+     * @param r       relation to remove the element from
      */
     public void removeRelationMembersFromRelation(@NonNull Relation r, @NonNull List<RelationMember> members) {
         Log.i(DEBUG_TAG, "removing members from relation " + r.getDescription(true));
@@ -2328,12 +2246,12 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
 
     /**
      * Remove downloaded element from a relation
-     * 
+     * <p>
      * Note the element does not need to have its state changed or be stored in the API storage since the parent
      * relation back link is just internal.
-     * 
+     *
      * @param element element to remove
-     * @param r relation to remove the element from
+     * @param r       relation to remove the element from
      */
     private void removeElementFromRelation(@NonNull final OsmElement element, @NonNull final Relation r) {
         Log.i(DEBUG_TAG, "remove " + element.getName() + " #" + element.getOsmId() + " from relation #" + r.getOsmId());
@@ -2350,11 +2268,11 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
 
     /**
      * Add element to relation at a specific position
-     * 
-     * @param e OsmElement to add
-     * @param pos position to insert the element
+     *
+     * @param e    OsmElement to add
+     * @param pos  position to insert the element
      * @param role role of the element
-     * @param rel relation to add the element to
+     * @param rel  relation to add the element to
      */
     private void addElementToRelation(@NonNull final OsmElement e, final int pos, final String role, @NonNull final Relation rel) {
         dirty = true;
@@ -2373,9 +2291,9 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
 
     /**
      * Add new member to relation at end
-     * 
+     *
      * @param newMember member to add
-     * @param rel target relation
+     * @param rel       target relation
      */
     public void addMemberToRelation(@NonNull final RelationMember newMember, @NonNull final Relation rel) {
         OsmElement e = newMember.getElement();
@@ -2400,10 +2318,10 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
 
     /**
      * Stuff to do if an OsmElement Relation membership has changed
-     * 
+     *
      * @param e the OsmElement
      */
-    private void onParentRelationChanged(@NonNull OsmElement e) {
+    public void onParentRelationChanged(@NonNull OsmElement e) {
         e.resetHasProblem();
         if (e instanceof StyleableFeature) {
             ((StyleableFeature) e).setStyle(null);
@@ -2412,8 +2330,8 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
 
     /**
      * compare current relations e is a member of to new state parents and make it so
-     * 
-     * @param e current OsmElement
+     *
+     * @param e       current OsmElement
      * @param parents new Map of parent Relations
      */
     public void updateParentRelations(@NonNull final OsmElement e, @NonNull final MultiHashMap<Long, RelationMemberPosition> parents) {
@@ -2476,8 +2394,8 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
 
     /**
      * Compare current list of relations members to new list and apply the necessary changes
-     * 
-     * @param r the relation
+     *
+     * @param r       the relation
      * @param members new list of members
      */
     public void updateRelation(@NonNull Relation r, @NonNull List<RelationMemberDescription> members) {
@@ -2541,9 +2459,9 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
 
     /**
      * Add further members without role to an existing relation
-     * 
+     *
      * @param relation existing relation
-     * @param members list of new members
+     * @param members  list of new members
      */
     public void addMembersToRelation(@NonNull Relation relation, @NonNull List<OsmElement> members) {
         dirty = true;
@@ -2562,9 +2480,9 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
 
     /**
      * Add further RelationMembers to an existing relation
-     * 
+     *
      * @param relation existing relation
-     * @param members list of new RelationMembers
+     * @param members  list of new RelationMembers
      */
     public void addRelationMembersToRelation(@NonNull Relation relation, @NonNull List<RelationMember> members) {
         dirty = true;
@@ -2587,10 +2505,10 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
 
     /**
      * Replace the element of all relation member with a specific element with a different one
-     * 
-     * @param relation the Relation
+     *
+     * @param relation    the Relation
      * @param origElement the original element
-     * @param newElement the replacement element
+     * @param newElement  the replacement element
      */
     public void replaceRelationMemberElement(@NonNull Relation relation, @NonNull OsmElement origElement, @NonNull OsmElement newElement) {
         dirty = true;
@@ -2615,8 +2533,8 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
 
     /**
      * Check the future relation member count against the maximum supported by the current API
-     * 
-     * @param r the Relation we inten to modify
+     *
+     * @param r         the Relation we inten to modify
      * @param increment how much the member count will increase
      * @throws OsmIllegalOperationException if the count is larger than the maximum supported
      */
@@ -2633,7 +2551,7 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
 
     /**
      * Validate that the member counts of multiple relations stay in limits
-     * 
+     *
      * @param relations a List of Relations
      * @param increment how much the member count will increase
      * @throws OsmIllegalOperationException if the count is larger than the maximum supported
@@ -2658,10 +2576,10 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
 
     /**
      * Make a copy of the element and store it in the clipboard
-     * 
+     *
      * @param elements elements to copy
-     * @param lat latitude where it was located
-     * @param lon longitude where it was located
+     * @param lat      latitude where it was located
+     * @param lon      longitude where it was located
      */
     public void copyToClipboard(@NonNull List<OsmElement> elements, int lat, int lon) {
         dirty = true; // otherwise clipboard will not get saved without other changes
@@ -2690,10 +2608,10 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
 
     /**
      * Cut original element to clipboard, does -not- preserve relation memberships
-     * 
+     *
      * @param elements elements to copy
-     * @param lat latitude where it was located
-     * @param lon longitude where it was located
+     * @param lat      latitude where it was located
+     * @param lon      longitude where it was located
      */
     public void cutToClipboard(@NonNull List<OsmElement> elements, int lat, int lon) {
         dirty = true; // otherwise clipboard will not get saved without other changes
@@ -2764,12 +2682,12 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
 
     /**
      * Paste the contents of the clipboard to coordinates
-     * 
+     * <p>
      * If the content was copied to the clipboard new elements will be created.
-     * 
+     *
      * @param index index of the clipboard to use
-     * @param lat latitude in WGS84*1E7 degrees
-     * @param lon longitude in WGS84*1E7 degrees
+     * @param lat   latitude in WGS84*1E7 degrees
+     * @param lon   longitude in WGS84*1E7 degrees
      * @return the contents or null is the clipboard was empty
      */
     @Nullable
@@ -2815,15 +2733,15 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
      * Re-create an OsmElement from a cut at a specific position
      *
      * @param clipboard the clipboard to use
-     * @param e the OsmElement to re-create
-     * @param deltaLat delta latitude (WGS84*1E7)
-     * @param deltaLon delta longitude (WGS84*1E7)
+     * @param e         the OsmElement to re-create
+     * @param deltaLat  delta latitude (WGS84*1E7)
+     * @param deltaLon  delta longitude (WGS84*1E7)
      * @param processed bookkeeping which nodes have already been duplicated
      * @return the re-created OsmElement
      */
     @Nullable
     private OsmElement pasteFromCut(@NonNull ClipboardStorage clipboard, @NonNull OsmElement e, int deltaLat, int deltaLon,
-            @NonNull Map<OsmElement, OsmElement> processed) {
+                                    @NonNull Map<OsmElement, OsmElement> processed) {
         if (currentStorage.contains(e)) {
             Log.e(DEBUG_TAG, "Attempt to paste from cut, but element is already present");
             clipboard.reset();
@@ -2855,12 +2773,12 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
 
     /**
      * Create a duplicate of an OsmElement at a specific position
-     * 
-     * @param e the OsmElement to duplicate
-     * @param deltaLat delta latitude (WGS84*1E7)
-     * @param deltaLon delta longitude (WGS84*1E7)
+     *
+     * @param e         the OsmElement to duplicate
+     * @param deltaLat  delta latitude (WGS84*1E7)
+     * @param deltaLon  delta longitude (WGS84*1E7)
      * @param processed bookkeeping which elements have already been duplicated
-     * @param deep duplicate child elements if true
+     * @param deep      duplicate child elements if true
      * @return the new, duplicated, OsmElement
      */
     @NonNull
@@ -2879,18 +2797,18 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
 
     /**
      * Duplicate a Relation
-     * 
-     * @param r the Relation
-     * @param deltaLat delta latitude (WGS84*1E7)
-     * @param deltaLon delta longitude (WGS84*1E7)
+     *
+     * @param r         the Relation
+     * @param deltaLat  delta latitude (WGS84*1E7)
+     * @param deltaLon  delta longitude (WGS84*1E7)
      * @param processed bookkeeping which elements have already been duplicated
-     * @param deep duplicate child elements if true
-     * @param insert insert in to current storage
+     * @param deep      duplicate child elements if true
+     * @param insert    insert in to current storage
      * @return a duplicate of r
      */
     @NonNull
     private Relation duplicateRelation(@NonNull Relation r, int deltaLat, int deltaLon, @NonNull Map<OsmElement, OsmElement> processed, boolean deep,
-            boolean insert) {
+                                       boolean insert) {
         Relation newRelation = factory.createRelationWithNewId();
         undo.save(newRelation); // do this before we create and add members
         newRelation.setTags(r.getTags());
@@ -2903,17 +2821,17 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
             for (RelationMember rm : members) {
                 if (!processed.containsKey(rm.getElement())) {
                     switch (rm.type) {
-                    case Node.NAME:
-                        duplicateNode((Node) rm.getElement(), deltaLat, deltaLon, processed, insert);
-                        break;
-                    case Way.NAME:
-                        duplicateWay((Way) rm.getElement(), deltaLat, deltaLon, processed, true, insert);
-                        break;
-                    case Relation.NAME:
-                        duplicateRelation((Relation) rm.getElement(), deltaLat, deltaLon, processed, true, insert);
-                        break;
-                    default:
-                        throw new IllegalArgumentException("Unexpected member element " + rm);
+                        case Node.NAME:
+                            duplicateNode((Node) rm.getElement(), deltaLat, deltaLon, processed, insert);
+                            break;
+                        case Way.NAME:
+                            duplicateWay((Way) rm.getElement(), deltaLat, deltaLon, processed, true, insert);
+                            break;
+                        case Relation.NAME:
+                            duplicateRelation((Relation) rm.getElement(), deltaLat, deltaLon, processed, true, insert);
+                            break;
+                        default:
+                            throw new IllegalArgumentException("Unexpected member element " + rm);
                     }
                 }
             }
@@ -2931,13 +2849,13 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
 
     /**
      * Duplicate a way
-     * 
-     * @param way the Way
-     * @param deltaLat delta latitude (WGS84*1E7)
-     * @param deltaLon delta longitude (WGS84*1E7)
+     *
+     * @param way       the Way
+     * @param deltaLat  delta latitude (WGS84*1E7)
+     * @param deltaLon  delta longitude (WGS84*1E7)
      * @param processed bookkeeping which elements have already been duplicated
-     * @param deep duplicate child elements if true
-     * @param insert insert in to current storage
+     * @param deep      duplicate child elements if true
+     * @param insert    insert in to current storage
      * @return a duplicate of way
      */
     @NonNull
@@ -2971,12 +2889,12 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
 
     /**
      * Duplicate a Node
-     * 
-     * @param node the Node
-     * @param deltaLat delta latitude (WGS84*1E7)
-     * @param deltaLon delta longitude (WGS84*1E7)
+     *
+     * @param node      the Node
+     * @param deltaLat  delta latitude (WGS84*1E7)
+     * @param deltaLon  delta longitude (WGS84*1E7)
      * @param processed bookkeeping which elements have already been duplicated
-     * @param insert insert in to current storage
+     * @param insert    insert in to current storage
      * @return a duplicate of node
      */
     @NonNull
@@ -2992,9 +2910,9 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
 
     /**
      * Create duplicates of a list of elements
-     * 
+     *
      * @param elements the OsmElements
-     * @param deep duplicate child elements if true
+     * @param deep     duplicate child elements if true
      * @return a List of the duplicated elements
      */
     @NonNull
@@ -3010,7 +2928,7 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
 
     /**
      * Check if there is something in the clipboard
-     * 
+     *
      * @return true if the clipboard is empty
      */
     public boolean clipboardIsEmpty() {
@@ -3020,9 +2938,9 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
 
     /**
      * Check if the clipboard is consistent
-     * 
+     * <p>
      * If this is not true the clipboard will be emptied
-     * 
+     *
      * @return true if the clipboard is ok
      */
     public boolean checkClipboard() {
@@ -3049,7 +2967,7 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
 
     /**
      * Get the current API Storage object
-     * 
+     *
      * @return the Storage for changes that should be uploaded
      */
     @NonNull
@@ -3059,7 +2977,7 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
 
     /**
      * Get the current Storage object
-     * 
+     *
      * @return the current Storage object
      */
     @NonNull
@@ -3086,7 +3004,7 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
 
     /**
      * Set the initial BoundingBox, this will truncate the list
-     * 
+     *
      * @param box the initial BoundingBox
      */
     public void setOriginalBox(@NonNull final BoundingBox box) {
@@ -3112,7 +3030,7 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
 
     /**
      * Delete a BoundingBox from the List of BoundingBoxes in Storage
-     * 
+     *
      * @param box the BoundingBox to delete
      */
     public void deleteBoundingBox(@NonNull BoundingBox box) {
@@ -3127,10 +3045,10 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
 
     /**
      * Merge a BoundingBox for a downloaded area in to the list
-     * 
+     * <p>
      * BoundingBoxes that the new box contains will be removed, if the new box on the other hand is contained in an
      * existing box it will not be added
-     * 
+     *
      * @param box the additional BoundingBox
      */
     public void mergeBoundingBox(@NonNull BoundingBox box) {
@@ -3159,7 +3077,7 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
 
     /**
      * Get the number of Nodes in API storage
-     * 
+     *
      * @return the number of Nodes in API storage
      */
     public int getApiNodeCount() {
@@ -3168,7 +3086,7 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
 
     /**
      * Get the number of Ways in API storage
-     * 
+     *
      * @return the number of Ways in API storage
      */
     public int getApiWayCount() {
@@ -3177,7 +3095,7 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
 
     /**
      * Get the number of Relations in API storage
-     * 
+     *
      * @return the number of Relations in API storage
      */
     public int getApiRelationCount() {
@@ -3188,7 +3106,7 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
      * Get the total number of elements in API storage
      * <p>
      * Returns the total number of elements to be created, modified or deleted
-     * 
+     *
      * @return the element count
      */
     public int getApiElementCount() {
@@ -3198,8 +3116,8 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
     /**
      * Retrieve an OsmElement from Storage This will check the API Storage first (because of deleted objects) and then
      * the regular version
-     * 
-     * @param type the type of object as a String (NODE, WAY, RELATION)
+     *
+     * @param type  the type of object as a String (NODE, WAY, RELATION)
      * @param osmId the id
      * @return the object or null if not in storage
      */
@@ -3214,7 +3132,7 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
 
     /**
      * Check if the data in Storage has been changed
-     * 
+     *
      * @return true if changes have been made
      */
     public boolean hasChanges() {
@@ -3223,7 +3141,7 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
 
     /**
      * Check if we have data in Storage
-     * 
+     *
      * @return true if there is no data
      */
     public boolean isEmpty() {
@@ -3232,7 +3150,7 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
 
     /**
      * Stores the current storage data to the default storage file
-     * 
+     *
      * @param ctx Android Context
      * @throws IOException if saving failed
      */
@@ -3273,9 +3191,9 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
 
     /**
      * Read save data from standard file
-     * 
+     * <p>
      * Loads the storage data from the default storage file NOTE: lock is acquired in logic before this is called
-     * 
+     *
      * @param context Android context
      * @return true if the state was read successfully
      */
@@ -3285,8 +3203,8 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
 
     /**
      * Read save data from file
-     * 
-     * @param context Android context
+     *
+     * @param context  Android context
      * @param filename the file to read
      * @return true if the state was read successfully
      */
@@ -3321,7 +3239,7 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
 
     /**
      * Return a localized list of strings describing the changes we would upload on {@link #uploadToServer(Server)}.
-     * 
+     *
      * @param aResources the translations
      * @return the changes
      */
@@ -3344,7 +3262,7 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
 
     /**
      * Return a list of the elements we would upload on {@link #uploadToServer(Server)}.
-     * 
+     *
      * @return the changed OsmElements
      */
     public List<OsmElement> listChangedElements() {
@@ -3357,7 +3275,7 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
 
     /**
      * Remove any elements in API storage that haven't been changed
-     * 
+     * <p>
      * This shouldn't be necessary and indicates that there is something which doesn't correctly remove elements.
      */
     private void removeUnchanged() {
@@ -3385,7 +3303,7 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
 
     /**
      * Log that the OsmElement is unchanged
-     * 
+     *
      * @param e the unchanged OsmElement
      */
     private void logUnchanged(@NonNull OsmElement e) {
@@ -3394,18 +3312,18 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
 
     /**
      * Upload created, modified and deleted data in diff format
-     * 
-     * @param server Server to upload changes to.
-     * @param comment Changeset comment tag
-     * @param source Changeset source tag
+     *
+     * @param server             Server to upload changes to.
+     * @param comment            Changeset comment tag
+     * @param source             Changeset source tag
      * @param closeOpenChangeset if true close any open Changeset first
-     * @param closeChangeset if true close the Changeset
-     * @param extraTags Additional tags to add
-     * @param elements List of OsmElement to upload if null all changed elements will be uploaded
+     * @param closeChangeset     if true close the Changeset
+     * @param extraTags          Additional tags to add
+     * @param elements           List of OsmElement to upload if null all changed elements will be uploaded
      * @throws IOException if the upload doesn't work
      */
     public void uploadToServer(@NonNull final Server server, @Nullable final String comment, @Nullable String source, boolean closeOpenChangeset,
-            boolean closeChangeset, @Nullable Map<String, String> extraTags, @Nullable List<OsmElement> elements) throws IOException {
+                               boolean closeChangeset, @Nullable Map<String, String> extraTags, @Nullable List<OsmElement> elements) throws IOException {
 
         dirty = true; // storages will get modified as data is uploaded, these changes need to be saved to file
         removeUnchanged();
@@ -3482,10 +3400,10 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
 
     /**
      * Merge additional data with existing, copy to a new storage because this may fail
-     * 
+     * <p>
      * This may throw an IllegalStateException if existing data was inconsistent
-     * 
-     * @param storage storage containing data to merge
+     *
+     * @param storage   storage containing data to merge
      * @param postMerge handler to run after merging
      * @return true if the merge was successful
      * @throws DataConflictException if merging causes a conflict
@@ -3534,7 +3452,7 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
                                 newElements.add(n);
                             } else {
                                 throw new DataConflictException(existingNode, ""); // can't resolve conflicts, upload
-                                                                                   // first
+                                // first
                             }
                         }
                     } else {
@@ -3568,7 +3486,7 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
                                 newElements.add(w);
                             } else {
                                 throw new DataConflictException(existingWay, ""); // can't resolve conflicts, upload
-                                                                                  // first
+                                // first
                             }
                         }
                     } else {
@@ -3639,7 +3557,7 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
                                 newElements.add(r);
                             } else {
                                 throw new DataConflictException(existingRelation, ""); // can't resolve conflicts,
-                                                                                       // upload first
+                                // upload first
                             }
                         }
                     } else {
@@ -3675,7 +3593,7 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
 
     /**
      * Log an error and return an IllegalStateException
-     * 
+     *
      * @param debugString string to log
      */
     private IllegalStateException logAndGetIllegalStateException(@NonNull String debugString) {
@@ -3685,7 +3603,7 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
 
     /**
      * Log an error and trigger sending a crash report
-     * 
+     *
      * @param debugString string to log
      */
     private void logAndSendReport(@NonNull String debugString) {
@@ -3695,17 +3613,17 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
 
     /**
      * Redo all backlinks
-     * 
+     * <p>
      * This may throw an IllegalStateException if existing data was inconsistent
-     * 
-     * @param tempCurrent temp storage
-     * @param nodeIndex index to the nodes in temp
-     * @param wayIndex index to the ways in temp
+     *
+     * @param tempCurrent   temp storage
+     * @param nodeIndex     index to the nodes in temp
+     * @param wayIndex      index to the ways in temp
      * @param relationIndex index to the relations in temp
      * @return true if successful
      */
     private boolean redoBacklinks(@NonNull Storage tempCurrent, @NonNull LongOsmElementMap<Node> nodeIndex, @NonNull LongOsmElementMap<Way> wayIndex,
-            @NonNull LongOsmElementMap<Relation> relationIndex) {
+                                  @NonNull LongOsmElementMap<Relation> relationIndex) {
         // zap all existing backlinks for our "old" relations
         for (Relation r : currentStorage.getRelations()) {
             final List<RelationMember> members = r.getMembers();
@@ -3751,38 +3669,38 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
 
     /**
      * Retrieve a relation member OsmElement from the appropriate index
-     * 
-     * @param r the Relation
-     * @param type type of OsmElement
-     * @param ref the OSM id of the element
-     * @param nodeIndex node index
-     * @param wayIndex way index
+     *
+     * @param r             the Relation
+     * @param type          type of OsmElement
+     * @param ref           the OSM id of the element
+     * @param nodeIndex     node index
+     * @param wayIndex      way index
      * @param relationIndex relation index
      * @return the element or null
      */
     public OsmElement elementFromIndex(@NonNull Relation r, @NonNull final String type, final long ref, @NonNull LongOsmElementMap<Node> nodeIndex,
-            @NonNull LongOsmElementMap<Way> wayIndex, @NonNull LongOsmElementMap<Relation> relationIndex) {
+                                       @NonNull LongOsmElementMap<Way> wayIndex, @NonNull LongOsmElementMap<Relation> relationIndex) {
         OsmElement e = null;
         switch (type) {
-        case Node.NAME:
-            e = nodeIndex.get(ref);
-            break;
-        case Way.NAME:
-            e = wayIndex.get(ref);
-            break;
-        case Relation.NAME:
-            e = relationIndex.get(ref);
-            break;
-        default:
-            logUnknownMemberType(r, type);
+            case Node.NAME:
+                e = nodeIndex.get(ref);
+                break;
+            case Way.NAME:
+                e = wayIndex.get(ref);
+                break;
+            case Relation.NAME:
+                e = relationIndex.get(ref);
+                break;
+            default:
+                logUnknownMemberType(r, type);
         }
         return e;
     }
 
     /**
      * Log an unknown member type
-     * 
-     * @param r the Relation
+     *
+     * @param r    the Relation
      * @param type the type
      */
     private void logUnknownMemberType(@NonNull Relation r, @NonNull final String type) {
@@ -3791,7 +3709,7 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
 
     /**
      * Generate a log message and throw an IllegalStateException if rm or the type is null
-     * 
+     *
      * @param id the relation OSM id
      * @param rm the member
      */
@@ -3827,17 +3745,17 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
                 final String type = rm.getType();
                 final long ref = rm.getRef();
                 switch (type) {
-                case Node.NAME:
-                    e = currentStorage.getNode(ref);
-                    break;
-                case Way.NAME:
-                    e = currentStorage.getWay(ref);
-                    break;
-                case Relation.NAME:
-                    e = currentStorage.getRelation(ref);
-                    break;
-                default:
-                    logUnknownMemberType(r, type);
+                    case Node.NAME:
+                        e = currentStorage.getNode(ref);
+                        break;
+                    case Way.NAME:
+                        e = currentStorage.getWay(ref);
+                        break;
+                    case Relation.NAME:
+                        e = currentStorage.getRelation(ref);
+                        break;
+                    default:
+                        logUnknownMemberType(r, type);
                 }
                 if (e != null) {
                     e.addParentRelation(r);
@@ -3853,11 +3771,11 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
 
     /**
      * Safely remove data that is not in/intersects with the provided BoundingBox
-     * 
+     * <p>
      * Skips selected elements, removes BoundingBoxes
-     * 
+     * <p>
      * To determine if an element is selected this uses the current Logic instance
-     * 
+     *
      * @param box the BoundingBox
      */
     @Override
@@ -3872,11 +3790,11 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
 
     /**
      * Safely remove data that is not in/intersects with the provided BoundingBox
-     * 
+     * <p>
      * Skips selected elements, removes BoundingBoxes
-     * 
+     *
      * @param logic the current Logic instance if null element selection will not be tested
-     * @param box the BoundingBox
+     * @param box   the BoundingBox
      */
     protected void prune(@Nullable Logic logic, @NonNull BoundingBox box) {
         LongHashSet keepNodes = new LongHashSet();
@@ -3933,9 +3851,9 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
 
     /**
      * Check if a list of relations has an id in a set
-     * 
+     *
      * @param relations the List of Relations
-     * @param ids the set of ids
+     * @param ids       the set of ids
      * @return true if ids contains one relations ids
      */
     private boolean inIdSet(List<Relation> relations, LongHashSet ids) {
@@ -3951,7 +3869,7 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
 
     /**
      * Check that if way nodes have been modified
-     * 
+     *
      * @param w the Way
      * @return true if a way node has been changed
      */
@@ -3966,10 +3884,10 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
 
     /**
      * Remove the references to downloaded elements from parent Relations
-     * 
+     *
      * @param logic the current Logic instance or null, this is required because elements may be members of selected
-     *            relations
-     * @param e the OsmElement we want to remove references for
+     *              relations
+     * @param e     the OsmElement we want to remove references for
      */
     private void removeReferenceFromParents(@Nullable Logic logic, @NonNull OsmElement e) {
         List<Relation> parents = e.getParentRelations();
@@ -3988,7 +3906,7 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
 
     /**
      * Remove all unchanged elements, retaining parent Relations for changed ones
-     * 
+     * <p>
      * Note this doesn't handle selected elements and should only be called when nothing is selected
      */
     public void pruneAll() {
@@ -4036,9 +3954,9 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
 
     /**
      * Recursively add parent relations to keep
-     * 
+     *
      * @param keepRelations the Set of relations to keep
-     * @param e the OsmElement the parents of we want to keep
+     * @param e             the OsmElement the parents of we want to keep
      */
     void keepParents(@NonNull LongHashSet keepRelations, @NonNull OsmElement e) {
         List<Relation> parents = e.getParentRelations();
@@ -4055,11 +3973,11 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
 
     /**
      * Merge additional data with existing, copy to a new storage because this may fail
-     * 
+     * <p>
      * If this is aborted the contents of the undo checkpoint need to be removed, this may throw an
      * IllegalStateException if existing data was inconsistent
-     * 
-     * @param osc storage containing data to merge
+     *
+     * @param osc       storage containing data to merge
      * @param postMerge handler to run after merging
      * @return true if the operation was successful
      */
@@ -4273,8 +4191,8 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
 
     /**
      * Check if a referenced relation member is deleted
-     * 
-     * @param r the Relation
+     *
+     * @param r  the Relation
      * @param rm the RelationMember
      * @return true if deleted
      */
@@ -4290,9 +4208,9 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
 
     /**
      * Set an OsmElement to new state and remove it from the upload This is only used when trying to fix conflicts
-     * 
+     *
      * @param element the OsmElement
-     * @param state the new state
+     * @param state   the new state
      */
     public void removeFromUpload(@NonNull OsmElement element, byte state) {
         undo.save(element);
@@ -4302,7 +4220,7 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
 
     /**
      * Undo the last undo checkpoint the element was used in
-     * 
+     *
      * @param element the element we want to reset to the previous state
      */
     public void undoLast(@NonNull OsmElement element) {
@@ -4323,7 +4241,7 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
 
     /**
      * Add the element to the current undo checkpoint in a fashion that it will be removed if the checkpoint is undone
-     * 
+     *
      * @param element the OsmElement
      */
     public void removeOnUndo(@NonNull OsmElement element) {
@@ -4332,7 +4250,7 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
 
     /**
      * Set the version of an OsmElement This is only used when trying to fix conflicts
-     * 
+     *
      * @param element the OsmElement
      * @param version the new version
      */
@@ -4344,7 +4262,7 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
 
     /**
      * Check if coordinates are in the original bboxes from downloads, needs a more efficient implementation
-     * 
+     *
      * @param lonE7 WGS84 longitude*1E7
      * @param latE7 WGS84 latitude*1E7
      * @return true if the coordinates are in one of the bounding boxes
@@ -4360,7 +4278,7 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
 
     /**
      * Get the last added BoundingBox
-     * 
+     *
      * @return the last BoundingBox in the list or an empty one
      */
     @NonNull
@@ -4370,7 +4288,7 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
 
     /**
      * Get the list of clipboards
-     * 
+     *
      * @return the clipboards
      */
     @NonNull
@@ -4412,78 +4330,66 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
         }
     }
 
-    public void updateSeason(Relation crop, Relation newSeason) {
+    public static final String TYPE_FIELD = "agromap_field";
+    public static final String TYPE_SEASON = "agricultural_season";
+    public static final String TYPE_CROP = "crop_planting";
+
+    public static final String ROLE_FIELD_GEOMETRY = "field_geometry";
+    public static final String ROLE_SEASON = "season"; // Роль Сезона в Поле
+    public static final String ROLE_CROP = "crop";     // Роль Посева в Сезоне
+
+    public void createNewYieldWithCrop(Way yield, Map<String, String> yieldTags, Relation season, Map<String, String> cropTags) {
         try {
             lock();
-            Relation oldSeasonRelation = crop.getParentRelations().get(0);
-            Relation yieldRelation = oldSeasonRelation.getParentRelations().get(0);
 
-            if (!newSeason.getParentRelations().isEmpty()) {
-                Relation otherYieldRelation = newSeason.getParentRelations().get(0);
-               if (!Objects.equals(yieldRelation.getOsmId(), otherYieldRelation.getOsmId())) {
-                   SortedMap<String, String> tags = newSeason.getTags();
-                   newSeason = factory.createRelationWithNewId();
-                   newSeason.setTags(tags);
-                   insertElementUnsafe(newSeason);
-                   setStatus(newSeason);
-               }
-            }
+            yield.addTags(yieldTags);
 
-            oldSeasonRelation.removeMember(oldSeasonRelation.getMember(crop));
-            crop.removeParentRelation(oldSeasonRelation);
+            season.addMember(new RelationMember(ROLE_FIELD_GEOMETRY, yield));
+            yield.addParentRelation(season);
 
-            if (oldSeasonRelation.getMembers().isEmpty()) {
-                yieldRelation.removeMember(yieldRelation.getMember(oldSeasonRelation));
-                oldSeasonRelation.removeParentRelation(yieldRelation);
-                apiStorage.removeRelation(oldSeasonRelation);
-            }
+            Relation crop = App.getDelegator().getFactory().createRelationWithNewId();
+            crop.addTags(cropTags);
 
-            if (newSeason.getParentRelations() == null || newSeason.getParentRelations().isEmpty()) {
-                RelationMember newRelationMemberSeason = new RelationMember(StorageDelegator.ROLE_SEASON, newSeason);
-                yieldRelation.addMember(newRelationMemberSeason);
-                newSeason.addParentRelation(yieldRelation);
-            }
+            crop.addMember(new RelationMember(ROLE_SEASON, season));
+            season.addParentRelation(crop);
 
-            newSeason.addMember(new RelationMember(StorageDelegator.ROLE_CROP, crop));
-            crop.addParentRelation(newSeason);
+            setElementCreatedStatus(yield);
+            setElementCreatedStatus(crop);
+            setElementCreatedStatus(season);
 
-//            onParentRelationChanged(crop);
-//            onParentRelationChanged(newSeason);
-//            onParentRelationChanged(yieldRelation);
+            onParentRelationChanged(season);
+            onParentRelationChanged(yield);
         } finally {
             unlock();
         }
     }
 
-    public void connectCropToSeason(Relation crop, Relation yield, Relation seasonValue) {
+    // --- Используем тот же вспомогательный метод, что и раньше ---
+    public void setElementCreatedStatus(@NonNull OsmElement osmElement) {
+        dirty(); // Убедимся, что сохранение состояния будет вызвано
+        // insertElementSafe сам вызывает undo.save()
         try {
-            lock();
-            insertElementUnsafe(crop);
-            setStatus(crop);
-            if (seasonValue.getParentRelations() != null && !seasonValue.getParentRelations().isEmpty()) {
-                if (!Objects.equals(seasonValue.getParentRelations().get(0).getOsmId(), yield.getOsmId())) {
-                    SortedMap<String, String> tags = seasonValue.getTags();
-                    seasonValue = factory.createRelationWithNewId();
-                    seasonValue.setTags(tags);
-                    insertElementUnsafe(seasonValue);
-                    setStatus(seasonValue);
-                }
-            }
-
-            if (seasonValue.getParentRelations() == null || seasonValue.getParentRelations().isEmpty()) {
-                yield.addMember(new RelationMember(StorageDelegator.ROLE_SEASON, seasonValue));
-                seasonValue.addParentRelation(yield);
-                crop.addMember(new RelationMember(yield.getMembersWithRole(Tags.ROLE_OUTER).get(0)));
-            }
-
-            seasonValue.addMember(new RelationMember(StorageDelegator.ROLE_CROP, crop));
-            crop.addParentRelation(seasonValue);
-
-            onParentRelationChanged(crop);
-            onParentRelationChanged(yield);
-            onParentRelationChanged(seasonValue);
-        } finally {
-            unlock();
+            // Добавляем в ОБА хранилища (current и api)
+            // и сохраняем для undo
+            insertElementSafe(osmElement);
+        } catch (Exception e) { // Используем более общий Exception для простоты примера
+            Log.e("OsmDataCreator", "Error inserting element: " + osmElement.getDescription(true), e);
+            // В реальном коде нужна лучшая обработка StorageException
+            return;
         }
+
+        osmElement.updateState(OsmElement.STATE_CREATED);
+        osmElement.stamp();
+        osmElement.resetHasProblem();
+
+        try {
+            // Убедимся, что он точно в apiStorage (insertElementSafe должен это делать, но для надежности)
+            getApiStorage().insertElementSafe(osmElement);
+        } catch (Exception e) {
+            Log.e("OsmDataCreator", "Error ensuring element in apiStorage: " + osmElement.getDescription(true), e);
+            return;
+        }
+        // Уведомляем систему об изменении элемента (обновление UI, фильтров и т.д.)
+        onElementChanged(null, osmElement);
     }
 }
