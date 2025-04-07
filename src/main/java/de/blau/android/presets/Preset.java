@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Set;
 import java.util.regex.Pattern;
 
@@ -1268,7 +1269,7 @@ public class Preset implements Serializable {
                 final String key = tag.getKey();
                 final String value = tag.getValue();
                 final String ignoreValue = ignoreTags != null ? ignoreTags.get(key) : null;
-                final boolean ignore = "".equals(ignoreValue) || value.equals(ignoreValue);
+                final boolean ignore = "".equals(ignoreValue) || Objects.equals(value, ignoreValue);
                 if ((useAddressKeys || !key.startsWith(Tags.KEY_ADDR_BASE)) && !ignore) {
                     String tagString = key + "\t";
                     possibleMatches.addAll(p.objectItems.get(tagString)); // for stuff that doesn't have fixed

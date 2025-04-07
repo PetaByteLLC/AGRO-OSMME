@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.regex.Pattern;
@@ -286,6 +287,8 @@ public class BaseValidator implements Validator {
     public int validateFixme(int status, SortedMap<String, String> tags) {
         for (Entry<String, String> entry : new ArrayList<>(tags.entrySet())) {
             // test key and value against pattern
+            if (Objects.isNull(entry.getKey())) continue;
+            if (Objects.isNull(entry.getValue())) continue;
             if (FIXME_PATTERN.matcher(entry.getKey()).matches() || FIXME_PATTERN.matcher(entry.getValue()).matches()) {
                 status |= Validator.FIXME;
             }

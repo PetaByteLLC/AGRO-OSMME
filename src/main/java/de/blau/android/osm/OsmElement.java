@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
@@ -392,6 +393,8 @@ public abstract class OsmElement implements OsmElementInterface, Serializable, X
     protected void tagsToXml(@NonNull final XmlSerializer s) throws IllegalArgumentException, IllegalStateException, IOException {
         if (tags != null) {
             for (Entry<String, String> tag : tags.entrySet()) {
+                if (Objects.isNull(tag.getKey())) continue;
+                if (Objects.isNull(tag.getValue())) continue;
                 s.startTag("", TAG);
                 s.attribute("", TAG_KEY_ATTR, tag.getKey());
                 s.attribute("", TAG_VALUE_ATTR, tag.getValue());

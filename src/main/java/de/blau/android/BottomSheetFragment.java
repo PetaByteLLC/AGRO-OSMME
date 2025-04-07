@@ -284,10 +284,10 @@ public class BottomSheetFragment extends BottomSheetDialogFragment {
 
     private String getPosition() {
         de.blau.android.Map logicMap = App.getLogic().getMap();
-        if (logicMap == null) return null;
-        if (logicMap.getTracker() == null) return null;
+        if (logicMap == null) return "";
+        if (logicMap.getTracker() == null) return "";
         Location lastLocation = logicMap.getTracker().getLastLocation();
-        if (lastLocation == null) return null;
+        if (lastLocation == null) return "";
         return String.format("%s, %s;", lastLocation.getLatitude(), lastLocation.getLongitude());
     }
 

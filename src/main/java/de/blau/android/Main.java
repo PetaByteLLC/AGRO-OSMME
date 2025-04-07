@@ -724,6 +724,8 @@ public class Main extends FullScreenAppCompatActivity
         return bestLocation;
     }
 
+    boolean first;
+
     /**
      * Loads the preferences into {@link #map}, triggers new {@inheritDoc}
      */
@@ -756,6 +758,12 @@ public class Main extends FullScreenAppCompatActivity
 
         findViewById(R.id.undo_button).setOnClickListener(v -> handleUndo());
         findViewById(R.id.next_button).setOnClickListener(v -> finishBuilding());
+
+        if (App.getLogic().hasChanges() && isConnected() && !first) {
+            upload();
+        } else {
+            first = true;
+        }
     }
 
     @Override
@@ -918,8 +926,10 @@ public class Main extends FullScreenAppCompatActivity
             });
         }
 
-        if (App.getLogic().hasChanges() && isConnected()) {
-            upload();
+//        if (App.getLogic().hasChanges() && isConnected()) {
+//            upload();
+//        }
+
 //            StringWriter stringWriter = new StringWriter();
 //            try {
 //                OsmXml.writeOsmChange(App.getDelegator().getCurrentStorage(), stringWriter, 1L, 10000, App.getUserAgent());
@@ -929,7 +939,6 @@ public class Main extends FullScreenAppCompatActivity
 //                throw new RuntimeException(e);
 //            }
 //            Log.d(DEBUG_TAG, stringWriter.toString());
-        }
     }
 
     /**
