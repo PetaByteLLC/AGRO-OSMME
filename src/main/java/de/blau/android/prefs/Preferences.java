@@ -2,8 +2,11 @@ package de.blau.android.prefs;
 
 import static de.blau.android.contract.Constants.LOG_TAG_LEN;
 
+import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import android.annotation.SuppressLint;
@@ -17,9 +20,14 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.preference.PreferenceManager;
+
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+
 import de.blau.android.App;
 import de.blau.android.Map;
 import de.blau.android.R;
+import de.blau.android.Season;
 import de.blau.android.contract.Urls;
 import de.blau.android.layer.streetlevel.AbstractImageOverlay;
 import de.blau.android.osm.Server;
@@ -2200,5 +2208,30 @@ public class Preferences {
 
     public String getCgiToken() {
         return prefs.getString("accessToken", null);
+    }
+
+    private static final String KEY_SEASONS = "seasons";
+
+    public void saveSeasons(List<Season> seasons) {
+        Gson gson = new Gson();
+        String json = gson.toJson(seasons);
+        prefs.edit().putString(KEY_SEASONS, json).apply();
+    }
+
+    public List<Season> getSeasons() {
+        String json = prefs.getString(KEY_SEASONS, null);
+
+        ArrayList<Season> seasons = new ArrayList<>();
+        if (json != null) {
+            Gson gson = new Gson();
+            for (Season s : gson.fromJson(json, Season[].class)) {
+                seasons.add(s);
+            }
+            return seasons;
+        } else {
+            // Список по умолчанию
+            seasons.add(new Season("01-01-2025", "2025", "31-12-2025"));
+            return seasons;
+        }
     }
 }
