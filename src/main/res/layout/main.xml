@@ -30,6 +30,20 @@
             android:id="@+id/mainMap"
             android:layout_width="match_parent"
             android:layout_height="fill_parent">
+            <TextView
+                android:id="@+id/seasons"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="top"
+                android:paddingVertical="4dp"
+                android:paddingHorizontal="10dp"
+                android:layout_margin="15dp"
+                android:textStyle="bold"
+                android:text="2025"
+                android:textSize="20sp"
+                android:textColor="#fff"
+                android:theme="@style/Theme.customMain"
+                android:background="@drawable/radius" />
             <com.google.android.material.floatingactionbutton.FloatingActionButton
                 android:id="@+id/layers"
                 android:layout_width="wrap_content"

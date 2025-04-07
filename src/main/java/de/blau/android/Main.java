@@ -284,6 +284,7 @@ public class Main extends FullScreenAppCompatActivity
      */
     private static final int REQUEST_CODE_ASK_MULTIPLE_PERMISSIONS = 54321;
 
+    public Season currentSeason;
     /**
      * Not clear if this is even useful
      */
@@ -2083,6 +2084,28 @@ public class Main extends FullScreenAppCompatActivity
 //                }
 //            }
 //        }
+
+        TextView seasonTextView = findViewById(R.id.seasons);
+        List<Season> seasons = prefs.getSeasons();
+        if (currentSeason == null) {
+            if (!seasons.isEmpty()) {
+                Season season = seasons.get(seasons.size() - 1);
+                seasonTextView.setText(season.getName());
+                currentSeason = season;
+            } else {
+                seasonTextView.setText("Сезон не выбран");
+            }
+        } else {
+            seasonTextView.setText(currentSeason.getName());
+        }
+        seasonTextView.setOnClickListener(v -> {
+            SeasonDialog.show(this, selectedSeason -> {
+                ScreenMessage.toastTopWarning(Main.this, "Вы выбрали: " + selectedSeason.getName());
+                currentSeason = selectedSeason;
+                invalidateOptionsMenu();
+            });
+        });
+
         return true;
     }
 
