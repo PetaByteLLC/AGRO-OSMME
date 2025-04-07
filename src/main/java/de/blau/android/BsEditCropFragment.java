@@ -218,8 +218,7 @@ public class BsEditCropFragment extends BottomSheetDialogFragment {
                     }
                 } else {
                     if (crop == null) return;
-
-//                    App.getDelegator().updateCrop(crop, map, seasonValue);
+                    App.getDelegator().updateCropAndSeasonRelation(crop, map, seasonForFieldRelation);
                     if (getParentFragment() instanceof BsEditYieldFragment) {
                         ((BsEditYieldFragment) getParentFragment()).updateCropList();
                     }
