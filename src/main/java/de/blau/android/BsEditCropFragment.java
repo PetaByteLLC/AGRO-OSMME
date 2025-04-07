@@ -26,17 +26,18 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import de.blau.android.osm.OsmElement;
 import de.blau.android.osm.Relation;
 import de.blau.android.osm.StorageDelegator;
-import de.blau.android.osm.Way;
 
 public class BsEditCropFragment extends BottomSheetDialogFragment {
 
     private final Relation crop;
-    private final Way yield;
+    private final Relation yield;
     private final List<Relation> seasons;
+    private final List<Season> seasonSelector;
     private final Main main;
 
     private Button saveButton;
@@ -53,11 +54,12 @@ public class BsEditCropFragment extends BottomSheetDialogFragment {
 
     private final boolean isNew;
 
-    public BsEditCropFragment(Relation crop, Way yield, List<Relation> seasons, Main main, boolean isNew) {
+    public BsEditCropFragment(Relation crop, Relation yield, List<Relation> seasons, Main main, boolean isNew) {
         this.crop = crop;
         this.yield = yield;
         this.main = main;
         this.seasons = seasons;
+        this.seasonSelector = App.getPreferences(getContext()).getSeasons();
         this.isNew = isNew;
     }
 
@@ -98,21 +100,19 @@ public class BsEditCropFragment extends BottomSheetDialogFragment {
         irrigationTypeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         irrigationType.setAdapter(irrigationTypeAdapter);
 
-//        List<Relation> seasons = main.getUnicalSeason();
-
-        ArrayAdapter<Relation> seasonAdapter = new ArrayAdapter<Relation>(getActivity(), R.layout.season_dropdown_item, seasons) {
+        ArrayAdapter<Season> seasonAdapter = new ArrayAdapter<Season>(getActivity(), R.layout.season_dropdown_item, seasonSelector) {
             @NonNull
             @Override
             public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
                 if (convertView == null) {
                     convertView = LayoutInflater.from(getContext()).inflate(R.layout.season_dropdown_item, parent, false);
                 }
-                Relation relation = getItem(position);
+                Season season = getItem(position);
                 TextView name = convertView.findViewById(R.id.text1);
-                name.setText("Сезон " + getTagValue(relation, "name"));
+                name.setText("Сезон " + season.getName());
 
                 TextView date = convertView.findViewById(R.id.text2);
-                date.setText(getTagValue(relation, "start") + " - " + getTagValue(relation, "end"));
+                date.setText(season.getStartDate() + " - " + season.getEndDate());
                 return convertView;
             }
         };
@@ -132,31 +132,29 @@ public class BsEditCropFragment extends BottomSheetDialogFragment {
             builder.setTitle("Создания сезона")
                     .setView(dialogView)
                     .setPositiveButton("Создать", (dialog, which) -> {
-                        Map<String, String> values = new HashMap<>();
-                        String nameValue = name.getText().toString();
-                        values.put("name", nameValue);
-                        values.put("start", start.getText().toString());
-                        values.put("end", end.getText().toString());
-                        values.put("type", StorageDelegator.TYPE_SEASON);
+                        Season newSeason = new Season(name.getText().toString());
+                        newSeason.setStartDate(start.getText().toString());
+                        newSeason.setEndDate(end.getText().toString());
 
-                        if (nameValue.matches("^\\d{4}$") && start.getText().length() == 0 && end.getText().length() == 0) {
-                            int yearValue = Integer.parseInt(nameValue);
+                        if (newSeason.getName().matches("^\\d{4}$") &&
+                                newSeason.getStartDate().isEmpty() &&
+                                newSeason.getEndDate().isEmpty()) {
+                            int yearValue = Integer.parseInt(newSeason.getName());
                             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-                                values.put("start", java.time.LocalDate.of(yearValue, 1, 1).toString());
-                                values.put("end", java.time.LocalDate.of(yearValue, 12, 31).toString());
+                                newSeason.setStartDate(java.time.LocalDate.of(yearValue, 1, 1).toString());
+                                newSeason.setEndDate(java.time.LocalDate.of(yearValue, 12, 31).toString());
                             } else {
                                 Calendar calendarStart = Calendar.getInstance();
                                 calendarStart.set(yearValue, Calendar.JANUARY, 1);
                                 Calendar calendarEnd = Calendar.getInstance();
                                 calendarEnd.set(yearValue, Calendar.DECEMBER, 31);
-                                values.put("start", formatCalendarToString(calendarStart));
-                                values.put("end", formatCalendarToString(calendarEnd));
+                                newSeason.setStartDate(formatCalendarToString(calendarStart));
+                                newSeason.setEndDate(formatCalendarToString(calendarEnd));
                             }
                         }
-                        Relation newRelationSeason = App.getDelegator().createNewSeason(yield, values);
-                        seasons.add(newRelationSeason);
+                        seasonSelector.add(newSeason);
                         seasonAdapter.notifyDataSetChanged();
-                        season.setSelection(seasons.size() - 1);
+                        season.setSelection(seasonSelector.size() - 1);
                     })
                     .setNegativeButton("Отмена", null)
                     .create()
@@ -174,8 +172,15 @@ public class BsEditCropFragment extends BottomSheetDialogFragment {
                 culture.setSelection(Arrays.asList(cultureData).indexOf(crop.getTagWithKey("culture")));
                 landCategory.setSelection(Arrays.asList(landCategoryData).indexOf(crop.getTagWithKey("landCategory")));
                 irrigationType.setSelection(Arrays.asList(irrigationTypeData).indexOf(crop.getTagWithKey("irrigationType")));
-                List<Relation> parentRelations = crop.getParentRelations();
-                season.setSelection(seasons.indexOf(parentRelations.get(0)));
+                OsmElement osmElement = crop.getMemberElements().get(0);
+                Season selectedSeason = null;
+                for (Season s : seasonSelector) {
+                    if (Objects.equals(s.getName(), osmElement.getTagWithKey("name"))) {
+                        selectedSeason = s;
+                        break;
+                    }
+                }
+                season.setSelection(seasonSelector.indexOf(selectedSeason));
             } catch (NullPointerException ignore) {
             }
         }
@@ -187,7 +192,7 @@ public class BsEditCropFragment extends BottomSheetDialogFragment {
             String productivityValue = productivity.getText().toString();
             String landCategoryValue = landCategory.getSelectedItem().toString();
             String irrigationTypeValue = irrigationType.getSelectedItem().toString();
-            Relation seasonValue = (Relation) season.getSelectedItem();
+            Season seasonValue = (Season) season.getSelectedItem();
             try {
                 if (culture.getSelectedItem() == null)
                     throw new NullPointerException("Выращиваемая культура");
@@ -204,15 +209,17 @@ public class BsEditCropFragment extends BottomSheetDialogFragment {
                 map.put("landCategory", landCategoryValue);
                 map.put("irrigationType", irrigationTypeValue);
                 map.put("type", StorageDelegator.TYPE_CROP);
+
+                Relation seasonForFieldRelation = App.getDelegator().createSeasonForFieldRelation(yield, seasonValue, seasons);
                 if (isNew) {
-                    Relation newCrop = App.getDelegator().createNewCrop(seasonValue, map);
+                    Relation newCrop = App.getDelegator().createCropForSeasonRelation(seasonForFieldRelation, map);
                     if (getParentFragment() instanceof BsEditYieldFragment) {
                         ((BsEditYieldFragment) getParentFragment()).updateCropList(newCrop);
                     }
                 } else {
                     if (crop == null) return;
 
-                    App.getDelegator().updateCrop(crop, map, seasonValue);
+//                    App.getDelegator().updateCrop(crop, map, seasonValue);
                     if (getParentFragment() instanceof BsEditYieldFragment) {
                         ((BsEditYieldFragment) getParentFragment()).updateCropList();
                     }
@@ -231,10 +238,10 @@ public class BsEditCropFragment extends BottomSheetDialogFragment {
         bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
         bottomSheetBehavior.setDraggable(false);
 
-        if (getDialog() != null) {
-            getDialog().setCancelable(false);
-            getDialog().setCanceledOnTouchOutside(false);
-        }
+//        if (getDialog() != null) {
+//            getDialog().setCancelable(false);
+//            getDialog().setCanceledOnTouchOutside(false);
+//        }
     }
 
     @Override
@@ -247,6 +254,8 @@ public class BsEditCropFragment extends BottomSheetDialogFragment {
         if (getActivity() != null) {
             getActivity().invalidateOptionsMenu();
         }
+
+        App.getPreferences(getContext()).saveSeasons(seasonSelector);
     }
 
     private String getTagValue(OsmElement osmElement, String key) {

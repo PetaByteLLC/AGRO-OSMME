@@ -39,6 +39,7 @@ import androidx.annotation.Nullable;
 import de.blau.android.App;
 import de.blau.android.Logic;
 import de.blau.android.R;
+import de.blau.android.Season;
 import de.blau.android.Selection;
 import de.blau.android.contract.FileExtensions;
 import de.blau.android.exception.DataConflictException;
@@ -4334,145 +4335,359 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
         }
     }
 
-    public static final String TYPE_FIELD = "agromap_field";
+    // --- КОНСТАНТЫ ---
+    public static final String TYPE_FIELD = "agromap_field"; // Тип для Relation Поля
     public static final String TYPE_SEASON = "agricultural_season";
     public static final String TYPE_CROP = "crop_planting";
 
-    public static final String ROLE_FIELD_GEOMETRY = "field_geometry";
-    public static final String ROLE_SEASON = "season"; // Роль Сезона в Поле
+    public static final String ROLE_FIELD_GEOMETRY = Tags.ROLE_OUTER; // Роль Way (Геометрии) в Relation Поля (стандартная)
+    public static final String ROLE_FIELD = "field";         // Роль Relation Поля в Relation Сезона
+    public static final String ROLE_SEASON = "season";       // Роль Relation Сезона в Relation Посева
 
-    public void createNewYieldWithCrop(Way yield, Map<String, String> yieldTags, Relation season, Map<String, String> cropTags) {
+    /**
+     * СОЗДАЕТ: Геометрию(Way) + Поле(Relation) + Сезон(Relation) + Посев(Relation)
+     * СВЯЗЫВАЕТ: Поле содержит Way, Сезон содержит Поле, Посев содержит Сезон.
+     *
+     * @param fieldWay     Way.
+     * @param fieldRelationTags Теги для Relation Поля (включая type=agromap_field).
+     * @param seasonTags        Теги для Relation Сезона (включая type=agricultural_season).
+     * @param cropTags          Теги для Relation Посева (включая type=crop_planting).
+     */
+    @NonNull
+    public void createFieldRelationWithSeasonAndCrop(@NonNull Way fieldWay,
+                                                     @NonNull Map<String, String> fieldRelationTags,
+                                                     @NonNull Map<String, String> seasonTags,
+                                                     @NonNull Map<String, String> cropTags) {
         try {
             lock();
 
-            yield.addTags(yieldTags);
+            setElementCreated(fieldWay); // Добавлен Way
 
-            season.addMember(new RelationMember(ROLE_FIELD_GEOMETRY, yield));
-            yield.addParentRelation(season);
+            // 2. Создаем Поле (Relation)
+            Relation fieldRelation = factory.createRelationWithNewId();
+            fieldRelationTags.put(Tags.KEY_TYPE, TYPE_FIELD); // Убедимся, что тип есть
+            fieldRelation.setTags(fieldRelationTags);
+            // Добавляем Way геометрии как члена Поля
+            RelationMember fieldWayMember = new RelationMember(ROLE_FIELD_GEOMETRY, fieldWay);
+            fieldRelation.addMember(fieldWayMember);
+            // Добавляем Поле в хранилища ПОСЛЕ добавления члена
+            setElementCreated(fieldRelation);
+            // Обратная ссылка для Way
+            fieldWay.addParentRelation(fieldRelation);
+            setElementModified(fieldWay); // Way изменен (добавлен родитель)
+            onParentRelationChanged(fieldWay);
 
-            Relation crop = factory.createRelationWithNewId();
-            crop.addTags(cropTags);
+            // 3. Создаем Сезон (Relation)
+            Relation seasonRelation = factory.createRelationWithNewId();
+            seasonTags.put(Tags.KEY_TYPE, TYPE_SEASON);
+            seasonRelation.setTags(seasonTags);
+            // Добавляем Relation Поля как члена Сезона
+            RelationMember fieldRelationMember = new RelationMember(ROLE_FIELD, fieldRelation);
+            seasonRelation.addMember(fieldRelationMember);
+            // Добавляем Сезон в хранилища ПОСЛЕ добавления члена
+            setElementCreated(seasonRelation);
+            // Обратная ссылка для Поля
+            fieldRelation.addParentRelation(seasonRelation);
+            setElementModified(fieldRelation); // Поле изменено (добавлен родитель)
+            onParentRelationChanged(fieldRelation);
 
-            crop.addMember(new RelationMember(ROLE_SEASON, season));
-            season.addParentRelation(crop);
+            // 4. Создаем Посев (Relation)
+            Relation cropRelation = factory.createRelationWithNewId();
+            cropTags.put(Tags.KEY_TYPE, TYPE_CROP);
+            cropRelation.setTags(cropTags);
+            // Добавляем Relation Сезона как члена Посева
+            RelationMember seasonRelationMember = new RelationMember(ROLE_SEASON, seasonRelation);
+            cropRelation.addMember(seasonRelationMember);
+            // Добавляем Посев в хранилища ПОСЛЕ добавления члена
+            setElementCreated(cropRelation);
+            // Обратная ссылка для Сезона
+            seasonRelation.addParentRelation(cropRelation);
+            setElementModified(seasonRelation); // Сезон изменен (добавлен родитель)
+            onParentRelationChanged(seasonRelation);
 
-            setElementCreatedStatus(yield);
-            setElementCreatedStatus(crop);
-            setElementCreatedStatus(season);
-
-            onParentRelationChanged(season);
-            onParentRelationChanged(yield);
         } finally {
             unlock();
         }
     }
 
-    public void updateYield(Way yield, Map<String, String> tags) {
-        if (!checkTagChanges(yield, tags)) return;
-        updateTags(yield, tags);
+    /**
+     * Обновляет теги Поля (Relation).
+     *
+     * @param fieldRelation Relation Поля для обновления.
+     * @param newTags       Полный набор новых тегов (включая type=agromap_field).
+     */
+    public void updateFieldRelationTags(@NonNull Relation fieldRelation, @NonNull Map<String, String> newTags) {
+        // Используем стандартный setTags для Relation
+//        newTags.put(Tags.KEY_TYPE, TYPE_FIELD);
+        updateTags(fieldRelation, newTags);
     }
 
-    public boolean checkTagChanges(OsmElement osmElement, Map<String, String> tags) {
-        boolean update = false;
-        for (String key : tags.keySet()) {
-            if (!Objects.equals(tags.get(key), osmElement.getTagWithKey(key))) {
-                update = true;
+    /**
+     * Создает новый Сезон (Relation) и связывает его с существующим Полем (Relation).
+     *
+     * @param parentFieldRelation Существующий Relation Поля.
+     * @param seasonValue          Теги для нового Сезона (включая type=agricultural_season).
+     */
+    @NonNull
+    public Relation createSeasonForFieldRelation(@NonNull Relation parentFieldRelation, @NonNull Season seasonValue, List<Relation> exitsSeasons) {
+        if (currentStorage.getRelation(parentFieldRelation.getOsmId()) == null) {
+            throw new IllegalArgumentException("Parent Field Relation " + parentFieldRelation.getDescription(true) + " not found.");
+        }
+        try {
+            lock();
+            // 1. Создаем Сезон\Ищем сущ
+            if (!exitsSeasons.isEmpty()) {
+                for (Relation relation : exitsSeasons) {
+                    if (Objects.equals(seasonValue.getName(), relation.getTagWithKey("name"))) {
+                        return relation;
+                    }
+                }
+            }
+
+            Relation season = factory.createRelationWithNewId();
+            Map<String, String> seasonTags = new HashMap<>();
+            seasonTags.put("name", seasonValue.getName());
+            seasonTags.put("start", seasonValue.getStartDate());
+            seasonTags.put("end", seasonValue.getEndDate());
+            seasonTags.put(Tags.KEY_TYPE, TYPE_SEASON);
+            season.setTags(seasonTags);
+
+            // 2. Связываем с Полем (Сезон содержит Relation Поля)
+            undo.save(parentFieldRelation); // Сохраняем Поле перед добавлением родителя
+            RelationMember fieldMember = new RelationMember(ROLE_FIELD, parentFieldRelation);
+            season.addMember(fieldMember);
+
+            // Добавляем Сезон ПОСЛЕ добавления члена
+            setElementCreated(season);
+
+            // Обратная ссылка для Поля
+            parentFieldRelation.addParentRelation(season);
+            setElementModified(parentFieldRelation); // Поле изменено (добавлен родитель)
+            onParentRelationChanged(parentFieldRelation);
+            return season;
+        } finally { unlock(); }
+    }
+
+    /**
+     * Создает новый Посев (Relation) и связывает его с существующим Сезоном (Relation).
+     *
+     * @param parentSeason Существующий Relation Сезона.
+     * @param cropTags     Теги для нового Посева (включая type=crop_planting).
+     * @return Созданное отношение Посева.
+     */
+    @NonNull
+    public Relation createCropForSeasonRelation(@NonNull Relation parentSeason, @NonNull Map<String, String> cropTags) {
+        if (currentStorage.getRelation(parentSeason.getOsmId()) == null) {
+            throw new IllegalArgumentException("Parent Season Relation " + parentSeason.getDescription(true) + " not found.");
+        }
+        try {
+            lock();
+            // 1. Создаем Посев
+            Relation crop = factory.createRelationWithNewId();
+            cropTags.put(Tags.KEY_TYPE, TYPE_CROP);
+            crop.setTags(cropTags);
+
+            // 2. Связываем с Сезоном (Посев содержит Relation Сезона)
+            undo.save(parentSeason); // Сохраняем Сезон перед добавлением родителя
+            RelationMember seasonMember = new RelationMember(ROLE_SEASON, parentSeason);
+            crop.addMember(seasonMember);
+
+            // Добавляем Посев ПОСЛЕ добавления члена
+            setElementCreated(crop);
+
+            // Обратная ссылка для Сезона
+            parentSeason.addParentRelation(crop);
+            setElementModified(parentSeason); // Сезон изменен (добавлен родитель)
+            onParentRelationChanged(parentSeason);
+
+            return crop;
+
+        } finally { unlock(); }
+    }
+
+
+    /**
+     * Обновляет теги существующего Посева (Relation) и/или перемещает его в другой Сезон (Relation).
+     *
+     * @param cropToUpdate     Существующий Посев (Relation), который редактируется.
+     * @param newCropTags      Новый набор тегов для Посева (включая type=crop_planting).
+     * @param targetSeason     Сезон (Relation), к которому Посев должен быть привязан ПОСЛЕ сохранения.
+     */
+    public void updateCropAndSeasonRelation(@NonNull Relation cropToUpdate, @NonNull Map<String, String> newCropTags, @NonNull Relation targetSeason) {
+        // ... (проверки cropToUpdate, targetSeason) ...
+
+        Relation oldSeason = null;
+        RelationMember oldSeasonMember = null; // Член ВНУТРИ Посева, указывающий на старый сезон
+        boolean seasonChanged = false;
+
+        // Ищем текущий член-сезон ВНУТРИ Посева
+        List<RelationMember> members = cropToUpdate.getMembers();
+        if (members != null) {
+            for (RelationMember member : members) {
+                if (ROLE_SEASON.equals(member.getRole()) && member.getElement() instanceof Relation) {
+                    OsmElement potentialSeason = member.getElement();
+                    if(potentialSeason != null && TYPE_SEASON.equals(potentialSeason.getTagWithKey(Tags.KEY_TYPE))) {
+                        oldSeason = (Relation) potentialSeason;
+                        oldSeasonMember = member;
+                        break;
+                    }
+                }
             }
         }
-        return update;
+
+        // Определяем, изменился ли сезон
+        if (oldSeason == null || oldSeason.getOsmId() != targetSeason.getOsmId()) {
+            seasonChanged = true;
+        }
+
+        try {
+            lock();
+
+            // 1. Обновляем теги Посева
+            newCropTags.put(Tags.KEY_TYPE, TYPE_CROP);
+            boolean tagsChanged = cropToUpdate.setTags(newCropTags); // Вызывает undo и potentially modified status
+
+            // 2. Перемещаем Посев, если Сезон изменился
+            if (seasonChanged) {
+                undo.save(targetSeason);
+                if (oldSeason != null) { undo.save(oldSeason); }
+
+                // --- ИЗМЕНЕНИЯ ЗДЕСЬ ---
+                // Удаляем старый член-сезон из Посева
+                if (oldSeasonMember != null) {
+                    cropToUpdate.removeMember(oldSeasonMember);
+                }
+                // Добавляем новый член-сезон в Посев
+                RelationMember newSeasonMember = new RelationMember(ROLE_SEASON, targetSeason);
+                cropToUpdate.addMember(newSeasonMember);
+                // ----------------------
+
+                // Обновляем обратные ссылки у Сезонов
+                if (oldSeason != null) {
+                    oldSeason.removeParentRelation(cropToUpdate);
+                    setElementModified(oldSeason);
+                    onParentRelationChanged(oldSeason);
+                }
+                targetSeason.addParentRelation(cropToUpdate);
+
+                setElementModified(targetSeason);
+                setElementModified(cropToUpdate); // Посев изменен (член и, возможно, родитель)
+                onParentRelationChanged(targetSeason);
+            } else if (!tagsChanged) {
+                // No changes
+            }
+        } finally { unlock(); }
     }
 
-    // --- Используем тот же вспомогательный метод, что и раньше ---
-    public void setElementCreatedStatus(@NonNull OsmElement osmElement) {
-        dirty(); // Убедимся, что сохранение состояния будет вызвано
-        // insertElementSafe сам вызывает undo.save()
+    private void setElementCreated(@NonNull OsmElement osmElement) {
+        // 1. Устанавливаем флаг, что данные изменились и требуют сохранения
+        dirty = true;
+
+        // 2. Добавляем элемент в ОБА хранилища (current и api) и сохраняем для undo.
+        // insertElementSafe сам вызывает undo.save() перед реальной вставкой/обновлением.
+        // Он также обрабатывает случай, если элемент по какой-то причине уже есть.
         try {
-            // Добавляем в ОБА хранилища (current и api)
-            // и сохраняем для undo
             insertElementSafe(osmElement);
-        } catch (Exception e) { // Используем более общий Exception для простоты примера
-            Log.e("OsmDataCreator", "Error inserting element: " + osmElement.getDescription(true), e);
-            // В реальном коде нужна лучшая обработка StorageException
+        } catch (StorageException e) {
+            Log.e(DEBUG_TAG, "setElementCreated: Failed insertElementSafe for " + osmElement.getDescription(true), e);
+            // Если вставка не удалась, дальнейшие действия могут быть бессмысленны.
+            // Можно либо пробросить исключение, либо просто выйти.
             return;
         }
 
+        // 3. Устанавливаем статус CREATED
         osmElement.updateState(OsmElement.STATE_CREATED);
-        osmElement.stamp();
-        osmElement.resetHasProblem();
 
+        // 4. Обновляем служебные поля элемента
+        osmElement.stamp();           // Устанавливаем временную метку
+        osmElement.resetHasProblem(); // Сбрасываем флаг наличия проблем (валидации)
+
+        // 5. Убеждаемся, что в apiStorage статус именно CREATED.
+        // Это может быть избыточно, если insertElementSafe гарантирует сохранение
+        // статуса при обновлении, но для надежности можно оставить.
         try {
-            // Убедимся, что он точно в apiStorage (insertElementSafe должен это делать, но для надежности)
-            getApiStorage().insertElementSafe(osmElement);
-        } catch (Exception e) {
-            Log.e("OsmDataCreator", "Error ensuring element in apiStorage: " + osmElement.getDescription(true), e);
-            return;
+            // Получаем копию элемента из apiStorage (если она там есть)
+            OsmElement apiCopy = apiStorage.getOsmElement(osmElement.getName(), osmElement.getOsmId());
+            if (apiCopy != null) {
+                // Если в apiStorage уже был этот элемент (например, из-за undo/redo или сложной логики),
+                // принудительно ставим ему статус CREATED.
+                apiCopy.updateState(OsmElement.STATE_CREATED);
+                // Обновляем и другие поля на всякий случай
+                apiCopy.setOsmVersion(osmElement.getOsmVersion());
+                // Копирование тегов и членов не требуется, т.к. insertElementSafe должен был обновить объект
+            } else {
+                // Этого не должно происходить, если insertElementSafe выше отработал корректно.
+                Log.w(DEBUG_TAG, "setElementCreated: Element " + osmElement.getDescription(true) + " not found in apiStorage after insertElementSafe. Attempting insert again.");
+                // Попробуем добавить еще раз, т.к. элемент должен быть в apiStorage
+                apiStorage.insertElementSafe(osmElement);
+                // И снова установим статус у только что добавленной копии
+                OsmElement newlyAddedApiCopy = apiStorage.getOsmElement(osmElement.getName(), osmElement.getOsmId());
+                if (newlyAddedApiCopy != null) {
+                    newlyAddedApiCopy.updateState(OsmElement.STATE_CREATED);
+                }
+            }
+        } catch (StorageException e) {
+            Log.e(DEBUG_TAG, "setElementCreated: Failed insert/update in apiStorage for " + osmElement.getDescription(true), e);
         }
-        // Уведомляем систему об изменении элемента (обновление UI, фильтров и т.д.)
+
+        // 6. Уведомляем систему об изменении элемента (для обновления UI, карт, фильтров).
+        // Передаем null как "pre" (предыдущее состояние), т.к. элемент новый.
         onElementChanged(null, osmElement);
     }
 
-    public Relation createNewSeason(Way yield, Map<String, String> values) {
-        try {
-            lock();
-            Relation season = factory.createRelationWithNewId();
-            season.addTags(values);
 
-            setElementCreatedStatus(season);
-            onParentRelationChanged(season);
-            if (yield != null) {
-                season.addMember(new RelationMember(ROLE_FIELD_GEOMETRY, yield));
-                yield.addParentRelation(season);
-
-                setElementCreatedStatus(yield);
-                onParentRelationChanged(yield);
+    /**
+     * Устанавливает статус MODIFIED (если был UNCHANGED), обновляет элемент в apiStorage,
+     * вызывает undo и уведомления. Должен вызываться ПОСЛЕ фактической модификации
+     * элемента (например, добавления члена, изменения родителя), но ДО вызова setTags,
+     * если теги тоже меняются (т.к. setTags сам управляет статусом).
+     *
+     * @param osmElement Измененный элемент OsmElement.
+     */
+    private void setElementModified(@NonNull OsmElement osmElement) {
+        // 1. Если элемент уже помечен как CREATED или DELETED, его статус менять не нужно.
+        // Однако, его представление в apiStorage должно быть актуальным, и действие
+        // должно быть сохранено в undo.
+        if (osmElement.getState() == OsmElement.STATE_CREATED || osmElement.getState() == OsmElement.STATE_DELETED) {
+            dirty = true; // Данные все равно изменились (например, добавлен член)
+            undo.save(osmElement); // Сохраняем текущее состояние для undo
+            try {
+                // Обновляем представление элемента в apiStorage, не меняя статус
+                apiStorage.insertElementSafe(osmElement);
+            } catch (StorageException e) {
+                Log.e(DEBUG_TAG, "setElementModified: Failed apiStorage.insertElementSafe for CREATED/DELETED element " + osmElement.getDescription(true), e);
             }
-
-            return season;
-        } finally {
-            unlock();
+            // onElementChanged вызывать не нужно, т.к. статус не изменился,
+            // но если нужно обновить UI из-за изменения членов/родителей, его можно вызвать.
+            // onElementChanged(null, osmElement);
+            return; // Выходим, статус не меняем
         }
-    }
 
-    public Relation createNewCrop(Relation season, Map<String, String> values) {
+        // 2. Если элемент был UNCHANGED или MODIFIED, продолжаем
+        dirty = true;
+        undo.save(osmElement); // Сохраняем для undo ПЕРЕД возможным изменением статуса
+
+        // 3. Обновляем статус на MODIFIED, ТОЛЬКО если он был UNCHANGED.
+        boolean statusChanged = false;
+        if (osmElement.isUnchanged()) {
+            osmElement.updateState(OsmElement.STATE_MODIFIED);
+            statusChanged = true; // Запоминаем, что статус поменялся
+        }
+
+        // 4. Обновляем служебные поля
+        osmElement.stamp();           // Всегда обновляем метку времени
+        osmElement.resetHasProblem(); // Всегда сбрасываем флаг проблем
+
+        // 5. Добавляем/обновляем элемент в apiStorage
         try {
-            lock();
-
-            Relation crop = factory.createRelationWithNewId();
-            crop.addTags(values);
-
-            setElementCreatedStatus(crop);
-
-            crop.addMember(new RelationMember(ROLE_SEASON, season));
-            season.addParentRelation(crop);
-
-            onParentRelationChanged(season);
-            onParentRelationChanged(crop);
-            return crop;
-        } finally {
-            unlock();
+            apiStorage.insertElementSafe(osmElement);
+        } catch (StorageException e) {
+            Log.e(DEBUG_TAG, "setElementModified: Failed apiStorage.insertElementSafe for " + osmElement.getDescription(true), e);
         }
-    }
 
-    public void updateCrop(Relation crop, Map<String, String> values, Relation season) {
-        try {
-            lock();
-
-            if (checkTagChanges(crop, values)) {
-                crop.addTags(values);
-            }
-
-            if (crop.getMember(season) != null) return;
-
-            crop.addMember(new RelationMember(ROLE_SEASON, season));
-            season.addParentRelation(crop);
-
-            setElementCreatedStatus(season);
-            setElementCreatedStatus(crop);
-
-            onParentRelationChanged(season);
-            onParentRelationChanged(crop);
-        } finally {
-            unlock();
-        }
+        // 6. Уведомляем систему, если статус действительно изменился (или всегда, для обновления UI?)
+        // Решаем: уведомлять всегда при модификации или только при смене статуса.
+        // Скорее всего, лучше уведомлять всегда, чтобы UI обновился.
+        onElementChanged(null, osmElement);
     }
 }

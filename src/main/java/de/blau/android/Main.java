@@ -4254,12 +4254,14 @@ public class Main extends FullScreenAppCompatActivity
             }
             List<Way> ways = logic.getWaysForNode(selectedNode);
             if (ways.isEmpty()) return;
-            editData(ways.get(0));
+            Way way = ways.get(0);
+            List<Relation> parentRelations = way.getParentRelations();
+            editData(parentRelations.get(0));
         }
     }
 
 
-    public void editYield(Way clickedRelation, FragmentManager fragmentManager) {
+    public void editYield(Relation clickedRelation, FragmentManager fragmentManager) {
         List<Relation> seasons = clickedRelation.getParentRelations();
         if (seasons == null || seasons.isEmpty()) return;
 
@@ -4274,7 +4276,7 @@ public class Main extends FullScreenAppCompatActivity
         bsEditYieldFragment.show(fragmentManager, bsEditYieldFragment.getTag());
     }
 
-    private void editData(Way relation) {
+    private void editData(Relation relation) {
         if (relation == null) return;
         editYield(relation, getSupportFragmentManager());
     }
@@ -4297,14 +4299,17 @@ public class Main extends FullScreenAppCompatActivity
         bottomSheetFragment.show(getSupportFragmentManager(), bottomSheetFragment.getTag());
     }
 
-    public void editor(Way way) {
+    public void editor(Relation relation) {
         final Logic logic = App.getLogic();
         if (logic.isInEditZoomRange()) {
             addedNodes = new ArrayList<>();
             logic.deselectAll();
             logic.setLocked(false);
 
-            if (way == null) return;
+            if (relation == null) return;
+            List<RelationMember> membersWithRole = relation.getMembersWithRole(StorageDelegator.ROLE_FIELD_GEOMETRY);
+            if (membersWithRole.isEmpty()) return;
+            Way way = (Way) membersWithRole.get(0).getElement();
             logic.setSelectedNode(way.getLastNode());
 
             updateActionbarEditMode();
@@ -5279,10 +5284,10 @@ public class Main extends FullScreenAppCompatActivity
     private class AllFieldListener implements OnClickListener {
         @Override
         public void onClick(View v) {
-            List<Way> relations = App.getLogic().getWays();
-            List<Way> relationList = new ArrayList<>();
+            List<Relation> relations = App.getLogic().getRelations();
+            List<Relation> relationList = new ArrayList<>();
 
-            for (Way relation : relations) {
+            for (Relation relation : relations) {
                 if (Objects.equals(relation.getTagWithKey("type"), StorageDelegator.TYPE_FIELD)) {
                     relationList.add(relation);
                 }
