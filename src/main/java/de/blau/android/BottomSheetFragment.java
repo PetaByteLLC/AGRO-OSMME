@@ -23,6 +23,7 @@ import androidx.annotation.Nullable;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
@@ -105,7 +106,7 @@ public class BottomSheetFragment extends BottomSheetDialogFragment {
         setDataPicker(sowingDate);
         setDataPicker(cleaningDate);
 
-        List<Relation> seasons = main.getUnicalSeason();
+        List<Relation> seasons = new ArrayList<>();
 
         ArrayAdapter<Relation> seasonAdapter = new ArrayAdapter<Relation>(getActivity(), R.layout.season_dropdown_item, seasons) {
             @NonNull
@@ -160,9 +161,7 @@ public class BottomSheetFragment extends BottomSheetDialogFragment {
                                 values.put("end", formatCalendarToString(calendarEnd));
                             }
                         }
-                        Relation newRelationSeason = App.getDelegator().getFactory().createRelationWithNewId();
-                        newRelationSeason.addTags(values);
-                        App.getDelegator().setElementCreatedStatus(newRelationSeason);
+                        Relation newRelationSeason = App.getDelegator().createNewSeason(null, values);
                         seasons.add(newRelationSeason);
                         seasonAdapter.notifyDataSetChanged();
                         season.setSelection(seasons.size() - 1);
