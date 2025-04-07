@@ -42,21 +42,35 @@ public final class OsmXml {
     public static final String GENERATOR   = "generator";
 
     private static final Comparator<Relation> relationOrder = (r1, r2) -> {
-        // Правило: Ребенок всегда идет ПЕРЕД Родителем
-        boolean r2IsParentOfR1 = r1.hasParentRelation(r2);
-        boolean r1IsParentOfR2 = r2.hasParentRelation(r1);
+        boolean r1ContainsR2 = false;
+        if (r1.getMembers() != null) {
+            for (RelationMember rm : r1.getMembers()) {
+                // Проверяем ID и реальный объект, если он загружен
+                if (rm.getRef() == r2.getOsmId() && (rm.getElement() == r2 || rm.getElement() == null)) {
+                    r1ContainsR2 = true;
+                    break;
+                }
+            }
+        }
 
-        if (r2IsParentOfR1 && !r1IsParentOfR2) { // r1 - ребенок, r2 - родитель
-            return -1; // r1 ПЕРЕД r2
+        boolean r2ContainsR1 = false;
+        if (r2.getMembers() != null) {
+            for (RelationMember rm : r2.getMembers()) {
+                if (rm.getRef() == r1.getOsmId() && (rm.getElement() == r1 || rm.getElement() == null)) {
+                    r2ContainsR1 = true;
+                    break;
+                }
+            }
         }
-        if (r1IsParentOfR2 && !r2IsParentOfR1) { // r2 - ребенок, r1 - родитель
-            return -1; // r2 ПЕРЕД r1 (меняем порядок аргументов при возврате)
-            // или можно было бы вернуть 1, но тогда нужно поменять логику выше
+
+        if (r1ContainsR2 && !r2ContainsR1) { // r1 содержит r2 (r1 - родитель)
+            return 1; // Родитель r1 идет ПОСЛЕ ребенка r2
         }
-        // Если циклическая зависимость или нет прямой зависимости
-        return 0;
-        // Можно добавить сравнение по ID для стабильности сортировки, если зависимости нет
-        // return Long.compare(r1.getOsmId(), r2.getOsmId());
+        if (r2ContainsR1 && !r1ContainsR2) { // r2 содержит r1 (r2 - родитель)
+            return -1; // Ребенок r1 идет ПЕРЕД родителем r2
+        }
+        // Стабильность при отсутствии зависимости
+        return Long.compare(r1.getOsmId(), r2.getOsmId());
     };
 
     /**
