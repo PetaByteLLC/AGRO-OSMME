@@ -4417,9 +4417,15 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
      * @param newTags       Полный набор новых тегов (включая type=agromap_field).
      */
     public void updateFieldRelationTags(@NonNull Relation fieldRelation, @NonNull Map<String, String> newTags) {
-        // Используем стандартный setTags для Relation
-//        newTags.put(Tags.KEY_TYPE, TYPE_FIELD);
-        updateTags(fieldRelation, newTags);
+        boolean update = false;
+        for (String key : newTags.keySet()) {
+            if (!Objects.equals(fieldRelation.getTagWithKey(key), newTags.get(key))) {
+                update = true;
+            }
+        }
+        if (update) {
+            updateTags(fieldRelation, newTags);
+        }
     }
 
     /**
