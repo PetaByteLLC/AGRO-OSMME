@@ -189,6 +189,32 @@ public final class OsmXml {
             });
         }
 
+        List<Relation> independentCreatedRelations = new ArrayList<>();
+        List<Relation> dependentCreatedRelations = new ArrayList<>();
+        if (!createdRelations.isEmpty()) {
+            LongHashSet createdRelationIds = new LongHashSet();
+            for(Relation r : createdRelations) { createdRelationIds.put(r.getOsmId()); }
+
+            for(Relation r : createdRelations) {
+                boolean dependsOnOtherNewRelation = false;
+                if (r.getMembers() != null) {
+                    for (RelationMember rm : r.getMembers()) {
+                        if (rm.getElement() instanceof Relation && createdRelationIds.contains(rm.getRef())) {
+                            dependsOnOtherNewRelation = true;
+                            break;
+                        }
+                    }
+                }
+                if (dependsOnOtherNewRelation) {
+                    dependentCreatedRelations.add(r);
+                } else {
+                    independentCreatedRelations.add(r);
+                }
+            }
+            // Сортируем зависимые между собой (надеясь, что улучшенный relationOrder сработает)
+            Collections.sort(dependentCreatedRelations, relationOrder); // Используйте ИСПРАВЛЕННЫЙ relationOrder!
+        }
+
         // NOTE as deleted elements cannot be referenced we need to undelete them in MODIFY elements before we reference
         // them, this will not always work for relations, see below
         serializeCreatedElements(serializer, changeSetId, createdNodes);
@@ -197,10 +223,13 @@ public final class OsmXml {
         serializeCreatedElements(serializer, changeSetId, createdWays);
         serializeModifiedElements(serializer, changeSetId, modifiedWays);
 
-        // if a newly created relation references deleted relations, they would need to be undeleted in a separate pass
-        serializeCreatedElements(serializer, changeSetId, createdRelations);
-        serializeModifiedElements(serializer, changeSetId, modifiedRelations);
 
+// Сначала независимые отношения (например, Сезоны, зависящие только от Way)
+        serializeCreatedElements(serializer, changeSetId, independentCreatedRelations);
+// Потом зависимые отношения (например, Посевы, зависящие от Сезонов)
+        serializeCreatedElements(serializer, changeSetId, dependentCreatedRelations);
+
+        serializeModifiedElements(serializer, changeSetId, modifiedRelations); // Порядок для modify не так важен
         // delete in opposite order
         if (!deletedNodes.isEmpty() || !deletedWays.isEmpty() || !deletedRelations.isEmpty()) {
             serializer.startTag(null, DELETE);
