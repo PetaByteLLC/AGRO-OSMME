@@ -168,7 +168,7 @@ public class BsEditYieldFragment extends BottomSheetDialogFragment {
                 ((BottomSheetFragmentAllField) getParentFragment()).updateList();
             }
 
-//            App.getDelegator().updateYield(yield, map);
+            App.getDelegator().updateYield(yield, map);
             dismiss();
         });
 
