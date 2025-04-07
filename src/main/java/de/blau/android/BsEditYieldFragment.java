@@ -29,11 +29,10 @@ import java.util.Map;
 
 import de.blau.android.osm.OsmElement;
 import de.blau.android.osm.Relation;
-import de.blau.android.osm.Way;
 
 public class BsEditYieldFragment extends BottomSheetDialogFragment {
 
-    private final Way yield;
+    private final Relation yield;
     private final List<Relation> seasons;
     private final List<Relation> crops;
     private final Main main;
@@ -60,7 +59,7 @@ public class BsEditYieldFragment extends BottomSheetDialogFragment {
     private Button cropAdd;
     private ArrayAdapter<Relation> cropAdapter;
 
-    public BsEditYieldFragment(Way yield, List<Relation> seasons, List<Relation> crops, Main main) {
+    public BsEditYieldFragment(Relation yield, List<Relation> seasons, List<Relation> crops, Main main) {
         this.yield = yield;
         this.seasons = seasons;
         this.crops = crops;
@@ -168,7 +167,7 @@ public class BsEditYieldFragment extends BottomSheetDialogFragment {
                 ((BottomSheetFragmentAllField) getParentFragment()).updateList();
             }
 
-            App.getDelegator().updateYield(yield, map);
+            App.getDelegator().updateFieldRelationTags(yield, map);
             dismiss();
         });
 
