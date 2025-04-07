@@ -161,6 +161,17 @@ public class BsEditCropFragment extends BottomSheetDialogFragment {
                     .show();
         });
 
+        if (main.currentSeason != null) {
+            Season currentSeason = seasonSelector.get(seasonSelector.size() - 1);
+            for (Season s : seasonSelector) {
+                if (main.currentSeason.equals(s)) {
+                    currentSeason = s;
+                    break;
+                }
+            }
+            season.setSelection(seasonSelector.indexOf(currentSeason));
+        }
+
         setDataPicker(sowingDate);
         setDataPicker(cleaningDate);
         if (crop != null) {

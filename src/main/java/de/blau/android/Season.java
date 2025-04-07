@@ -2,6 +2,8 @@ package de.blau.android;
 
 import androidx.annotation.NonNull;
 
+import java.util.Objects;
+
 public class Season {
     private String name;
     private String startDate;
@@ -39,6 +41,19 @@ public class Season {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Season season = (Season) o;
+        return Objects.equals(name, season.name) && Objects.equals(startDate, season.startDate) && Objects.equals(endDate, season.endDate);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name, startDate, endDate);
     }
 
     @NonNull

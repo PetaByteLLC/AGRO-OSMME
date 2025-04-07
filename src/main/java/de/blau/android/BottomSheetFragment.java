@@ -107,6 +107,17 @@ public class BottomSheetFragment extends BottomSheetDialogFragment {
         ArrayAdapter<Season> seasonAdapter = getSeasonArrayAdapter(seasons);
         season.setAdapter(seasonAdapter);
 
+        if (main.currentSeason != null) {
+            Season currentSeason = seasons.get(seasons.size() - 1);
+            for (Season s : seasons) {
+                if (main.currentSeason.equals(s)) {
+                    currentSeason = s;
+                    break;
+                }
+            }
+            season.setSelection(seasons.indexOf(currentSeason));
+        }
+
         addSeason.setOnClickListener(v -> {
             LayoutInflater inflater = getLayoutInflater();
             View dialogView = inflater.inflate(R.layout.season_create_diaglog, null);
