@@ -333,28 +333,32 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
         }
     }
 
-//    public void updateTags(@NonNull final OsmElement elem, @Nullable final Map<String, String> tags) {
-//        try {
-//            lock();
-//            dirty = true;
-//            undo.save(elem);
-//            SortedMap<String, String> elemTags = elem.getTags();
-//            for (String key : tags.keySet()) {
-//                if (Objects.equals(elemTags.get(key), tags.get(key))) continue;
-//                elem.addTag(key, tags.get(key));
-//            }
-//            setStatus(elem);
-//            try {
-//                apiStorage.insertElementSafe(elem);
-//                onElementChanged(null, elem);
-//            } catch (StorageException e) {
-//                // TODO handle OOM
-//                Log.e(DEBUG_TAG, "setTags got " + e.getMessage());
-//            }
-//        } finally {
-//            unlock();
-//        }
-//    }
+    public void updateTags(@NonNull final OsmElement elem, @Nullable final Map<String, String> tags) {
+        try {
+            lock();
+            dirty = true;
+            undo.save(elem);
+            SortedMap<String, String> elemTags = elem.getTags();
+            for (String key : tags.keySet()) {
+                if (Objects.equals(elemTags.get(key), tags.get(key))) continue;
+                elem.addTag(key, tags.get(key));
+            }
+            if (elem.isUnchanged()) {
+                elem.updateState(OsmElement.STATE_MODIFIED);
+            }
+            elem.stamp(); // Обновляем временную метку
+            elem.resetHasProblem(); // Сбрасываем флаги проблем
+            try {
+                apiStorage.insertElementSafe(elem);
+                onElementChanged(null, elem);
+            } catch (StorageException e) {
+                // TODO handle OOM
+                Log.e(DEBUG_TAG, "setTags got " + e.getMessage());
+            }
+        } finally {
+            unlock();
+        }
+    }
 
     /**
      * Called after an element has been changed
@@ -4336,7 +4340,6 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
 
     public static final String ROLE_FIELD_GEOMETRY = "field_geometry";
     public static final String ROLE_SEASON = "season"; // Роль Сезона в Поле
-    public static final String ROLE_CROP = "crop";     // Роль Посева в Сезоне
 
     public void createNewYieldWithCrop(Way yield, Map<String, String> yieldTags, Relation season, Map<String, String> cropTags) {
         try {
@@ -4347,7 +4350,7 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
             season.addMember(new RelationMember(ROLE_FIELD_GEOMETRY, yield));
             yield.addParentRelation(season);
 
-            Relation crop = App.getDelegator().getFactory().createRelationWithNewId();
+            Relation crop = factory.createRelationWithNewId();
             crop.addTags(cropTags);
 
             crop.addMember(new RelationMember(ROLE_SEASON, season));
@@ -4362,6 +4365,21 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
         } finally {
             unlock();
         }
+    }
+
+    public void updateYield(Way yield, Map<String, String> tags) {
+        if (!checkTagChanges(yield, tags)) return;
+        updateTags(yield, tags);
+    }
+
+    public boolean checkTagChanges(OsmElement osmElement, Map<String, String> tags) {
+        boolean update = false;
+        for (String key : tags.keySet()) {
+            if (!Objects.equals(tags.get(key), osmElement.getTagWithKey(key))) {
+                update = true;
+            }
+        }
+        return update;
     }
 
     // --- Используем тот же вспомогательный метод, что и раньше ---
@@ -4391,5 +4409,70 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
         }
         // Уведомляем систему об изменении элемента (обновление UI, фильтров и т.д.)
         onElementChanged(null, osmElement);
+    }
+
+    public Relation createNewSeason(Way yield, Map<String, String> values) {
+        try {
+            lock();
+            Relation season = factory.createRelationWithNewId();
+            season.addTags(values);
+
+            setElementCreatedStatus(season);
+            onParentRelationChanged(season);
+            if (yield != null) {
+                season.addMember(new RelationMember(ROLE_FIELD_GEOMETRY, yield));
+                yield.addParentRelation(season);
+
+                setElementCreatedStatus(yield);
+                onParentRelationChanged(yield);
+            }
+
+            return season;
+        } finally {
+            unlock();
+        }
+    }
+
+    public Relation createNewCrop(Relation season, Map<String, String> values) {
+        try {
+            lock();
+
+            Relation crop = factory.createRelationWithNewId();
+            crop.addTags(values);
+
+            setElementCreatedStatus(crop);
+
+            crop.addMember(new RelationMember(ROLE_SEASON, season));
+            season.addParentRelation(crop);
+
+            onParentRelationChanged(season);
+            onParentRelationChanged(crop);
+            return crop;
+        } finally {
+            unlock();
+        }
+    }
+
+    public void updateCrop(Relation crop, Map<String, String> values, Relation season) {
+        try {
+            lock();
+
+            if (checkTagChanges(crop, values)) {
+                crop.addTags(values);
+            }
+
+            if (crop.getMember(season) != null) return;
+
+            crop.addMember(new RelationMember(ROLE_SEASON, season));
+            season.addParentRelation(crop);
+
+            setElementCreatedStatus(season);
+            setElementCreatedStatus(crop);
+
+            onParentRelationChanged(season);
+            onParentRelationChanged(crop);
+        } finally {
+            unlock();
+        }
     }
 }
