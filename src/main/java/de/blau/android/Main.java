@@ -2730,12 +2730,12 @@ public class Main extends FullScreenAppCompatActivity
                 return true;
             case R.id.logout:
                 Runnable reset2 = () -> {
-//                    prefs.setCgiToken(null);
+                    prefs.setCgiToken(null);
                     delegator.reset(true);
                     invalidateOptionsMenu();
                     map.invalidate();
-//                    startActivity(new Intent(this, LoginActivity.class));
-//                    finish();
+                    startActivity(new Intent(this, LoginActivity.class));
+                    finish();
                 };
                 if (logic != null && logic.hasChanges()) {
                     DataLoss.createDialog(this, (dialog, which) -> reset2.run()).show();
