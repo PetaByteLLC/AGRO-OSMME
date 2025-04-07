@@ -21,22 +21,21 @@ import androidx.annotation.Nullable;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 import de.blau.android.osm.OsmElement;
 import de.blau.android.osm.Relation;
 import de.blau.android.osm.StorageDelegator;
+import de.blau.android.osm.Way;
 
 public class BsEditCropFragment extends BottomSheetDialogFragment {
 
     private final Relation crop;
-    private final Relation yield;
+    private final Way yield;
     private final List<Relation> seasons;
     private final Main main;
 
@@ -54,7 +53,7 @@ public class BsEditCropFragment extends BottomSheetDialogFragment {
 
     private final boolean isNew;
 
-    public BsEditCropFragment(Relation crop, Relation yield, List<Relation> seasons, Main main, boolean isNew) {
+    public BsEditCropFragment(Relation crop, Way yield, List<Relation> seasons, Main main, boolean isNew) {
         this.crop = crop;
         this.yield = yield;
         this.main = main;
@@ -99,7 +98,7 @@ public class BsEditCropFragment extends BottomSheetDialogFragment {
         irrigationTypeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         irrigationType.setAdapter(irrigationTypeAdapter);
 
-        List<Relation> seasons = main.getUnicalSeason();
+//        List<Relation> seasons = main.getUnicalSeason();
 
         ArrayAdapter<Relation> seasonAdapter = new ArrayAdapter<Relation>(getActivity(), R.layout.season_dropdown_item, seasons) {
             @NonNull
@@ -138,7 +137,7 @@ public class BsEditCropFragment extends BottomSheetDialogFragment {
                         values.put("name", nameValue);
                         values.put("start", start.getText().toString());
                         values.put("end", end.getText().toString());
-                        values.put("type", StorageDelegator.ROLE_SEASON);
+                        values.put("type", StorageDelegator.TYPE_SEASON);
 
                         if (nameValue.matches("^\\d{4}$") && start.getText().length() == 0 && end.getText().length() == 0) {
                             int yearValue = Integer.parseInt(nameValue);
@@ -154,8 +153,7 @@ public class BsEditCropFragment extends BottomSheetDialogFragment {
                                 values.put("end", formatCalendarToString(calendarEnd));
                             }
                         }
-                        Relation newRelationSeason = App.getDelegator().getFactory().createRelationWithNewId();
-                        App.getDelegator().updateTags(newRelationSeason, values);
+                        Relation newRelationSeason = App.getDelegator().createNewSeason(yield, values);
                         seasons.add(newRelationSeason);
                         seasonAdapter.notifyDataSetChanged();
                         season.setSelection(seasons.size() - 1);
@@ -167,18 +165,19 @@ public class BsEditCropFragment extends BottomSheetDialogFragment {
 
         setDataPicker(sowingDate);
         setDataPicker(cleaningDate);
-
-        cultureVarieties.setText(getTagValue(crop, "cultureVarieties"));
-        sowingDate.setText(getTagValue(crop, "sowingDate"));
-        cleaningDate.setText(getTagValue(crop, "cleaningDate"));
-        productivity.setText(getTagValue(crop, "productivity"));
-        try {
-            culture.setSelection(Arrays.asList(cultureData).indexOf(crop.getTagWithKey("culture")));
-            landCategory.setSelection(Arrays.asList(landCategoryData).indexOf(crop.getTagWithKey("landCategory")));
-            irrigationType.setSelection(Arrays.asList(irrigationTypeData).indexOf(crop.getTagWithKey("irrigationType")));
-            List<Relation> parentRelations = crop.getParentRelations();
-            season.setSelection(seasons.indexOf(parentRelations.get(0)));
-        } catch (NullPointerException ignore) {
+        if (crop != null) {
+            cultureVarieties.setText(getTagValue(crop, "cultureVarieties"));
+            sowingDate.setText(getTagValue(crop, "sowingDate"));
+            cleaningDate.setText(getTagValue(crop, "cleaningDate"));
+            productivity.setText(getTagValue(crop, "productivity"));
+            try {
+                culture.setSelection(Arrays.asList(cultureData).indexOf(crop.getTagWithKey("culture")));
+                landCategory.setSelection(Arrays.asList(landCategoryData).indexOf(crop.getTagWithKey("landCategory")));
+                irrigationType.setSelection(Arrays.asList(irrigationTypeData).indexOf(crop.getTagWithKey("irrigationType")));
+                List<Relation> parentRelations = crop.getParentRelations();
+                season.setSelection(seasons.indexOf(parentRelations.get(0)));
+            } catch (NullPointerException ignore) {
+            }
         }
 
         saveButton.setOnClickListener(v -> {
@@ -190,9 +189,11 @@ public class BsEditCropFragment extends BottomSheetDialogFragment {
             String irrigationTypeValue = irrigationType.getSelectedItem().toString();
             Relation seasonValue = (Relation) season.getSelectedItem();
             try {
-                if (culture.getSelectedItem() == null) throw new NullPointerException("Выращиваемая культура");
+                if (culture.getSelectedItem() == null)
+                    throw new NullPointerException("Выращиваемая культура");
                 String cultureValue = culture.getSelectedItem().toString();
-                if (cultureValue.equals("Выращиваемая культура")) throw new NullPointerException("Выращиваемая культура");
+                if (cultureValue.equals("Выращиваемая культура"))
+                    throw new NullPointerException("Выращиваемая культура");
 
                 Map<String, String> map = new HashMap<>();
                 map.put("culture", cultureValue);
@@ -202,18 +203,16 @@ public class BsEditCropFragment extends BottomSheetDialogFragment {
                 map.put("productivity", productivityValue);
                 map.put("landCategory", landCategoryValue);
                 map.put("irrigationType", irrigationTypeValue);
-                map.put("type", StorageDelegator.ROLE_CROP);
-
-                App.getDelegator().updateTags(crop, map);
+                map.put("type", StorageDelegator.TYPE_CROP);
                 if (isNew) {
-                    App.getDelegator().connectCropToSeason(crop, yield, seasonValue);
+                    Relation newCrop = App.getDelegator().createNewCrop(seasonValue, map);
                     if (getParentFragment() instanceof BsEditYieldFragment) {
-                        ((BsEditYieldFragment) getParentFragment()).updateCropList(crop);
+                        ((BsEditYieldFragment) getParentFragment()).updateCropList(newCrop);
                     }
                 } else {
-                    if (!Objects.equals(seasonValue, crop.getParentRelations().get(0))) {
-                        App.getDelegator().updateSeason(crop, seasonValue);
-                    }
+                    if (crop == null) return;
+
+                    App.getDelegator().updateCrop(crop, map, seasonValue);
                     if (getParentFragment() instanceof BsEditYieldFragment) {
                         ((BsEditYieldFragment) getParentFragment()).updateCropList();
                     }
