@@ -16,6 +16,8 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import de.blau.android.util.collections.LongHashSet;
+
 /**
  * Provide reading and writing data files in OSM and JOSM format
  * 
@@ -40,13 +42,21 @@ public final class OsmXml {
     public static final String GENERATOR   = "generator";
 
     private static final Comparator<Relation> relationOrder = (r1, r2) -> {
-        if (r1.hasParentRelation(r2)) {
-            return -1;
+        // Правило: Ребенок всегда идет ПЕРЕД Родителем
+        boolean r2IsParentOfR1 = r1.hasParentRelation(r2);
+        boolean r1IsParentOfR2 = r2.hasParentRelation(r1);
+
+        if (r2IsParentOfR1 && !r1IsParentOfR2) { // r1 - ребенок, r2 - родитель
+            return -1; // r1 ПЕРЕД r2
         }
-        if (r2.hasParentRelation(r1)) {
-            return 1;
+        if (r1IsParentOfR2 && !r2IsParentOfR1) { // r2 - ребенок, r1 - родитель
+            return -1; // r2 ПЕРЕД r1 (меняем порядок аргументов при возврате)
+            // или можно было бы вернуть 1, но тогда нужно поменять логику выше
         }
+        // Если циклическая зависимость или нет прямой зависимости
         return 0;
+        // Можно добавить сравнение по ID для стабильности сортировки, если зависимости нет
+        // return Long.compare(r1.getOsmId(), r2.getOsmId());
     };
 
     /**
@@ -320,6 +330,32 @@ public final class OsmXml {
             });
         }
 
+        List<Relation> independentCreatedRelations = new ArrayList<>();
+        List<Relation> dependentCreatedRelations = new ArrayList<>();
+        if (!createdRelations.isEmpty()) {
+            LongHashSet createdRelationIds = new LongHashSet();
+            for(Relation r : createdRelations) { createdRelationIds.put(r.getOsmId()); }
+
+            for(Relation r : createdRelations) {
+                boolean dependsOnOtherNewRelation = false;
+                if (r.getMembers() != null) {
+                    for (RelationMember rm : r.getMembers()) {
+                        if (rm.getElement() instanceof Relation && createdRelationIds.contains(rm.getRef())) {
+                            dependsOnOtherNewRelation = true;
+                            break;
+                        }
+                    }
+                }
+                if (dependsOnOtherNewRelation) {
+                    dependentCreatedRelations.add(r);
+                } else {
+                    independentCreatedRelations.add(r);
+                }
+            }
+            // Сортируем зависимые между собой (надеясь, что улучшенный relationOrder сработает)
+            Collections.sort(dependentCreatedRelations, relationOrder); // Используйте ИСПРАВЛЕННЫЙ relationOrder!
+        }
+
         // NOTE as deleted elements cannot be referenced we need to undelete them in MODIFY elements before we reference
         // them, this will not always work for relations, see below
         serializeCreatedElements(serializer, changeSetId, createdNodes);
@@ -328,9 +364,12 @@ public final class OsmXml {
         serializeCreatedElements(serializer, changeSetId, createdWays);
         serializeModifiedElements(serializer, changeSetId, modifiedWays);
 
-        // if a newly created relation references deleted relations, they would need to be undeleted in a separate pass
-        serializeCreatedElements(serializer, changeSetId, createdRelations);
-        serializeModifiedElements(serializer, changeSetId, modifiedRelations);
+// Сначала независимые отношения (например, Сезоны, зависящие только от Way)
+        serializeCreatedElements(serializer, changeSetId, independentCreatedRelations);
+// Потом зависимые отношения (например, Посевы, зависящие от Сезонов)
+        serializeCreatedElements(serializer, changeSetId, dependentCreatedRelations);
+
+        serializeModifiedElements(serializer, changeSetId, modifiedRelations); // Порядок для modify не так важен
 
         // delete in opposite order
         if (!deletedNodes.isEmpty() || !deletedWays.isEmpty() || !deletedRelations.isEmpty()) {

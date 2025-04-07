@@ -918,18 +918,18 @@ public class Main extends FullScreenAppCompatActivity
             });
         }
 
-        if (App.getLogic().hasChanges() && isConnected()) {
+//        if (App.getLogic().hasChanges() && isConnected()) {
 //            upload();
-//            StringWriter stringWriter = new StringWriter();
-//            try {
-//                OsmXml.writeOsmChange(App.getDelegator().getCurrentStorage(), stringWriter, 1L, 10000, App.getUserAgent());
-//            } catch (IOException e) {
-//                throw new RuntimeException(e);
-//            } catch (XmlPullParserException e) {
-//                throw new RuntimeException(e);
-//            }
-//            Log.d(DEBUG_TAG, stringWriter.toString());
-        }
+            StringWriter stringWriter = new StringWriter();
+            try {
+                OsmXml.writeOsmChange(App.getDelegator().getCurrentStorage(), stringWriter, 1L, 10000, App.getUserAgent());
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            } catch (XmlPullParserException e) {
+                throw new RuntimeException(e);
+            }
+            Log.d(DEBUG_TAG, stringWriter.toString());
+//        }
     }
 
     /**
@@ -2698,12 +2698,12 @@ public class Main extends FullScreenAppCompatActivity
                 return true;
             case R.id.logout:
                 Runnable reset2 = () -> {
-                    prefs.setCgiToken(null);
+//                    prefs.setCgiToken(null);
                     delegator.reset(true);
                     invalidateOptionsMenu();
                     map.invalidate();
-                    startActivity(new Intent(this, LoginActivity.class));
-                    finish();
+//                    startActivity(new Intent(this, LoginActivity.class));
+//                    finish();
                 };
                 if (logic != null && logic.hasChanges()) {
                     DataLoss.createDialog(this, (dialog, which) -> reset2.run()).show();
@@ -4254,35 +4254,27 @@ public class Main extends FullScreenAppCompatActivity
             }
             List<Way> ways = logic.getWaysForNode(selectedNode);
             if (ways.isEmpty()) return;
-            Way way = ways.get(0);
-            List<Relation> parentRelations = way.getParentRelations();
-            if (parentRelations == null || parentRelations.isEmpty()) return;
-            Relation relation = parentRelations.get(0);
-            editData(relation);
-            return;
+            editData(ways.get(0));
         }
     }
 
 
-    public void editYield(Relation clickedRelation, FragmentManager fragmentManager) {
-        List<RelationMember> seasonMembers = clickedRelation.getMembersWithRole(StorageDelegator.ROLE_SEASON);
-        List<Relation> seasons = new ArrayList<>();
-        for (RelationMember relationMember : seasonMembers) {
-            seasons.add((Relation) relationMember.getElement());
-        }
-        List<RelationMember> cropMembers = new ArrayList<>();
-        for (Relation season : seasons) {
-            cropMembers.addAll(season.getMembersWithRole(StorageDelegator.ROLE_CROP));
-        }
+    public void editYield(Way clickedRelation, FragmentManager fragmentManager) {
+        List<Relation> seasons = clickedRelation.getParentRelations();
+        if (seasons == null || seasons.isEmpty()) return;
+
         List<Relation> crops = new ArrayList<>();
-        for (RelationMember relationMember : cropMembers) {
-            crops.add((Relation) relationMember.getElement());
+        for (Relation season : seasons) {
+            if (season == null) continue;
+            if (season.getParentRelations() == null) continue;
+            crops.addAll(season.getParentRelations());
         }
+
         BsEditYieldFragment bsEditYieldFragment = new BsEditYieldFragment(clickedRelation, seasons, crops, this);
         bsEditYieldFragment.show(fragmentManager, bsEditYieldFragment.getTag());
     }
 
-    private void editData(Relation relation) {
+    private void editData(Way relation) {
         if (relation == null) return;
         editYield(relation, getSupportFragmentManager());
     }
@@ -4301,21 +4293,17 @@ public class Main extends FullScreenAppCompatActivity
             ScreenMessage.toastTopWarning(this, "Не хватает точек");
             return;
         }
-        BottomSheetFragment bottomSheetFragment = new BottomSheetFragment(lastSelectedWay, this, false);
+        BottomSheetFragment bottomSheetFragment = new BottomSheetFragment(lastSelectedWay, this);
         bottomSheetFragment.show(getSupportFragmentManager(), bottomSheetFragment.getTag());
     }
 
-    public void editor(Relation relation) {
+    public void editor(Way way) {
         final Logic logic = App.getLogic();
         if (logic.isInEditZoomRange()) {
             addedNodes = new ArrayList<>();
             logic.deselectAll();
             logic.setLocked(false);
 
-            List<RelationMember> members = relation.getMembersWithRole(Tags.ROLE_OUTER);
-            if (members.isEmpty()) return;
-            RelationMember relationMember = members.get(0);
-            Way way = (Way) relationMember.getElement();
             if (way == null) return;
             logic.setSelectedNode(way.getLastNode());
 
@@ -5291,11 +5279,11 @@ public class Main extends FullScreenAppCompatActivity
     private class AllFieldListener implements OnClickListener {
         @Override
         public void onClick(View v) {
-            List<Relation> relations = App.getLogic().getRelations();
-            List<Relation> relationList = new ArrayList<>();
+            List<Way> relations = App.getLogic().getWays();
+            List<Way> relationList = new ArrayList<>();
 
-            for (Relation relation : relations) {
-                if (Objects.equals(relation.getTagWithKey("type"), "agromap_field")) {
+            for (Way relation : relations) {
+                if (Objects.equals(relation.getTagWithKey("type"), StorageDelegator.TYPE_FIELD)) {
                     relationList.add(relation);
                 }
             }
