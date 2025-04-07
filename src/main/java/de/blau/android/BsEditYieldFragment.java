@@ -29,10 +29,11 @@ import java.util.Map;
 
 import de.blau.android.osm.OsmElement;
 import de.blau.android.osm.Relation;
+import de.blau.android.osm.Way;
 
 public class BsEditYieldFragment extends BottomSheetDialogFragment {
 
-    private final Relation yield;
+    private final Way yield;
     private final List<Relation> seasons;
     private final List<Relation> crops;
     private final Main main;
@@ -59,7 +60,7 @@ public class BsEditYieldFragment extends BottomSheetDialogFragment {
     private Button cropAdd;
     private ArrayAdapter<Relation> cropAdapter;
 
-    public BsEditYieldFragment(Relation yield, List<Relation> seasons, List<Relation> crops, Main main) {
+    public BsEditYieldFragment(Way yield, List<Relation> seasons, List<Relation> crops, Main main) {
         this.yield = yield;
         this.seasons = seasons;
         this.crops = crops;
@@ -120,8 +121,8 @@ public class BsEditYieldFragment extends BottomSheetDialogFragment {
                 culture.setText(getTagValue(relation, "culture"));
 
                 TextView season = convertView.findViewById(R.id.season);
-                List<Relation> parentRelations = relation.getParentRelations();
-                Relation parentRelation = parentRelations.get(0);
+                List<OsmElement> parentRelations = relation.getMemberElements();
+                Relation parentRelation = (Relation) parentRelations.get(0);
                 season.setText("Сезон " + getTagValue(parentRelation, "name"));
                 return convertView;
             }
@@ -134,8 +135,7 @@ public class BsEditYieldFragment extends BottomSheetDialogFragment {
         });
 
         cropAdd.setOnClickListener(v -> {
-            Relation relationWithNewId = App.getDelegator().getFactory().createRelationWithNewId();
-            BsEditCropFragment cropFragment = new BsEditCropFragment(relationWithNewId, yield, seasons, main, true);
+            BsEditCropFragment cropFragment = new BsEditCropFragment(null, yield, seasons, main, true);
             cropFragment.show(getChildFragmentManager(), cropFragment.getTag());
         });
 
@@ -168,7 +168,7 @@ public class BsEditYieldFragment extends BottomSheetDialogFragment {
                 ((BottomSheetFragmentAllField) getParentFragment()).updateList();
             }
 
-            App.getDelegator().updateTags(yield, map);
+//            App.getDelegator().updateYield(yield, map);
             dismiss();
         });
 
