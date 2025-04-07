@@ -1,5 +1,7 @@
 package de.blau.android;
 
+import androidx.annotation.NonNull;
+
 public class Season {
     private String name;
     private String startDate;
@@ -37,5 +39,11 @@ public class Season {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    @NonNull
+    @Override
+    public String toString() {
+        return getName();
     }
 }

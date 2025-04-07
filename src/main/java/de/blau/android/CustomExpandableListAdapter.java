@@ -13,18 +13,18 @@ import java.util.List;
 
 import de.blau.android.osm.BoundingBox;
 import de.blau.android.osm.OsmElement;
+import de.blau.android.osm.Relation;
 import de.blau.android.osm.ViewBox;
-import de.blau.android.osm.Way;
 
 public class CustomExpandableListAdapter extends BaseExpandableListAdapter {
 
     private Context context;
     private List<String> listGroup;
-    private HashMap<String, List<Way>> listChild;
+    private HashMap<String, List<Relation>> listChild;
     private Main main;
     private BottomSheetFragmentAllField bottomSheetFragmentAllField;
 
-    public CustomExpandableListAdapter(Context context, List<String> listGroup, HashMap<String, List<Way>> listChild, Main main, BottomSheetFragmentAllField bottomSheetFragmentAllField) {
+    public CustomExpandableListAdapter(Context context, List<String> listGroup, HashMap<String, List<Relation>> listChild, Main main, BottomSheetFragmentAllField bottomSheetFragmentAllField) {
         this.context = context;
         this.listGroup = listGroup;
         this.listChild = listChild;
@@ -48,7 +48,7 @@ public class CustomExpandableListAdapter extends BaseExpandableListAdapter {
     }
 
     @Override
-    public Way getChild(int groupPosition, int childPosition) {
+    public Relation getChild(int groupPosition, int childPosition) {
         return listChild.get(listGroup.get(groupPosition)).get(childPosition);
     }
 
@@ -100,7 +100,7 @@ public class CustomExpandableListAdapter extends BaseExpandableListAdapter {
             LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             convertView = inflater.inflate(R.layout.bs_all_field_item, null);
         }
-        Way way = getChild(groupPosition, childPosition);
+        Relation way = getChild(groupPosition, childPosition);
 
         TextView title = convertView.findViewById(R.id.title);
         String text = getTagValue(way, "name") + " " + getTagValue(way, "area");
