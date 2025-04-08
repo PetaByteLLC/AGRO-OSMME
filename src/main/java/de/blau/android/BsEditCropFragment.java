@@ -2,6 +2,7 @@ package de.blau.android;
 
 import static de.blau.android.AgroConstants.*;
 import static de.blau.android.DatePiker.formatCalendarToString;
+import static de.blau.android.TagHelper.getTagValue;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -272,12 +273,6 @@ public class BsEditCropFragment extends BottomSheetDialogFragment {
         }
 
         App.getPreferences(getContext()).saveSeasons(seasonSelector);
-    }
-
-    private String getTagValue(OsmElement osmElement, String key) {
-        if (key == null || osmElement == null) return "";
-        String tagWithKey = osmElement.getTagWithKey(key);
-        return tagWithKey == null ? "" : tagWithKey;
     }
 
 }

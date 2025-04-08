@@ -2,6 +2,7 @@ package de.blau.android;
 
 import static de.blau.android.AgroConstants.CROP_TAG_CULTURE;
 import static de.blau.android.AgroConstants.CROP_TAG_CULTURE_VARIETIES;
+import static de.blau.android.TagHelper.getText;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -177,7 +178,4 @@ public class CustomExpandableListAdapter extends BaseExpandableListAdapter {
         return true;
     }
 
-    private String getText(String string) {
-        return string == null ? "" : string;
-    }
 }

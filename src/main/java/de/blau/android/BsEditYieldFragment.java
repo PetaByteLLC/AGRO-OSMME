@@ -1,6 +1,7 @@
 package de.blau.android;
 
 import static de.blau.android.AgroConstants.*;
+import static de.blau.android.TagHelper.getTagValue;
 
 import android.content.DialogInterface;
 import android.os.Bundle;

@@ -2,6 +2,7 @@ package de.blau.android;
 
 import static de.blau.android.AgroConstants.DATE_FORMAT;
 
+import android.annotation.SuppressLint;
 import android.app.DatePickerDialog;
 import android.content.Context;
 import android.widget.EditText;
@@ -10,6 +11,7 @@ import java.util.Calendar;
 
 public class DatePiker {
 
+    @SuppressLint("DefaultLocale")
     public static void setDataPicker(EditText editText, Context context) {
         editText.setOnClickListener(v -> {
             Calendar calendar = Calendar.getInstance();
@@ -20,8 +22,7 @@ public class DatePiker {
             DatePickerDialog datePickerDialog = new DatePickerDialog(
                     context,
                     (view1, year1, monthOfYear, dayOfMonth) -> {
-                        String date = String.format(DATE_FORMAT, year1, monthOfYear + 1, dayOfMonth);
-                        editText.setText(date);
+                        editText.setText(String.format(DATE_FORMAT, year1, monthOfYear + 1, dayOfMonth));
                     },
                     year, month, day);
             datePickerDialog.show();

@@ -237,7 +237,7 @@ public class BottomSheetFragment extends BottomSheetDialogFragment {
                 }
                 Season season = getItem(position);
                 TextView name = convertView.findViewById(R.id.text1);
-                name.setText("Сезон " + season.getName());
+                name.setText("Сезон " + TagHelper.getText(season.getName()));
 
                 TextView date = convertView.findViewById(R.id.text2);
                 date.setText(season.getStartDate() + " - " + season.getEndDate());

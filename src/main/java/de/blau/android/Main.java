@@ -4564,7 +4564,7 @@ public class Main extends FullScreenAppCompatActivity
 //        createdWay = logic.getSelectedWay(); // will be null if way was deleted by undo
         invalidateMap();
         if (addedNodes != null) {
-            TextView pointCounterTextView = (TextView) findViewById(R.id.pointCount);
+            TextView pointCounterTextView = findViewById(R.id.pointCount);
             pointCounterTextView.setText(addedNodes.size() + " точек");
             if (addedNodes.isEmpty()) {
                 ScreenMessage.toastTopWarning(Main.this, "Поставьте первую точку");
@@ -5347,7 +5347,7 @@ public class Main extends FullScreenAppCompatActivity
             List<Relation> relationList = new ArrayList<>();
 
             for (Relation relation : relations) {
-                if (Objects.equals(relation.getTagWithKey("type"), StorageDelegator.TYPE_FIELD)) {
+                if (Objects.equals(relation.getTagWithKey(Tags.KEY_TYPE), StorageDelegator.TYPE_FIELD)) {
                     relationList.add(relation);
                 }
             }
