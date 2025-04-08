@@ -30,8 +30,8 @@ public class SeasonDialog {
         EditText end = view.findViewById(R.id.season_end);
         Button addButton = view.findViewById(R.id.add_button);
 
-        setDataPicker(start, context);
-        setDataPicker(end, context);
+        DatePiker.setDataPicker(start, context);
+        DatePiker.setDataPicker(end, context);
 
         List<Season> seasons = App.getPreferences(context).getSeasons();
         ArrayAdapter<Season> adapter = new ArrayAdapter<>(
@@ -99,21 +99,4 @@ public class SeasonDialog {
         dialog.show();
     }
 
-    private static void setDataPicker(EditText editText, Context context) {
-        editText.setOnClickListener(v -> {
-            Calendar calendar = Calendar.getInstance();
-            int year = calendar.get(Calendar.YEAR);
-            int month = calendar.get(Calendar.MONTH);
-            int day = calendar.get(Calendar.DAY_OF_MONTH);
-
-            DatePickerDialog datePickerDialog = new DatePickerDialog(
-                    context,
-                    (view1, year1, monthOfYear, dayOfMonth) -> {
-                        String date = dayOfMonth + "/" + (monthOfYear + 1) + "/" + year1;
-                        editText.setText(date);
-                    },
-                    year, month, day);
-            datePickerDialog.show();
-        });
-    }
 }

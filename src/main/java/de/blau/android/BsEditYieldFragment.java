@@ -163,10 +163,6 @@ public class BsEditYieldFragment extends BottomSheetDialogFragment {
             map.put("cadastrNumber", cadastrNumber.getText().toString());
             map.put("technology", technology.getSelectedItem().toString());
 
-            if (getParentFragment() instanceof BottomSheetFragmentAllField) {
-                ((BottomSheetFragmentAllField) getParentFragment()).updateList();
-            }
-
             App.getDelegator().updateFieldRelationTags(yield, map);
             dismiss();
         });
@@ -217,6 +213,10 @@ public class BsEditYieldFragment extends BottomSheetDialogFragment {
         main.invisibleUnlockButton();
         if (getActivity() != null) {
             getActivity().invalidateOptionsMenu();
+        }
+
+        if (getParentFragment() instanceof BottomSheetFragmentAllField) {
+            ((BottomSheetFragmentAllField) getParentFragment()).updateList();
         }
     }
 

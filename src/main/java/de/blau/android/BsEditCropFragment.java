@@ -1,7 +1,9 @@
 package de.blau.android;
 
+import static de.blau.android.AgroConstants.*;
+import static de.blau.android.DatePiker.formatCalendarToString;
+
 import android.app.AlertDialog;
-import android.app.DatePickerDialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -31,6 +33,7 @@ import java.util.Objects;
 import de.blau.android.osm.OsmElement;
 import de.blau.android.osm.Relation;
 import de.blau.android.osm.StorageDelegator;
+import de.blau.android.osm.Tags;
 
 public class BsEditCropFragment extends BottomSheetDialogFragment {
 
@@ -85,38 +88,19 @@ public class BsEditCropFragment extends BottomSheetDialogFragment {
         productivity = view.findViewById(R.id.productivity);
         addSeason = view.findViewById(R.id.add_season);
 
-        String[] cultureData = {"Выращиваемая культура", "Пшеница", "Зерновые", "Ячмень", "Кукуруза", "Хлопок-сырец", "Сахарная свекла"};
-        ArrayAdapter<String> cultureAdapter = new ArrayAdapter<String>(getActivity(), R.layout.agro_simple_spinner_item, cultureData);
+        ArrayAdapter<String> cultureAdapter = new ArrayAdapter<String>(getActivity(), R.layout.agro_simple_spinner_item, CULTURE_DATA);
         cultureAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         culture.setAdapter(cultureAdapter);
 
-        String[] landCategoryData = {"Категория угодья", "орошаемая", "богара"};
-        ArrayAdapter<String> landCategoryAdapter = new ArrayAdapter<String>(getActivity(), R.layout.agro_simple_spinner_item, landCategoryData);
+        ArrayAdapter<String> landCategoryAdapter = new ArrayAdapter<String>(getActivity(), R.layout.agro_simple_spinner_item, LAND_CATEGORY_DATA);
         landCategoryAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         landCategory.setAdapter(landCategoryAdapter);
 
-        String[] irrigationTypeData = {"Тип полива", "каналы/гравитация", "установки"};
-        ArrayAdapter<String> irrigationTypeAdapter = new ArrayAdapter<String>(getActivity(), R.layout.agro_simple_spinner_item, irrigationTypeData);
+        ArrayAdapter<String> irrigationTypeAdapter = new ArrayAdapter<String>(getActivity(), R.layout.agro_simple_spinner_item, IRRIGATION_TYPE_DATA);
         irrigationTypeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         irrigationType.setAdapter(irrigationTypeAdapter);
 
-        ArrayAdapter<Season> seasonAdapter = new ArrayAdapter<Season>(getActivity(), R.layout.season_dropdown_item, seasonSelector) {
-            @NonNull
-            @Override
-            public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
-                if (convertView == null) {
-                    convertView = LayoutInflater.from(getContext()).inflate(R.layout.season_dropdown_item, parent, false);
-                }
-                Season season = getItem(position);
-                TextView name = convertView.findViewById(R.id.text1);
-                name.setText("Сезон " + season.getName());
-
-                TextView date = convertView.findViewById(R.id.text2);
-                date.setText(season.getStartDate() + " - " + season.getEndDate());
-                return convertView;
-            }
-        };
-        seasonAdapter.setDropDownViewResource(R.layout.agro_simple_spinner_item);
+        ArrayAdapter<Season> seasonAdapter = getSeasonArrayAdapter();
         season.setAdapter(seasonAdapter);
 
         addSeason.setOnClickListener(v -> {
@@ -126,8 +110,8 @@ public class BsEditCropFragment extends BottomSheetDialogFragment {
             final EditText start = dialogView.findViewById(R.id.start);
             final EditText end = dialogView.findViewById(R.id.end);
 
-            setDataPicker(start);
-            setDataPicker(end);
+            DatePiker.setDataPicker(start, getContext());
+            DatePiker.setDataPicker(end, getContext());
             AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
             builder.setTitle("Создания сезона")
                     .setView(dialogView)
@@ -172,21 +156,21 @@ public class BsEditCropFragment extends BottomSheetDialogFragment {
             season.setSelection(seasonSelector.indexOf(currentSeason));
         }
 
-        setDataPicker(sowingDate);
-        setDataPicker(cleaningDate);
+        DatePiker.setDataPicker(sowingDate, getContext());
+        DatePiker.setDataPicker(cleaningDate, getContext());
         if (crop != null) {
-            cultureVarieties.setText(getTagValue(crop, "cultureVarieties"));
-            sowingDate.setText(getTagValue(crop, "sowingDate"));
-            cleaningDate.setText(getTagValue(crop, "cleaningDate"));
-            productivity.setText(getTagValue(crop, "productivity"));
+            cultureVarieties.setText(getTagValue(crop, CROP_TAG_CULTURE_VARIETIES));
+            sowingDate.setText(getTagValue(crop, CROP_TAG_SOWING_DATE));
+            cleaningDate.setText(getTagValue(crop, CROP_TAG_CLEANING_DATE));
+            productivity.setText(getTagValue(crop, CROP_TAG_PRODUCTIVITY));
             try {
-                culture.setSelection(Arrays.asList(cultureData).indexOf(crop.getTagWithKey("culture")));
-                landCategory.setSelection(Arrays.asList(landCategoryData).indexOf(crop.getTagWithKey("landCategory")));
-                irrigationType.setSelection(Arrays.asList(irrigationTypeData).indexOf(crop.getTagWithKey("irrigationType")));
+                culture.setSelection(Arrays.asList(CULTURE_DATA).indexOf(crop.getTagWithKey(CROP_TAG_CULTURE)));
+                landCategory.setSelection(Arrays.asList(LAND_CATEGORY_DATA).indexOf(crop.getTagWithKey(CROP_TAG_LAND_CATEGORY)));
+                irrigationType.setSelection(Arrays.asList(IRRIGATION_TYPE_DATA).indexOf(crop.getTagWithKey(CROP_TAG_IRRIGATION_TYPE)));
                 OsmElement osmElement = crop.getMemberElements().get(0);
                 Season selectedSeason = null;
                 for (Season s : seasonSelector) {
-                    if (Objects.equals(s.getName(), osmElement.getTagWithKey("name"))) {
+                    if (Objects.equals(s.getName(), osmElement.getTagWithKey(Tags.KEY_NAME))) {
                         selectedSeason = s;
                         break;
                     }
@@ -212,14 +196,14 @@ public class BsEditCropFragment extends BottomSheetDialogFragment {
                     throw new NullPointerException("Выращиваемая культура");
 
                 Map<String, String> map = new HashMap<>();
-                map.put("culture", cultureValue);
-                map.put("cultureVarieties", cultureVarietiesValue);
-                map.put("sowingDate", sowingDateValue);
-                map.put("cleaningDate", cleaningDateValue);
-                map.put("productivity", productivityValue);
-                map.put("landCategory", landCategoryValue);
-                map.put("irrigationType", irrigationTypeValue);
-                map.put("type", StorageDelegator.TYPE_CROP);
+                map.put(CROP_TAG_CULTURE, cultureValue);
+                map.put(CROP_TAG_CULTURE_VARIETIES, cultureVarietiesValue);
+                map.put(CROP_TAG_SOWING_DATE, sowingDateValue);
+                map.put(CROP_TAG_CLEANING_DATE, cleaningDateValue);
+                map.put(CROP_TAG_PRODUCTIVITY, productivityValue);
+                map.put(CROP_TAG_LAND_CATEGORY, landCategoryValue);
+                map.put(CROP_TAG_IRRIGATION_TYPE, irrigationTypeValue);
+                map.put(Tags.KEY_TYPE, StorageDelegator.TYPE_CROP);
 
                 Relation seasonForFieldRelation = App.getDelegator().createSeasonForFieldRelation(yield, seasonValue, seasons);
                 if (isNew) {
@@ -254,6 +238,28 @@ public class BsEditCropFragment extends BottomSheetDialogFragment {
 //        }
     }
 
+    @NonNull
+    private ArrayAdapter<Season> getSeasonArrayAdapter() {
+        ArrayAdapter<Season> seasonAdapter = new ArrayAdapter<Season>(getActivity(), R.layout.season_dropdown_item, seasonSelector) {
+            @NonNull
+            @Override
+            public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
+                if (convertView == null) {
+                    convertView = LayoutInflater.from(getContext()).inflate(R.layout.season_dropdown_item, parent, false);
+                }
+                Season season = getItem(position);
+                TextView name = convertView.findViewById(R.id.text1);
+                name.setText("Сезон " + season.getName());
+
+                TextView date = convertView.findViewById(R.id.text2);
+                date.setText(season.getStartDate() + " - " + season.getEndDate());
+                return convertView;
+            }
+        };
+        seasonAdapter.setDropDownViewResource(R.layout.agro_simple_spinner_item);
+        return seasonAdapter;
+    }
+
     @Override
     public void onDismiss(@NonNull DialogInterface dialog) {
         super.onDismiss(dialog);
@@ -274,31 +280,4 @@ public class BsEditCropFragment extends BottomSheetDialogFragment {
         return tagWithKey == null ? "" : tagWithKey;
     }
 
-    private String formatCalendarToString(Calendar calendar) {
-        // Преобразуем календарь в строку в формате "yyyy-MM-dd"
-        int year = calendar.get(Calendar.YEAR);
-        int month = calendar.get(Calendar.MONTH) + 1; // Месяцы начинаются с 0
-        int day = calendar.get(Calendar.DAY_OF_MONTH);
-
-        // Форматируем строку как "yyyy-MM-dd"
-        return String.format("%04d-%02d-%02d", year, month, day);
-    }
-
-    private void setDataPicker(EditText editText) {
-        editText.setOnClickListener(v -> {
-            Calendar calendar = Calendar.getInstance();
-            int year = calendar.get(Calendar.YEAR);
-            int month = calendar.get(Calendar.MONTH);
-            int day = calendar.get(Calendar.DAY_OF_MONTH);
-
-            DatePickerDialog datePickerDialog = new DatePickerDialog(
-                    getContext(),
-                    (view1, year1, monthOfYear, dayOfMonth) -> {
-                        String date = dayOfMonth + "/" + (monthOfYear + 1) + "/" + year1;
-                        editText.setText(date);
-                    },
-                    year, month, day);
-            datePickerDialog.show();
-        });
-    }
 }

@@ -8,6 +8,9 @@ import android.widget.BaseExpandableListAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -100,54 +103,34 @@ public class CustomExpandableListAdapter extends BaseExpandableListAdapter {
             LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             convertView = inflater.inflate(R.layout.bs_all_field_item, null);
         }
-        Relation way = getChild(groupPosition, childPosition);
+        Relation relation = getChild(groupPosition, childPosition);
 
         TextView title = convertView.findViewById(R.id.title);
-        String text = getTagValue(way, "name") + " " + getTagValue(way, "area");
+        String text = getTagValue(relation, "name") + " " + getTagValue(relation, "area");
         title.setText(text.trim());
 
-        String cultureData = way.getTagWithKey("culture");
-        TextView culture = convertView.findViewById(R.id.culture);
-        culture.setText(cultureData);
+        TextView cropTextView = convertView.findViewById(R.id.crops);
 
-        ImageView cultureIcon = convertView.findViewById(R.id.cultureIcon);
-        if (cultureData != null) {
-            switch (cultureData) {
-                case "Пшеницa":
-                    cultureIcon.setImageResource(R.drawable.lucide_wheat);
-                    break;
-                case "Зерновые":
-                    cultureIcon.setImageResource(R.drawable.fluent_food_grains);
-                    break;
-                case "Ячмень":
-                    cultureIcon.setImageResource(R.drawable.mdi_wheat);
-                    break;
-                case "Кукуруза":
-                    cultureIcon.setImageResource(R.drawable.mdi_corn);
-                    break;
-                case "Хлопок-сырец":
-                    cultureIcon.setImageResource(R.drawable.icons_cotton_flower);
-                    break;
-                case "Сахарная свекла":
-                    cultureIcon.setImageResource(R.drawable.sugar_beet);
-                    break;
+        List<Relation> seasons = relation.getParentRelations();
+        if (seasons != null) {
+            List<Relation> crops = new ArrayList<>();
+            for (Relation season : seasons) {
+                if (season == null) continue;
+                if (season.getParentRelations() == null) continue;
+                crops.addAll(season.getParentRelations());
             }
-        } else {
-            cultureIcon.setImageResource(R.drawable.lucide_wheat);
-        }
 
-        TextView variety = convertView.findViewById(R.id.variety);
-        variety.setText(way.getTagWithKey("variety"));
+            String cropValues = getRelationArrayAdapter(crops);
+            cropTextView.setText(cropValues);
+        }
 
         ImageView viewOnMap = convertView.findViewById(R.id.viewOnMap);
         viewOnMap.setOnClickListener(v -> {
-            BoundingBox bounds = way.getBounds();
+            BoundingBox bounds = relation.getBounds();
             if (bounds != null) {
                 final ViewBox box = new ViewBox(bounds);
                 double[] center = box.getCenter();
                 main.invalidateMap();
-//                main.zoomToAndEdit((int) (center[0] * 1E7D), (int) (center[1] * 1E7D), way);
-//                App.getLogic().setZoom(main.getMap(), Ui.ZOOM_FOR_ZOOMTO);
                 main.getMap().getViewBox().moveTo(main.getMap(), (int) (center[0] * 1E7D), (int) (center[1] * 1E7D));
                 dismiss();
             }
@@ -155,20 +138,28 @@ public class CustomExpandableListAdapter extends BaseExpandableListAdapter {
 
         ImageView edit = convertView.findViewById(R.id.edit);
         edit.setOnClickListener(v -> {
-            BoundingBox bounds = way.getBounds();
+            BoundingBox bounds = relation.getBounds();
             if (bounds != null) {
                 final ViewBox box = new ViewBox(bounds);
                 double[] center = box.getCenter();
                 main.invalidateMap();
-//                main.zoomToAndEdit((int) (center[0] * 1E7D), (int) (center[1] * 1E7D), way);
-//                App.getLogic().setZoom(main.getMap(), Ui.ZOOM_FOR_ZOOMTO);
                 main.getMap().getViewBox().moveTo(main.getMap(), (int) (center[0] * 1E7D), (int) (center[1] * 1E7D));
-                main.editor(way);
+                main.editor(relation);
                 dismiss();
             }
         });
 
         return convertView;
+    }
+
+    @NonNull
+    private String getRelationArrayAdapter(List<Relation> crops) {
+        StringBuilder stringBuilder = new StringBuilder();
+        for (Relation crop : crops) {
+            stringBuilder.append(getText(crop.getTagWithKey("culture"))).append("\t");
+            stringBuilder.append(getText(crop.getTagWithKey("cultureVarieties"))).append("\n");
+        }
+        return stringBuilder.toString();
     }
 
     private void dismiss() {
@@ -180,5 +171,9 @@ public class CustomExpandableListAdapter extends BaseExpandableListAdapter {
     @Override
     public boolean isChildSelectable(int groupPosition, int childPosition) {
         return true;
+    }
+
+    private String getText(String string) {
+        return string == null ? "" : string;
     }
 }

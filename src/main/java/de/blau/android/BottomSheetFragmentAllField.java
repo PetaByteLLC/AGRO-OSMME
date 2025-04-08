@@ -1,5 +1,7 @@
 package de.blau.android;
 
+import static de.blau.android.AgroConstants.YIELD_TAG_REGION;
+
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -59,7 +61,7 @@ public class BottomSheetFragmentAllField extends BottomSheetDialogFragment {
     private List<String> getGroup() {
         ArrayList<String> list = new ArrayList<>();
         for (Relation relation : relations) {
-            String region = relation.getTagWithKey("region");
+            String region = relation.getTagWithKey(YIELD_TAG_REGION);
             if (region != null && !region.isEmpty()) {
                 list.add(region);
             }
@@ -74,7 +76,7 @@ public class BottomSheetFragmentAllField extends BottomSheetDialogFragment {
         for (String group : groups) {
             ArrayList<Relation> value = new ArrayList<>();
             for (Relation relation : relations) {
-                if (Objects.equals(group, relation.getTagWithKey("region"))) value.add(relation);
+                if (Objects.equals(group, relation.getTagWithKey(YIELD_TAG_REGION))) value.add(relation);
             }
             result.put(group, value);
         }
