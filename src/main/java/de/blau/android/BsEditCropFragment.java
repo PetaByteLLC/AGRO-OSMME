@@ -204,7 +204,7 @@ public class BsEditCropFragment extends BottomSheetDialogFragment {
                 map.put(CROP_TAG_PRODUCTIVITY, productivityValue);
                 map.put(CROP_TAG_LAND_CATEGORY, landCategoryValue);
                 map.put(CROP_TAG_IRRIGATION_TYPE, irrigationTypeValue);
-                map.put(Tags.KEY_TYPE, StorageDelegator.TYPE_CROP);
+                map.put(Tags.KEY_TYPE, TYPE_CROP);
 
                 Relation seasonForFieldRelation = App.getDelegator().createSeasonForFieldRelation(yield, seasonValue, seasons);
                 if (isNew) {

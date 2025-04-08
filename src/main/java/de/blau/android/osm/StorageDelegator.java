@@ -1,5 +1,6 @@
 package de.blau.android.osm;
 
+import static de.blau.android.AgroConstants.*;
 import static de.blau.android.contract.Constants.LOG_TAG_LEN;
 import static de.blau.android.util.Winding.COLINEAR;
 import static de.blau.android.util.Winding.COUNTERCLOCKWISE;
@@ -36,6 +37,7 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import de.blau.android.AgroConstants;
 import de.blau.android.App;
 import de.blau.android.Logic;
 import de.blau.android.R;
@@ -4335,14 +4337,7 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
         }
     }
 
-    // --- КОНСТАНТЫ ---
-    public static final String TYPE_FIELD = "agromap_field"; // Тип для Relation Поля
-    public static final String TYPE_SEASON = "agricultural_season";
-    public static final String TYPE_CROP = "crop_planting";
-
-    public static final String ROLE_FIELD_GEOMETRY = Tags.ROLE_OUTER; // Роль Way (Геометрии) в Relation Поля (стандартная)
-    public static final String ROLE_FIELD = "field";         // Роль Relation Поля в Relation Сезона
-    public static final String ROLE_SEASON = "season";       // Роль Relation Сезона в Relation Посева
+    // Роль Relation Сезона в Relation Посева
 
     /**
      * СОЗДАЕТ: Геометрию(Way) + Поле(Relation) + Сезон(Relation) + Посев(Relation)
@@ -4444,7 +4439,7 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
             // 1. Создаем Сезон\Ищем сущ
             if (!exitsSeasons.isEmpty()) {
                 for (Relation relation : exitsSeasons) {
-                    if (Objects.equals(seasonValue.getName(), relation.getTagWithKey("name"))) {
+                    if (Objects.equals(seasonValue.getName(), relation.getTagWithKey(Tags.KEY_NAME))) {
                         return relation;
                     }
                 }
@@ -4452,9 +4447,9 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
 
             Relation season = factory.createRelationWithNewId();
             Map<String, String> seasonTags = new HashMap<>();
-            seasonTags.put("name", seasonValue.getName());
-            seasonTags.put("start", seasonValue.getStartDate());
-            seasonTags.put("end", seasonValue.getEndDate());
+            seasonTags.put(Tags.KEY_NAME, seasonValue.getName());
+            seasonTags.put(AgroConstants.SEASON_TAG_START, seasonValue.getStartDate());
+            seasonTags.put(AgroConstants.SEASON_TAG_END, seasonValue.getEndDate());
             seasonTags.put(Tags.KEY_TYPE, TYPE_SEASON);
             season.setTags(seasonTags);
 
@@ -4710,7 +4705,7 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
             // Итерируем по копии, т.к. будем удалять элементы
             for (Relation r : new ArrayList<>(currentStorage.getRelations())) {
                 if (TYPE_SEASON.equals(r.getTagWithKey(Tags.KEY_TYPE)) &&
-                        seasonName.equals(r.getTagWithKey("name"))) {
+                        seasonName.equals(r.getTagWithKey(Tags.KEY_NAME))) {
                     seasonsToDelete.add(r);
                 }
             }

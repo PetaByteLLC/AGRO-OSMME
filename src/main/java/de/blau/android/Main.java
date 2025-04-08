@@ -1,5 +1,6 @@
 package de.blau.android;
 
+import static de.blau.android.AgroConstants.*;
 import static de.blau.android.contract.Constants.LOG_TAG_LEN;
 
 import java.io.File;
@@ -7,7 +8,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
-import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Deque;
@@ -306,7 +306,7 @@ public class Main extends FullScreenAppCompatActivity
     private void addAllRelation(List<Relation> relations, List<Relation> seasons) {
         if (relations == null) return;
         for (Relation relation : relations) {
-            if (Objects.equals(relation.getTagWithKey("type"), StorageDelegator.ROLE_SEASON) && relation.getState() != OsmElement.STATE_DELETED) {
+            if (Objects.equals(relation.getTagWithKey(Tags.KEY_TYPE), ROLE_SEASON) && relation.getState() != OsmElement.STATE_DELETED) {
                 if (seasons.isEmpty()) {
                     seasons.add(relation);
                 } else {
@@ -4366,7 +4366,7 @@ public class Main extends FullScreenAppCompatActivity
             logic.setLocked(false);
 
             if (relation == null) return;
-            List<RelationMember> membersWithRole = relation.getMembersWithRole(StorageDelegator.ROLE_FIELD_GEOMETRY);
+            List<RelationMember> membersWithRole = relation.getMembersWithRole(ROLE_FIELD_GEOMETRY);
             if (membersWithRole.isEmpty()) return;
             Way way = (Way) membersWithRole.get(0).getElement();
             logic.setSelectedNode(way.getLastNode());
@@ -5347,7 +5347,7 @@ public class Main extends FullScreenAppCompatActivity
             List<Relation> relationList = new ArrayList<>();
 
             for (Relation relation : relations) {
-                if (Objects.equals(relation.getTagWithKey(Tags.KEY_TYPE), StorageDelegator.TYPE_FIELD)) {
+                if (Objects.equals(relation.getTagWithKey(Tags.KEY_TYPE), TYPE_FIELD)) {
                     relationList.add(relation);
                 }
             }

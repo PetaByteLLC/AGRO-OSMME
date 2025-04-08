@@ -1,6 +1,17 @@
 package de.blau.android;
 
+import de.blau.android.osm.Tags;
+
 public class AgroConstants {
+
+    // --- КОНСТАНТЫ ---
+    public static final String TYPE_FIELD = "agromap_field"; // Тип для Relation Поля
+    public static final String TYPE_SEASON = "agricultural_season";
+    public static final String TYPE_CROP = "crop_planting";
+
+    public static final String ROLE_FIELD_GEOMETRY = Tags.ROLE_OUTER; // Роль Way (Геометрии) в Relation Поля (стандартная)
+    public static final String ROLE_FIELD = "field";         // Роль Relation Поля в Relation Сезона
+    public static final String ROLE_SEASON = "season";
 
     public static final String YIELD_TAG_REGION = "region";
     public static final String YIELD_TAG_DISTRICT = "district";

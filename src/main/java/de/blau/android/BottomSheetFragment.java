@@ -262,14 +262,14 @@ public class BottomSheetFragment extends BottomSheetDialogFragment {
         yield.put(YIELD_TAG_FARMER_MOBILE, farmerMobile);
         yield.put(YIELD_TAG_CADASTRAL_NUMBER, cadastrNumber);
         yield.put(YIELD_TAG_POSITION, getPosition());
-        yield.put(Tags.KEY_TYPE, StorageDelegator.TYPE_FIELD);
+        yield.put(Tags.KEY_TYPE, TYPE_FIELD);
         yield.put(YIELD_TAG_TECHNOLOGY, technology);
 
         Map<String, String> seasonTags = new HashMap<>();
         seasonTags.put(Tags.KEY_NAME, season.getName());
         seasonTags.put(SEASON_TAG_START, season.getStartDate());
         seasonTags.put(SEASON_TAG_END, season.getEndDate());
-        seasonTags.put(Tags.KEY_TYPE, StorageDelegator.TYPE_SEASON);
+        seasonTags.put(Tags.KEY_TYPE, TYPE_SEASON);
 
         Map<String, String> crop = new HashMap<>();
         crop.put(CROP_TAG_CULTURE_VARIETIES, cultureVarieties);
@@ -279,7 +279,7 @@ public class BottomSheetFragment extends BottomSheetDialogFragment {
         crop.put(CROP_TAG_CULTURE, culture);
         crop.put(CROP_TAG_LAND_CATEGORY, landCategory);
         crop.put(CROP_TAG_IRRIGATION_TYPE, irrigationType);
-        crop.put(Tags.KEY_TYPE, StorageDelegator.TYPE_CROP);
+        crop.put(Tags.KEY_TYPE, TYPE_CROP);
 
         App.getDelegator().createFieldRelationWithSeasonAndCrop(lastSelectedWay, yield, seasonTags, crop);
         dismiss();
