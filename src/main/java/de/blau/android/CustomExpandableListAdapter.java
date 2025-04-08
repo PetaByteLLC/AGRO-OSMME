@@ -1,5 +1,8 @@
 package de.blau.android;
 
+import static de.blau.android.AgroConstants.CROP_TAG_CULTURE;
+import static de.blau.android.AgroConstants.CROP_TAG_CULTURE_VARIETIES;
+
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,6 +20,7 @@ import java.util.List;
 import de.blau.android.osm.BoundingBox;
 import de.blau.android.osm.OsmElement;
 import de.blau.android.osm.Relation;
+import de.blau.android.osm.Tags;
 import de.blau.android.osm.ViewBox;
 
 public class CustomExpandableListAdapter extends BaseExpandableListAdapter {
@@ -106,7 +110,7 @@ public class CustomExpandableListAdapter extends BaseExpandableListAdapter {
         Relation relation = getChild(groupPosition, childPosition);
 
         TextView title = convertView.findViewById(R.id.title);
-        String text = getTagValue(relation, "name") + " " + getTagValue(relation, "area");
+        String text = getTagValue(relation, Tags.KEY_NAME) + " " + getTagValue(relation, Tags.KEY_AREA);
         title.setText(text.trim());
 
         TextView cropTextView = convertView.findViewById(R.id.crops);
@@ -156,8 +160,8 @@ public class CustomExpandableListAdapter extends BaseExpandableListAdapter {
     private String getRelationArrayAdapter(List<Relation> crops) {
         StringBuilder stringBuilder = new StringBuilder();
         for (Relation crop : crops) {
-            stringBuilder.append(getText(crop.getTagWithKey("culture"))).append("\t");
-            stringBuilder.append(getText(crop.getTagWithKey("cultureVarieties"))).append("\n");
+            stringBuilder.append(getText(crop.getTagWithKey(CROP_TAG_CULTURE))).append("\t");
+            stringBuilder.append(getText(crop.getTagWithKey(CROP_TAG_CULTURE_VARIETIES))).append("\n");
         }
         return stringBuilder.toString();
     }

@@ -1,5 +1,7 @@
 package de.blau.android;
 
+import static de.blau.android.AgroConstants.*;
+
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -29,6 +31,7 @@ import java.util.Map;
 
 import de.blau.android.osm.OsmElement;
 import de.blau.android.osm.Relation;
+import de.blau.android.osm.Tags;
 
 public class BsEditYieldFragment extends BottomSheetDialogFragment {
 
@@ -93,7 +96,7 @@ public class BsEditYieldFragment extends BottomSheetDialogFragment {
         cropList = view.findViewById(R.id.crop_list);
         cropAdd = view.findViewById(R.id.crop_add);
 
-        label.setText((getTagValue(yield, "name") + " " + getTagValue(yield, "area")).trim());
+        label.setText((getTagValue(yield, Tags.KEY_NAME) + " " + getTagValue(yield, Tags.KEY_AREA)).trim());
         toggleButton.setOnClickListener(v -> {
             if (areEditTextsVisible) {
                 collapseEditTexts();
@@ -102,8 +105,7 @@ public class BsEditYieldFragment extends BottomSheetDialogFragment {
             }
         });
 
-        String[] technologyData = {"Технология возделывания", "яровая", "озимая"};
-        ArrayAdapter<String> technologyAdapter = new ArrayAdapter<String>(getActivity(), R.layout.agro_simple_spinner_item, technologyData);
+        ArrayAdapter<String> technologyAdapter = new ArrayAdapter<String>(getActivity(), R.layout.agro_simple_spinner_item, TECHNOLOGY_DATA);
         technologyAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         technology.setAdapter(technologyAdapter);
 
@@ -117,12 +119,12 @@ public class BsEditYieldFragment extends BottomSheetDialogFragment {
                 Relation relation = getItem(position);
 
                 TextView culture = convertView.findViewById(R.id.culture);
-                culture.setText(getTagValue(relation, "culture"));
+                culture.setText(getTagValue(relation, CROP_TAG_CULTURE));
 
                 TextView season = convertView.findViewById(R.id.season);
                 List<OsmElement> parentRelations = relation.getMemberElements();
                 Relation parentRelation = (Relation) parentRelations.get(0);
-                season.setText("Сезон " + getTagValue(parentRelation, "name"));
+                season.setText("Сезон " + getTagValue(parentRelation, Tags.KEY_NAME));
                 return convertView;
             }
         };
@@ -138,30 +140,30 @@ public class BsEditYieldFragment extends BottomSheetDialogFragment {
             cropFragment.show(getChildFragmentManager(), cropFragment.getTag());
         });
 
-        name.setText(getTagValue(yield, "name"));
-        region.setText(getTagValue(yield, "region"));
-        district.setText(getTagValue(yield, "district"));
-        aggregator.setText(getTagValue(yield, "aggregator"));
-        farmerName.setText(getTagValue(yield, "farmerName"));
-        farmerSurName.setText(getTagValue(yield, "farmerSurName"));
-        farmerMobile.setText(getTagValue(yield, "farmerMobile"));
-        cadastrNumber.setText(getTagValue(yield, "cadastrNumber"));
+        name.setText(getTagValue(yield, Tags.KEY_NAME));
+        region.setText(getTagValue(yield, YIELD_TAG_REGION));
+        district.setText(getTagValue(yield, YIELD_TAG_DISTRICT));
+        aggregator.setText(getTagValue(yield, YIELD_TAG_AGGREGATOR));
+        farmerName.setText(getTagValue(yield, YIELD_TAG_FARMER_NAME));
+        farmerSurName.setText(getTagValue(yield, YIELD_TAG_FARMER_SURNAME));
+        farmerMobile.setText(getTagValue(yield, YIELD_TAG_FARMER_MOBILE));
+        cadastrNumber.setText(getTagValue(yield, YIELD_TAG_CADASTRAL_NUMBER));
         try {
-            technology.setSelection(Arrays.asList(technologyData).indexOf(yield.getTagWithKey("technology")));
+            technology.setSelection(Arrays.asList(TECHNOLOGY_DATA).indexOf(yield.getTagWithKey(YIELD_TAG_TECHNOLOGY)));
         } catch (NullPointerException ignore) {
         }
 
         saveBtn.setOnClickListener(v -> {
             Map<String, String> map = new HashMap<>();
-            map.put("name", name.getText().toString());
-            map.put("region", region.getText().toString());
-            map.put("district", district.getText().toString());
-            map.put("aggregator", aggregator.getText().toString());
-            map.put("farmerName", farmerName.getText().toString());
-            map.put("farmerSurName", farmerSurName.getText().toString());
-            map.put("farmerMobile", farmerMobile.getText().toString());
-            map.put("cadastrNumber", cadastrNumber.getText().toString());
-            map.put("technology", technology.getSelectedItem().toString());
+            map.put(Tags.KEY_NAME, name.getText().toString());
+            map.put(YIELD_TAG_REGION, region.getText().toString());
+            map.put(YIELD_TAG_DISTRICT, district.getText().toString());
+            map.put(YIELD_TAG_AGGREGATOR, aggregator.getText().toString());
+            map.put(YIELD_TAG_FARMER_NAME, farmerName.getText().toString());
+            map.put(YIELD_TAG_FARMER_SURNAME, farmerSurName.getText().toString());
+            map.put(YIELD_TAG_FARMER_MOBILE, farmerMobile.getText().toString());
+            map.put(YIELD_TAG_CADASTRAL_NUMBER, cadastrNumber.getText().toString());
+            map.put(YIELD_TAG_TECHNOLOGY, technology.getSelectedItem().toString());
 
             App.getDelegator().updateFieldRelationTags(yield, map);
             dismiss();
@@ -218,11 +220,5 @@ public class BsEditYieldFragment extends BottomSheetDialogFragment {
         if (getParentFragment() instanceof BottomSheetFragmentAllField) {
             ((BottomSheetFragmentAllField) getParentFragment()).updateList();
         }
-    }
-
-    private String getTagValue(OsmElement osmElement, String key) {
-        if (key == null || osmElement == null) return "";
-        String tagWithKey = osmElement.getTagWithKey(key);
-        return tagWithKey == null ? "" : tagWithKey;
     }
 }
