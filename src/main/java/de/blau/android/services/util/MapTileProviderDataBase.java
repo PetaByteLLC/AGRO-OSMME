@@ -469,16 +469,17 @@ public class MapTileProviderDataBase {
      * @return true if it exists and can be read and written, false if it doesn't
      */
     public static boolean exists(@NonNull File dir) {
-        SQLiteDatabase checkDB = null;
-        try {
-            String path = dir.getAbsolutePath() + "/databases/" + DATABASE_NAME + ".db";
-            checkDB = SQLiteDatabase.openDatabase(path, null, SQLiteDatabase.OPEN_READWRITE);
-            checkDB.close();
-        } catch (Exception e) {
-            // database doesn't exist yet.
-            // NOTE this originally caught just SQLiteException however this seems to cause issues with some Android
-            // versions
-        }
-        return checkDB != null;
+        return false;
+//        SQLiteDatabase checkDB = null;
+//        try {
+//            String path = dir.getAbsolutePath() + "/databases/" + DATABASE_NAME + ".db";
+//            checkDB = SQLiteDatabase.openDatabase(path, null, SQLiteDatabase.OPEN_READWRITE);
+//            checkDB.close();
+//        } catch (Exception e) {
+//            // database doesn't exist yet.
+//            // NOTE this originally caught just SQLiteException however this seems to cause issues with some Android
+//            // versions
+//        }
+//        return checkDB != null;
     }
 }

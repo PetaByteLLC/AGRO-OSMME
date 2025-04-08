@@ -34,19 +34,7 @@ public class FilterModeConfig implements ModeConfig {
 
     @Override
     public HashMap<String, String> getExtraTags(@NonNull Logic logic, @NonNull OsmElement e) {
-        HashMap<String, String> map = new HashMap<>();
-        Map logicMap = logic.getMap();
-        if (logicMap == null) return null;
-        if (logicMap.getTracker() == null) return null;
-        Location lastLocation = logicMap.getTracker().getLastLocation();
-        if (lastLocation == null) return null;
-        String position = e.getTagWithKey("position");
-        if (position != null) return null;
-        String newPosition = String.format("%s, %s;", lastLocation.getLatitude(), lastLocation.getLongitude());
-//        map.put("position", position != null ?
-//                (Objects.equals(newPosition, position) ? position : newPosition + position) : newPosition);
-        map.put("position", newPosition);
-        return map;
+        return null;
     }
 
     @Override

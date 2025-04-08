@@ -134,7 +134,7 @@ import de.blau.android.util.mvt.style.Style;
 
 /**
  * Layer dialog
- * 
+ *
  * @author Simon Poole
  *
  */
@@ -159,7 +159,7 @@ public class Layers extends AbstractConfigurationDialog implements OnUpdateListe
 
     /**
      * Show dialog that allows to configure the layers
-     * 
+     *
      * @param activity the calling Activity
      */
     public static void showDialog(@NonNull FragmentActivity activity) {
@@ -168,7 +168,7 @@ public class Layers extends AbstractConfigurationDialog implements OnUpdateListe
 
     /**
      * Create a new instance of the Layers dialog
-     * 
+     *
      * @return an instance of the Layers dialog
      */
     @NonNull
@@ -343,7 +343,7 @@ public class Layers extends AbstractConfigurationDialog implements OnUpdateListe
 
     /**
      * Show a list of available tracks (starting point in the current view), then download on selection
-     * 
+     *
      * @param activity the calling activity
      * @param prefs the current Preferences
      * @param map the current map object
@@ -399,7 +399,7 @@ public class Layers extends AbstractConfigurationDialog implements OnUpdateListe
 
         /**
          * Get an adapter
-         * 
+         *
          * @param context an Android Context
          * @param items a List of GpxFile
          */
@@ -436,7 +436,7 @@ public class Layers extends AbstractConfigurationDialog implements OnUpdateListe
 
     /**
      * Add a StyleableLayer from a file
-     * 
+     *
      * @param activity the calling Activity
      * @param prefs current Preferences
      * @param map current Map
@@ -465,7 +465,7 @@ public class Layers extends AbstractConfigurationDialog implements OnUpdateListe
 
     /**
      * Add a StyleableLayer from a file Uri
-     * 
+     *
      * @param activity the calling Activity
      * @param prefs current Preferences
      * @param map current Map
@@ -508,7 +508,7 @@ public class Layers extends AbstractConfigurationDialog implements OnUpdateListe
 
     /**
      * Convert an CSV file to geojson and write it to our directory, returning an URi
-     * 
+     *
      * @param context an Android Context
      * @param fileUri the original Uri
      * @return an Uri a new Uri for the converted file
@@ -534,9 +534,9 @@ public class Layers extends AbstractConfigurationDialog implements OnUpdateListe
 
     /**
      * Add a Layer from a mapbox-gl Style
-     * 
+     *
      * Adds a custom imagery entry then sets the style
-     * 
+     *
      * @param activity the calling Activity
      * @param prefs current Preferences
      * @param map current Map
@@ -584,7 +584,7 @@ public class Layers extends AbstractConfigurationDialog implements OnUpdateListe
 
     /**
      * Update the dialog and set the prefs
-     * 
+     *
      * @param activity calling FragmentActivity
      * @param prefs Preference instance to set
      * @param map the current Map instance
@@ -616,7 +616,7 @@ public class Layers extends AbstractConfigurationDialog implements OnUpdateListe
 
     /**
      * Create the view we want to display
-     * 
+     *
      * @param container parent view or null
      * @return the View
      */
@@ -647,7 +647,7 @@ public class Layers extends AbstractConfigurationDialog implements OnUpdateListe
 
     /**
      * Add a row to the TableLayout
-     * 
+     *
      * @param context Android context
      */
     private void addRows(@NonNull Context context) {
@@ -670,7 +670,7 @@ public class Layers extends AbstractConfigurationDialog implements OnUpdateListe
 
     /**
      * Create a row in the dialog for a specific layer
-     * 
+     *
      * @param context Android context
      * @param layer the MapViewLayer
      * @param tp LayoutParams for this row
@@ -686,7 +686,7 @@ public class Layers extends AbstractConfigurationDialog implements OnUpdateListe
         visible.setBackgroundColor(Color.TRANSPARENT);
         visible.setPadding(0, 0, Density.dpToPx(context, 5), 0);
         visible.setOnClickListener(v -> {
-            if (layer != null && !layer.getName().contains("OpenStreetMap")) {
+            if (layer != null && !layer.getName().contains("OpenStreetMap data")) {
                 setVisibility(context, layer, !layer.isVisible());
                 visible.setImageResource(layer.isVisible() ? visibleId : invisibleId);
                 layer.invalidate();
@@ -822,7 +822,7 @@ public class Layers extends AbstractConfigurationDialog implements OnUpdateListe
 
     /**
      * Check if the event is in the top half of the view
-     * 
+     *
      * @param v the View
      * @param event the event
      * @return true if the event is in the top half of the view
@@ -833,7 +833,7 @@ public class Layers extends AbstractConfigurationDialog implements OnUpdateListe
 
     /**
      * Move the layer entry to a new position
-     * 
+     *
      * @param event the DragEvent with the information on the layer to move
      * @param newIndex the new index in the DB of the layer
      */
@@ -852,7 +852,7 @@ public class Layers extends AbstractConfigurationDialog implements OnUpdateListe
 
     /**
      * Move a layer in the DB
-     * 
+     *
      * @param activity the current Activity
      * @param map the current Map instance
      * @param oldIndex the old index in the DB
@@ -869,7 +869,7 @@ public class Layers extends AbstractConfigurationDialog implements OnUpdateListe
 
     /**
      * Highlight (or not) the layer divider
-     * 
+     *
      * @param divider the divider between layer entries
      * @param highlight if true highlight
      */
@@ -880,7 +880,7 @@ public class Layers extends AbstractConfigurationDialog implements OnUpdateListe
 
     /**
      * Create a divider View to be added to a TableLayout
-     * 
+     *
      * @param context Android context
      * @param tpDivider
      * @return a thin TableRow
@@ -921,7 +921,7 @@ public class Layers extends AbstractConfigurationDialog implements OnUpdateListe
 
         /**
          * Construct a new listener for the layer menu button
-         * 
+         *
          * @param button the menu button
          * @param layer the layer
          */
@@ -1338,7 +1338,7 @@ public class Layers extends AbstractConfigurationDialog implements OnUpdateListe
 
     /**
      * Convert all GeoJSOn objects in a layer to todos // NOSONAR
-     * 
+     *
      * @param activity the current Activity
      * @param map the current Map instance
      * @param layer the GeoJSON layer
@@ -1375,7 +1375,7 @@ public class Layers extends AbstractConfigurationDialog implements OnUpdateListe
 
     /**
      * Show the contents of a RhinoException in the JS console together with the script
-     * 
+     *
      * @param activity current Activity
      * @param layer the GeoJSON layer
      * @param script the script
@@ -1397,7 +1397,7 @@ public class Layers extends AbstractConfigurationDialog implements OnUpdateListe
 
     /**
      * Show a dialog that shows a selection of imagery sources that can be used
-     * 
+     *
      * @param row the TableRow we were invoked from, can be null if row doesn't exists
      * @param layer the layer we should change imagery for, can be null if layer doesn't exist yet
      * @param isOverlay true if this is for the overlay layer
@@ -1504,7 +1504,7 @@ public class Layers extends AbstractConfigurationDialog implements OnUpdateListe
 
         /**
          * Construct a new listener
-         * 
+         *
          * @param activity the calling activity
          * @param dialog the dialog
          * @param row the TableRow with the information
@@ -1542,7 +1542,7 @@ public class Layers extends AbstractConfigurationDialog implements OnUpdateListe
 
     /**
      * Change the imagery for a tile layer
-     * 
+     *
      * @param activity the calling activity
      * @param row the TableRow with the information, if null we will only set the prefs
      * @param layer the layer, if null we will only set the prefs
@@ -1591,7 +1591,7 @@ public class Layers extends AbstractConfigurationDialog implements OnUpdateListe
 
     /**
      * Set layer visibility
-     * 
+     *
      * @param context an Android Context
      * @param layer the layer
      * @param visible the value to set
@@ -1604,7 +1604,7 @@ public class Layers extends AbstractConfigurationDialog implements OnUpdateListe
 
     /**
      * Set layer visibility
-     * 
+     *
      * @param db an AdvancedPrefDatabase instance
      * @param layer the layer
      * @param visible the value to set
@@ -1616,7 +1616,7 @@ public class Layers extends AbstractConfigurationDialog implements OnUpdateListe
 
     /**
      * Set the Preference instance in Main, Logic and Map
-     * 
+     *
      * @param activity the calling FragmentActivity
      * @param prefs the new Preference object
      */
