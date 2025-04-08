@@ -4696,4 +4696,99 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
         // Скорее всего, лучше уведомлять всегда, чтобы UI обновился.
         onElementChanged(null, osmElement);
     }
+
+    public void removeSeasonsByName(@NonNull String seasonName) {
+        boolean deletedSomething = false;
+        Log.d(DEBUG_TAG, "Attempting to remove seasons with name: " + seasonName + " and their related crops.");
+
+        try {
+            lock(); // Блокируем хранилище
+
+            // --- Шаг 1: Найти все сезоны, подлежащие удалению ---
+            // Собираем их в отдельный список, чтобы не менять основную коллекцию во время итерации
+            List<Relation> seasonsToDelete = new ArrayList<>();
+            // Итерируем по копии, т.к. будем удалять элементы
+            for (Relation r : new ArrayList<>(currentStorage.getRelations())) {
+                if (TYPE_SEASON.equals(r.getTagWithKey(Tags.KEY_TYPE)) &&
+                        seasonName.equals(r.getTagWithKey("name"))) {
+                    seasonsToDelete.add(r);
+                }
+            }
+
+            // Если нет сезонов с таким именем, выходим
+            if (seasonsToDelete.isEmpty()) {
+                Log.d(DEBUG_TAG, "No seasons found with name '" + seasonName + "' to remove.");
+                return;
+            }
+
+            Set<Long> deletedCropIds = new HashSet<>(); // Храним ID уже удаленных посевов, чтобы не пытаться удалить дважды
+
+            // --- Шаг 2: Для каждого найденного сезона найти и удалить связанные посевы ---
+            for (Relation season : seasonsToDelete) {
+                Log.d(DEBUG_TAG, "Processing season " + season.getDescription(true) + " for related crops.");
+
+                // Получаем список отношений, которые содержат этот сезон как член (обратные ссылки)
+                List<Relation> parentRelations = season.getParentRelations();
+                // Создаем копию для безопасной итерации, т.к. удаление посева может изменить parentRelations сезона
+                List<Relation> parentsToCheck = new ArrayList<>(parentRelations != null ? parentRelations : Collections.emptyList());
+
+                for (Relation parent : parentsToCheck) {
+                    long parentId = parent.getOsmId();
+                    // Пропускаем, если этот посев уже был удален (на случай сложных связей)
+                    if (deletedCropIds.contains(parentId)) {
+                        continue;
+                    }
+
+                    // Проверяем, является ли родительское отношение Посевом
+                    if (TYPE_CROP.equals(parent.getTagWithKey(Tags.KEY_TYPE))) {
+                        // Теперь ВАЖНО проверить, что этот Посев содержит ИМЕННО ЭТОТ сезон
+                        // с ролью ROLE_SEASON. Элемент может быть членом многих отношений.
+                        boolean isMemberWithCorrectRole = false;
+                        List<RelationMember> membersInCrop = parent.getAllMembers(season); // Получаем члены в Посеве, указывающие на наш Сезон
+                        if (membersInCrop != null) {
+                            for (RelationMember member : membersInCrop) {
+                                // Проверяем, что ссылка идет от Посева на Сезон с нужной ролью
+                                if (ROLE_SEASON.equals(member.getRole())) {
+                                    isMemberWithCorrectRole = true;
+                                    break;
+                                }
+                            }
+                        }
+
+                        if (isMemberWithCorrectRole) {
+                            Log.i(DEBUG_TAG, "Found related crop " + parent.getDescription(true) + " referencing season " + season.getDescription(true) + ". Removing crop.");
+                            // --- Удаляем найденный Посев ---
+                            // removeRelation сам позаботится об undo, apiStorage и удалении обратных ссылок
+                            // (включая удаление ссылки из 'parentRelations' нашего 'season')
+                            removeRelation(parent);
+                            deletedCropIds.add(parentId); // Запоминаем, что удалили этот посев
+                            deletedSomething = true;
+                        }
+                    }
+                }
+            }
+
+            // --- Шаг 3: Теперь удаляем сами сезоны ---
+            for (Relation season : seasonsToDelete) {
+                // Проверяем, существует ли сезон еще (он мог быть удален на шаге 2,
+                // если какая-то сущность была одновременно и сезоном, и посевом - маловероятно, но безопасно проверить)
+                if (currentStorage.getRelation(season.getOsmId()) != null || apiStorage.getRelation(season.getOsmId()) != null) {
+                    Log.i(DEBUG_TAG, "Removing season itself: " + season.getDescription(true));
+                    // Используем существующий метод удаления
+                    removeRelation(season);
+                    deletedSomething = true;
+                } else {
+                    Log.w(DEBUG_TAG, "Season " + season.getDescription(true) + " was already removed (possibly during crop removal?). Skipping redundant removal.");
+                }
+            }
+
+        } finally {
+            unlock(); // Обязательно освобождаем блокировку
+        }
+
+        if (deletedSomething) {
+            Log.i(DEBUG_TAG, "Finished removing seasons named '" + seasonName + "' and their related crops. At least one element was removed.");
+        }
+
+    }
 }

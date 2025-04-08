@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Map;
 
 import de.blau.android.osm.Node;
+import de.blau.android.osm.OsmElement;
 import de.blau.android.osm.StorageDelegator;
 import de.blau.android.osm.Way;
 
@@ -222,10 +223,10 @@ public class BottomSheetFragment extends BottomSheetDialogFragment {
         bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
         bottomSheetBehavior.setDraggable(false);
 
-        if (getDialog() != null) {
-            getDialog().setCancelable(false);
-            getDialog().setCanceledOnTouchOutside(false);
-        }
+//        if (getDialog() != null) {
+//            getDialog().setCancelable(false);
+//            getDialog().setCanceledOnTouchOutside(false);
+//        }
     }
 
     private @NonNull ArrayAdapter<Season> getSeasonArrayAdapter(List<Season> seasons) {
@@ -311,6 +312,15 @@ public class BottomSheetFragment extends BottomSheetDialogFragment {
         main.invisibleUnlockButton();
         if (getActivity() != null) {
             getActivity().invalidateOptionsMenu(); // Обновляем меню в активности
+        }
+
+        if (lastSelectedWay.getParentRelations() == null || lastSelectedWay.getParentRelations().isEmpty()) {
+            if (lastSelectedWay.getState() == OsmElement.STATE_CREATED) {
+                App.getDelegator().removeWay(lastSelectedWay);
+                for (Node node : lastSelectedWay.getNodes()) {
+                    App.getDelegator().removeNode(node);
+                }
+            }
         }
 
         App.getPreferences(getContext()).saveSeasons(seasons);

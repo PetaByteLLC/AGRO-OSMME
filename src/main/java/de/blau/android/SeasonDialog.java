@@ -13,6 +13,10 @@ import java.util.List;
 
 public class SeasonDialog {
 
+    private static final String removeMessage = "После удаления будут также удалены все связанные с ним данные, включая поля, участки, зоны и другие объекты, которые были частью этого сезона." +
+            "Это действие необратимо — восстановить данные после удаления будет невозможно." +
+            "Вы уверены, что хотите продолжить?";
+
     public interface OnSeasonSelectedListener {
         void onSeasonSelected(Season season);
     }
@@ -30,22 +34,48 @@ public class SeasonDialog {
         setDataPicker(end, context);
 
         List<Season> seasons = App.getPreferences(context).getSeasons();
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(
+        ArrayAdapter<Season> adapter = new ArrayAdapter<>(
                 context,
                 android.R.layout.simple_list_item_1,
-                toStringList(seasons)
+                seasons
         );
         listView.setAdapter(adapter);
 
         AlertDialog dialog = new AlertDialog.Builder(context)
                 .setTitle("Выберите сезон")
                 .setView(view)
-                .setNegativeButton("Отмена", null)
+                .setNegativeButton("Отмена", (dialogInterface, which) -> {
+                    if (!seasons.isEmpty()) {
+                        listener.onSeasonSelected(seasons.get(seasons.size() - 1));
+                    } else {
+                        listener.onSeasonSelected(null);
+                    }
+                })
                 .create();
 
         listView.setOnItemClickListener((parent, view1, position, id) -> {
             dialog.dismiss();
             listener.onSeasonSelected(seasons.get(position));
+        });
+
+        listView.setOnItemLongClickListener((parent, view1, position, id) -> {
+            Season itemAtPosition = (Season) parent.getItemAtPosition(position);
+            new AlertDialog.Builder(context)
+                    .setTitle("Вы уверены, что хотите удалить сезон?")
+                    .setMessage(removeMessage)
+                    .setIcon(android.R.drawable.ic_dialog_alert)
+                    .setPositiveButton("Удалить", (dialogInterface, which) -> {
+                        seasons.remove(itemAtPosition);
+                        App.getPreferences(context).saveSeasons(seasons);
+                        adapter.notifyDataSetChanged();
+                        App.getDelegator().removeSeasonsByName(itemAtPosition.getName());
+
+                        Toast.makeText(context, "Сезон удалён", Toast.LENGTH_SHORT).show();
+                    })
+                    .setNegativeButton("Отмена", null)
+                    .show();
+
+            return true;
         });
 
         addButton.setOnClickListener(v -> {
@@ -56,8 +86,6 @@ public class SeasonDialog {
                 Season newSeason = new Season(startDate, name, endDate);
                 seasons.add(newSeason);
                 App.getPreferences(context).saveSeasons(seasons);
-                adapter.clear();
-                adapter.addAll(toStringList(seasons));
                 adapter.notifyDataSetChanged();
 
                 input.setText("");
@@ -69,14 +97,6 @@ public class SeasonDialog {
         });
 
         dialog.show();
-    }
-
-    private static List<String> toStringList(List<Season> seasons) {
-        List<String> names = new java.util.ArrayList<>();
-        for (Season s : seasons) {
-            names.add(s.getName());
-        }
-        return names;
     }
 
     private static void setDataPicker(EditText editText, Context context) {

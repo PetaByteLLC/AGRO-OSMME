@@ -664,6 +664,8 @@ public class Main extends FullScreenAppCompatActivity
 
         getOnBackPressedDispatcher().addCallback(this, onBackPressedCallback);
 
+//        setExistSeason(logic);
+
         invisibleUnlockButton();
         App.getLogic().hideCrosshairs();
         invalidateMap();
@@ -679,6 +681,26 @@ public class Main extends FullScreenAppCompatActivity
             finish();
         }
     }
+
+//    private void setExistSeason(Logic logic) {
+//        List<Relation> relations = logic.getRelations();
+//        List<Season> seasons = new ArrayList<>();
+//        for (Relation relation : relations) {
+//            if (Objects.equals(relation.getTagWithKey(Tags.KEY_TYPE), StorageDelegator.TYPE_SEASON)) {
+//                if (seasons.isEmpty()) {
+//                    seasons.add(new Season(relation.getTagWithKey("start"), relation.getTagWithKey(Tags.KEY_NAME), relation.getTagWithKey("end")));
+//                    continue;
+//                }
+//                for (Season season : seasons) {
+//                    if (!Objects.equals(season.getName(), relation.getTagWithKey(Tags.KEY_NAME))) {
+//                        seasons.add(new Season(relation.getTagWithKey("start"), relation.getTagWithKey(Tags.KEY_NAME), relation.getTagWithKey("end")));
+//                    }
+//                }
+//            }
+//        }
+//
+//        prefs.saveSeasons(seasons);
+//    }
 
     /**
      * Set how we should handle screen orientation changes based of our preferences
@@ -2100,9 +2122,14 @@ public class Main extends FullScreenAppCompatActivity
         }
         seasonTextView.setOnClickListener(v -> {
             SeasonDialog.show(this, selectedSeason -> {
-                ScreenMessage.toastTopWarning(Main.this, "Вы выбрали: " + selectedSeason.getName());
-                currentSeason = selectedSeason;
-                invalidateOptionsMenu();
+                if (selectedSeason != null) {
+                    ScreenMessage.toastTopWarning(Main.this, "Вы выбрали: " + selectedSeason.getName());
+                    currentSeason = selectedSeason;
+                    invalidateOptionsMenu();
+                } else {
+                    seasonTextView.setText("Сезон не выбран");
+                    currentSeason = null;
+                }
             });
         });
 
@@ -4295,7 +4322,7 @@ public class Main extends FullScreenAppCompatActivity
 
     public void editYield(Relation clickedRelation, FragmentManager fragmentManager) {
         List<Relation> seasons = clickedRelation.getParentRelations();
-        if (seasons == null || seasons.isEmpty()) return;
+        if (seasons == null || seasons.isEmpty()) seasons = new ArrayList<>();
 
         List<Relation> crops = new ArrayList<>();
         for (Relation season : seasons) {

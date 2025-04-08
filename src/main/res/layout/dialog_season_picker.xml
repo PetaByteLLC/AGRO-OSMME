@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:padding="16dp"
-    android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="16dp">
 
     <ListView
         android:id="@+id/season_list"
@@ -12,23 +12,23 @@
 
     <EditText
         android:id="@+id/season_name"
-        android:hint="Введите название сезона"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:hint="Введите название сезона"
         android:inputType="text" />
 
     <EditText
         android:id="@+id/season_start"
-        android:hint="Начало сезона"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:hint="Начало сезона"
         android:inputType="date" />
 
     <EditText
         android:id="@+id/season_end"
-        android:hint="Конец сезона"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:hint="Конец сезона"
         android:inputType="date" />
 
     <Button
@@ -37,5 +37,14 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="end"
-        android:layout_marginTop="8dp"/>
+        android:background="@drawable/radius"
+        android:paddingHorizontal="20dp"/>
+
+    <TextView
+        android:layout_marginTop="20dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Долгое зажатие по сезону удалить запись"
+        android:textColor="@color/material_red"
+        android:textSize="17sp"/>
 </LinearLayout>
