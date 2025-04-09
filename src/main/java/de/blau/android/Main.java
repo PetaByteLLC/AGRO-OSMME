@@ -747,7 +747,7 @@ public class Main extends FullScreenAppCompatActivity
         return bestLocation;
     }
 
-    boolean first;
+    boolean first = true;
 
     /**
      * Loads the preferences into {@link #map}, triggers new {@inheritDoc}

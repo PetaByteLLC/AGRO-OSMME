@@ -7,6 +7,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.SortedMap;
 
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlPullParserFactory;
@@ -16,6 +19,7 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import de.blau.android.AgroConstants;
 import de.blau.android.util.collections.LongHashSet;
 
 /**
@@ -207,7 +211,18 @@ public final class OsmXml {
         List<Relation> dependentCreatedRelations = new ArrayList<>();
         if (!createdRelations.isEmpty()) {
             LongHashSet createdRelationIds = new LongHashSet();
-            for(Relation r : createdRelations) { createdRelationIds.put(r.getOsmId()); }
+            for(Relation r : createdRelations) {
+                createdRelationIds.put(r.getOsmId());
+
+                if (Objects.equals(r.getTagWithKey(Tags.KEY_TYPE), AgroConstants.TYPE_FIELD)) {
+                    SortedMap<String, String> tags = r.getTags();
+                    for (Map.Entry<String, String> record : tags.entrySet()) {
+                        if (record.getValue().startsWith("/storage")) {
+                            r.addTag(record.getKey(), FileUploader.uploadFile(record.getValue()));
+                        }
+                    }
+                }
+            }
 
             for(Relation r : createdRelations) {
                 boolean dependsOnOtherNewRelation = false;
