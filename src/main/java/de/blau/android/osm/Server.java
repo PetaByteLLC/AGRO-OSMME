@@ -515,7 +515,8 @@ public class Server {
     @NonNull
     public InputStream getStreamForBox(@Nullable final Context context, @NonNull final BoundingBox box) throws IOException {
         Log.d(DEBUG_TAG, "getStreamForBox");
-        URL url = new URL(getReadOnlyUrl() + "map?bbox=" + box.toApiString());
+//        URL url = new URL(getReadOnlyUrl() + "map?bbox=" + box.toApiString());
+        URL url = new URL("http://agro.brisklyminds.com/agroadmin/ws/public/api/map.json?bbox=" + box.toApiString());
         return openConnection(context, url, timeout, timeout);
     }
 

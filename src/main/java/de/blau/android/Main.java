@@ -2421,6 +2421,7 @@ public class Main extends FullScreenAppCompatActivity
                 return true;
             case R.id.menu_transfer_download_current:
                 onMenuDownloadCurrent(true);
+                onMenuDownloadCurrent(true);
                 return true;
             case R.id.menu_transfer_download_replace:
                 onMenuDownloadCurrent(false);
