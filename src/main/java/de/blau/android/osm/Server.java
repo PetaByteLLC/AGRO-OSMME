@@ -518,7 +518,7 @@ public class Server {
 //        URL url = new URL(getReadOnlyUrl() + "map?bbox=" + box.toApiString());
         String username = App.getPreferences(context).getAgroUsername();
         if (username == null) throw new NullPointerException("Not logged in system!");
-        URL url = new URL("http://agro.brisklyminds.com/agroadmin/ws/public/api/map.json?bbox=" + box.toApiString() + "&username" + username);
+        URL url = new URL("http://agro.brisklyminds.com/agroadmin/ws/public/api/map?bbox=" + box.toApiString() + "&username" + username);
         return openConnection(context, url, timeout, timeout);
     }
 
