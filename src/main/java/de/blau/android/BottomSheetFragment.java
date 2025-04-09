@@ -29,10 +29,13 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import de.blau.android.osm.BoundingBox;
 import de.blau.android.osm.Node;
 import de.blau.android.osm.OsmElement;
 import de.blau.android.osm.Tags;
+import de.blau.android.osm.ViewBox;
 import de.blau.android.osm.Way;
+import de.blau.android.util.LatLon;
 
 public class BottomSheetFragment extends BottomSheetDialogFragment {
 
@@ -180,6 +183,8 @@ public class BottomSheetFragment extends BottomSheetDialogFragment {
         irrigationTypeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         irrigationType.setAdapter(irrigationTypeAdapter);
 
+        setRegionAndDistrict(lastSelectedWay);
+
         view.findViewById(R.id.btn_save).setOnClickListener(v -> {
             int size = App.getLogic().getWays().size();
             String nameValue = name.getText() == null || name.getText().toString().trim().isEmpty()
@@ -286,6 +291,26 @@ public class BottomSheetFragment extends BottomSheetDialogFragment {
         dismiss();
     }
 
+    private void setRegionAndDistrict(Way way) {
+        BoundingBox bounds = way.getBounds();
+        if (bounds.isValid()) {
+            final ViewBox box = new ViewBox(bounds);
+            double[] centerCoords = box.getCenter(); // Предполагаем, что это double градусы
+
+            if (centerCoords.length >= 2) {
+                // Предполагаем порядок [lat, lon] и что это double градусы
+                double centerLat = centerCoords[1];
+                double centerLon = centerCoords[0];
+                // Создаем LatLon с double градусами
+                LatLon location = new LatLon(centerLat, centerLon); // Убедитесь, что конструктор принимает double!
+                ReferenceDataManager.ReferenceFeature matchingFeature = ReferenceDataManager.findFeatureContainingPoint(location);
+                if (matchingFeature == null) return;
+                region.setText(matchingFeature.getAdm1Ky());
+                district.setText(matchingFeature.getAdm2Ky());
+            }
+        }
+    }
+
     public static String getArea(Way way) {
         List<Node> nodes = way.getNodes();
         int n = nodes.size();
@@ -327,7 +352,7 @@ public class BottomSheetFragment extends BottomSheetDialogFragment {
         // Рассчитываем площадь по формуле Гаусса (Shoelace) для координат в метрах
         double areaSqMeters = 0.0;
         for (int i = 0; i < n - 1; i++) {
-            areaSqMeters += (x_meters[i] * y_meters[i+1]) - (x_meters[i+1] * y_meters[i]);
+            areaSqMeters += (x_meters[i] * y_meters[i + 1]) - (x_meters[i + 1] * y_meters[i]);
         }
         areaSqMeters = Math.abs(areaSqMeters / 2.0);
 

@@ -147,6 +147,10 @@ public class Splash extends AppCompatActivity {
             App.getCurrentPresets(Splash.this);
 
             Log.d(DEBUG_TAG, "Preset load finished");
+            Progress.showDialog(Splash.this, Progress.PROGRESS_IMPORTING_FILE);
+            ReferenceDataManager.loadData(Splash.this);
+            Progress.dismissDialog(Splash.this, Progress.PROGRESS_IMPORTING_FILE);
+
             //
             Intent intent = new Intent(Splash.this, Main.class);
             intent.putExtra(SHORTCUT_EXTRAS_KEY, shortcutExtras);
