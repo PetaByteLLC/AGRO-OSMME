@@ -1,6 +1,7 @@
 package de.blau.android;
 
 import static de.blau.android.AgroConstants.*;
+import static de.blau.android.BottomSheetFragment.getArea;
 import static de.blau.android.TagHelper.getTagValue;
 
 import android.app.AlertDialog;
@@ -34,7 +35,9 @@ import java.util.Map;
 
 import de.blau.android.osm.OsmElement;
 import de.blau.android.osm.Relation;
+import de.blau.android.osm.RelationMember;
 import de.blau.android.osm.Tags;
+import de.blau.android.osm.Way;
 
 public class BsEditYieldFragment extends BottomSheetDialogFragment {
 
@@ -183,6 +186,14 @@ public class BsEditYieldFragment extends BottomSheetDialogFragment {
             map.put(YIELD_TAG_FARMER_MOBILE, farmerMobile.getText().toString());
             map.put(YIELD_TAG_CADASTRAL_NUMBER, cadastrNumber.getText().toString());
             map.put(YIELD_TAG_TECHNOLOGY, technology.getSelectedItem().toString());
+
+            List<RelationMember> membersWithRole = yield.getMembersWithRole(ROLE_FIELD_GEOMETRY);
+            if (!membersWithRole.isEmpty()) {
+                OsmElement element = membersWithRole.get(0).getElement();
+                if (element != null) {
+                    map.put(Tags.KEY_AREA, getArea((Way) element));
+                }
+            }
 
             App.getDelegator().updateFieldRelationTags(yield, map);
             dismiss();

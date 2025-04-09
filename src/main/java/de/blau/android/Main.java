@@ -679,6 +679,9 @@ public class Main extends FullScreenAppCompatActivity
             Intent intent = new Intent(Main.this, LoginActivity.class);
             startActivity(intent);
             finish();
+        } else {
+//            onMenuDownloadCurrent(true);
+//            onMenuDownloadCurrent(true);
         }
     }
 

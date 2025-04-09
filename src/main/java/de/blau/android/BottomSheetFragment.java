@@ -26,11 +26,11 @@ import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import de.blau.android.osm.Node;
 import de.blau.android.osm.OsmElement;
-import de.blau.android.osm.StorageDelegator;
 import de.blau.android.osm.Tags;
 import de.blau.android.osm.Way;
 
@@ -264,6 +264,7 @@ public class BottomSheetFragment extends BottomSheetDialogFragment {
         yield.put(YIELD_TAG_POSITION, getPosition());
         yield.put(Tags.KEY_TYPE, TYPE_FIELD);
         yield.put(YIELD_TAG_TECHNOLOGY, technology);
+        yield.put(Tags.KEY_AREA, getArea(lastSelectedWay));
 
         Map<String, String> seasonTags = new HashMap<>();
         seasonTags.put(Tags.KEY_NAME, season.getName());
@@ -283,6 +284,59 @@ public class BottomSheetFragment extends BottomSheetDialogFragment {
 
         App.getDelegator().createFieldRelationWithSeasonAndCrop(lastSelectedWay, yield, seasonTags, crop);
         dismiss();
+    }
+
+    public static String getArea(Way way) {
+        List<Node> nodes = way.getNodes();
+        int n = nodes.size();
+
+        // Проверка на валидный замкнутый полигон
+        if (n < 4 || !nodes.get(0).equals(nodes.get(n - 1))) {
+            return ""; // Не полигон или не замкнут
+        }
+
+        // Массивы для координат в метрах (относительно первой точки)
+        double[] x_meters = new double[n];
+        double[] y_meters = new double[n];
+        x_meters[0] = 0.0;
+        y_meters[0] = 0.0;
+
+        // Константы для перевода градусов в метры
+        final double METERS_PER_DEGREE_LAT = 111132.954;
+        final double METERS_PER_DEGREE_LON_BASE = 111319.488; // На экваторе
+
+        // Рассчитываем координаты в метрах для каждой вершины относительно первой
+        for (int i = 0; i < n - 1; i++) {
+            Node p1 = nodes.get(i);
+            Node p2 = nodes.get(i + 1);
+
+            double deltaLat = p2.getLat() - p1.getLat();
+            double deltaLon = p2.getLon() - p1.getLon();
+
+            // Используем среднюю широту сегмента для расчета длины градуса долготы
+            double avgLatSegmentRad = Math.toRadians((p1.getLat() + p2.getLat()) / 2.0);
+
+            double deltaY_meters = deltaLat * METERS_PER_DEGREE_LAT;
+            double deltaX_meters = deltaLon * METERS_PER_DEGREE_LON_BASE * Math.cos(avgLatSegmentRad);
+
+            // Координаты следующей точки = коорд. предыдущей + дельта
+            x_meters[i + 1] = x_meters[i] + deltaX_meters;
+            y_meters[i + 1] = y_meters[i] + deltaY_meters;
+        }
+
+        // Рассчитываем площадь по формуле Гаусса (Shoelace) для координат в метрах
+        double areaSqMeters = 0.0;
+        for (int i = 0; i < n - 1; i++) {
+            areaSqMeters += (x_meters[i] * y_meters[i+1]) - (x_meters[i+1] * y_meters[i]);
+        }
+        areaSqMeters = Math.abs(areaSqMeters / 2.0);
+
+        // Конвертируем в гектары
+        double areaHaApprox = areaSqMeters / 10000.0;
+
+        // Возвращаем отформатированную строку
+        // Используем Locale.US для точки в качестве десятичного разделителя
+        return String.format(Locale.US, "%.3f", areaHaApprox);
     }
 
     private String formatCalendarToString(Calendar calendar) {
