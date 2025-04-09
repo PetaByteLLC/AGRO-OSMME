@@ -3,6 +3,7 @@ package de.blau.android;
 import static de.blau.android.AgroConstants.*;
 import static de.blau.android.TagHelper.getTagValue;
 
+import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -17,6 +18,7 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -134,6 +136,22 @@ public class BsEditYieldFragment extends BottomSheetDialogFragment {
             Relation clickedRelation = (Relation) p.getItemAtPosition(pos);
             BsEditCropFragment cropFragment = new BsEditCropFragment(clickedRelation, yield, seasons, main, false);
             cropFragment.show(getChildFragmentManager(), cropFragment.getTag());
+        });
+
+        cropList.setOnItemLongClickListener((p, v, pos, id) -> {
+            Relation clickedRelation = (Relation) p.getItemAtPosition(pos);
+            new AlertDialog.Builder(getContext())
+                    .setTitle("Вы уверены, что хотите удалить посев?")
+                    .setMessage(REMOVE_CROP_MESSAGE)
+                    .setIcon(android.R.drawable.ic_dialog_alert)
+                    .setPositiveButton("Удалить", (dialogInterface, which) -> {
+                        App.getDelegator().removeRelation(clickedRelation);
+                        Toast.makeText(getContext(), "Посев удалён", Toast.LENGTH_SHORT).show();
+                        dismiss();
+                    })
+                    .setNegativeButton("Отмена", null)
+                    .show();
+            return true;
         });
 
         cropAdd.setOnClickListener(v -> {
