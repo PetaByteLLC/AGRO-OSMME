@@ -28,9 +28,17 @@
             android:gravity="end">
 
             <ImageView
+                android:id="@+id/remove"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:contentDescription="@string/image_information_title"
+                android:src="@drawable/baseline_delete_outline_24"/>
+
+            <ImageView
                 android:id="@+id/edit"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
                 android:contentDescription="@string/image_information_title"
                 android:src="@drawable/outline_edit_square_24" />
 
@@ -38,7 +46,6 @@
                 android:id="@+id/viewOnMap"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="bottom"
                 android:layout_marginStart="10dp"
                 android:contentDescription="@string/image_information_title"
                 android:src="@drawable/baseline_gps_fixed_24" />

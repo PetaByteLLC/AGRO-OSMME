@@ -4343,7 +4343,7 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
      * СОЗДАЕТ: Геометрию(Way) + Поле(Relation) + Сезон(Relation) + Посев(Relation)
      * СВЯЗЫВАЕТ: Поле содержит Way, Сезон содержит Поле, Посев содержит Сезон.
      *
-     * @param fieldWay     Way.
+     * @param fieldWay          Way.
      * @param fieldRelationTags Теги для Relation Поля (включая type=agromap_field).
      * @param seasonTags        Теги для Relation Сезона (включая type=agricultural_season).
      * @param cropTags          Теги для Relation Посева (включая type=crop_planting).
@@ -4427,7 +4427,7 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
      * Создает новый Сезон (Relation) и связывает его с существующим Полем (Relation).
      *
      * @param parentFieldRelation Существующий Relation Поля.
-     * @param seasonValue          Теги для нового Сезона (включая type=agricultural_season).
+     * @param seasonValue         Теги для нового Сезона (включая type=agricultural_season).
      */
     @NonNull
     public Relation createSeasonForFieldRelation(@NonNull Relation parentFieldRelation, @NonNull Season seasonValue, List<Relation> exitsSeasons) {
@@ -4466,7 +4466,9 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
             setElementModified(parentFieldRelation); // Поле изменено (добавлен родитель)
             onParentRelationChanged(parentFieldRelation);
             return season;
-        } finally { unlock(); }
+        } finally {
+            unlock();
+        }
     }
 
     /**
@@ -4503,16 +4505,18 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
 
             return crop;
 
-        } finally { unlock(); }
+        } finally {
+            unlock();
+        }
     }
 
 
     /**
      * Обновляет теги существующего Посева (Relation) и/или перемещает его в другой Сезон (Relation).
      *
-     * @param cropToUpdate     Существующий Посев (Relation), который редактируется.
-     * @param newCropTags      Новый набор тегов для Посева (включая type=crop_planting).
-     * @param targetSeason     Сезон (Relation), к которому Посев должен быть привязан ПОСЛЕ сохранения.
+     * @param cropToUpdate Существующий Посев (Relation), который редактируется.
+     * @param newCropTags  Новый набор тегов для Посева (включая type=crop_planting).
+     * @param targetSeason Сезон (Relation), к которому Посев должен быть привязан ПОСЛЕ сохранения.
      */
     public void updateCropAndSeasonRelation(@NonNull Relation cropToUpdate, @NonNull Map<String, String> newCropTags, @NonNull Relation targetSeason) {
         // ... (проверки cropToUpdate, targetSeason) ...
@@ -4527,7 +4531,7 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
             for (RelationMember member : members) {
                 if (ROLE_SEASON.equals(member.getRole()) && member.getElement() instanceof Relation) {
                     OsmElement potentialSeason = member.getElement();
-                    if(potentialSeason != null && TYPE_SEASON.equals(potentialSeason.getTagWithKey(Tags.KEY_TYPE))) {
+                    if (potentialSeason != null && TYPE_SEASON.equals(potentialSeason.getTagWithKey(Tags.KEY_TYPE))) {
                         oldSeason = (Relation) potentialSeason;
                         oldSeasonMember = member;
                         break;
@@ -4551,7 +4555,9 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
             // 2. Перемещаем Посев, если Сезон изменился
             if (seasonChanged) {
                 undo.save(targetSeason);
-                if (oldSeason != null) { undo.save(oldSeason); }
+                if (oldSeason != null) {
+                    undo.save(oldSeason);
+                }
 
                 // --- ИЗМЕНЕНИЯ ЗДЕСЬ ---
                 // Удаляем старый член-сезон из Посева
@@ -4577,7 +4583,9 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
             } else if (!tagsChanged) {
                 // No changes
             }
-        } finally { unlock(); }
+        } finally {
+            unlock();
+        }
     }
 
     private void setElementCreated(@NonNull OsmElement osmElement) {
@@ -4786,4 +4794,194 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
         }
 
     }
+
+    /**
+     * Removes a specific Field Relation, its reference from any parent Season Relations,
+     * removes Seasons that become field-less as a result, removes Crops associated
+     * with those deleted Seasons, and optionally removes the associated geometry Way
+     * if it becomes orphaned and untagged, along with its nodes if they become orphaned.
+     * Assumes underlying remove/modify methods handle the `dirty` flag.
+     *
+     * @param fieldRelation The Relation object (must have type=agromap_field) to remove.
+     */
+    public void removeFieldRelation(@NonNull Relation fieldRelation) {
+        if (fieldRelation == null) {
+            return;
+        }
+        long fieldOsmId = fieldRelation.getOsmId();
+
+        Set<Long> seasonsPotentiallyToDelete = new HashSet<>();
+        Set<Long> cropsToDelete = new HashSet<>();
+        Set<Long> waysPotentiallyToDelete = new HashSet<>();
+
+        try {
+            lock(); // Lock the storage for thread safety
+
+            // --- 1. Validate the input Relation ---
+            OsmElement checkExists = getOsmElement(Relation.NAME, fieldOsmId);
+            if (checkExists == null || !(checkExists instanceof Relation) || checkExists.getState() == OsmElement.STATE_DELETED) {
+                return; // Not found, not a relation, or already deleted
+            }
+            Relation storedFieldRelation = (Relation) checkExists;
+            if (!TYPE_FIELD.equals(storedFieldRelation.getTagWithKey(Tags.KEY_TYPE))) {
+                return; // Wrong type
+            }
+
+            // --- 2. Identify Geometry Ways ---
+            if (storedFieldRelation.getMembers() != null) {
+                for (RelationMember member : storedFieldRelation.getMembers()) {
+                    if (ROLE_FIELD_GEOMETRY.equals(member.getRole()) && Way.NAME.equals(member.getType())) {
+                        waysPotentiallyToDelete.add(member.getRef());
+                    }
+                }
+            }
+
+            // --- 3. Identify Parent Seasons ---
+            List<Relation> initialParentSeasons = new ArrayList<>();
+            List<Relation> allPotentialParents = storedFieldRelation.getParentRelations();
+            if (allPotentialParents != null) {
+                for (Relation parentRef : new ArrayList<>(allPotentialParents)) {
+                    Relation currentParent = (Relation) getOsmElement(Relation.NAME, parentRef.getOsmId());
+                    if (currentParent != null && currentParent.getState() != OsmElement.STATE_DELETED &&
+                            TYPE_SEASON.equals(currentParent.getTagWithKey(Tags.KEY_TYPE))) {
+                        boolean isMember = false;
+                        if (currentParent.getMembers() != null) {
+                            for(RelationMember rm : currentParent.getMembers()){
+                                if(rm.getRef() == fieldOsmId && Relation.NAME.equals(rm.getType()) && ROLE_FIELD.equals(rm.getRole())){
+                                    isMember = true;
+                                    break;
+                                }
+                            }
+                        }
+                        if(isMember) {
+                            initialParentSeasons.add(currentParent);
+                        }
+                    }
+                }
+            }
+
+            // --- 4. Remove the Field Relation itself ---
+            // removeRelation handles dirty flag, undo, api storage
+            removeRelation(storedFieldRelation);
+
+            // --- 5. Process Parent Seasons: Remove Field ref & Check if Season should be deleted ---
+            for (Relation season : initialParentSeasons) {
+                Relation currentSeason = (Relation) getOsmElement(Relation.NAME, season.getOsmId());
+                if (currentSeason == null || currentSeason.getState() == OsmElement.STATE_DELETED) {
+                    continue;
+                }
+
+                List<RelationMember> membersToRemove = new ArrayList<>();
+                if(currentSeason.getMembers() != null){
+                    for (RelationMember member : new ArrayList<>(currentSeason.getMembers())) {
+                        if (member.getRef() == fieldOsmId && Relation.NAME.equals(member.getType()) && ROLE_FIELD.equals(member.getRole())) {
+                            membersToRemove.add(member);
+                        }
+                    }
+                }
+
+                if (!membersToRemove.isEmpty()) {
+                    undo.save(currentSeason); // Save before modifying members
+                    for (RelationMember memberToRemove : membersToRemove) {
+                        currentSeason.removeMember(memberToRemove);
+                        setElementModified(currentSeason); // Handles dirty flag, undo, api storage
+                    }
+                }
+
+                // Check if any other 'field' members remain
+                boolean hasOtherFields = false;
+                if(currentSeason.getMembers() != null) {
+                    for (RelationMember member : currentSeason.getMembers()) {
+                        if (ROLE_FIELD.equals(member.getRole())) {
+                            hasOtherFields = true;
+                            break;
+                        }
+                    }
+                }
+
+                if (!hasOtherFields) {
+                    seasonsPotentiallyToDelete.add(currentSeason.getOsmId());
+                }
+            }
+
+            // --- 6. Identify Crops linked to Seasons marked for deletion ---
+            for (Long seasonIdToDelete : seasonsPotentiallyToDelete) {
+                Relation seasonRelation = (Relation) getOsmElement(Relation.NAME, seasonIdToDelete);
+                if (seasonRelation == null || seasonRelation.getState() == OsmElement.STATE_DELETED) continue;
+
+                List<Relation> seasonParents = seasonRelation.getParentRelations();
+                if (seasonParents != null) {
+                    for (Relation cropRef : new ArrayList<>(seasonParents)) {
+                        Relation currentCrop = (Relation) getOsmElement(Relation.NAME, cropRef.getOsmId());
+                        if (currentCrop != null && currentCrop.getState() != OsmElement.STATE_DELETED &&
+                                TYPE_CROP.equals(currentCrop.getTagWithKey(Tags.KEY_TYPE))) {
+                            boolean isMember = false;
+                            if(currentCrop.getMembers() != null){
+                                for(RelationMember rm : currentCrop.getMembers()){
+                                    if(rm.getRef() == seasonIdToDelete && Relation.NAME.equals(rm.getType()) && ROLE_SEASON.equals(rm.getRole())){
+                                        isMember = true;
+                                        break;
+                                    }
+                                }
+                            }
+                            if(isMember){
+                                cropsToDelete.add(currentCrop.getOsmId());
+                            }
+                        }
+                    }
+                }
+            }
+
+            // --- 7. Delete Identified Crops ---
+            for (Long cropId : cropsToDelete) {
+                Relation cropRelation = (Relation) getOsmElement(Relation.NAME, cropId);
+                if (cropRelation != null && cropRelation.getState() != OsmElement.STATE_DELETED) {
+                    removeRelation(cropRelation); // Handles dirty flag, undo, api storage
+                }
+            }
+
+            // --- 8. Delete Identified Seasons ---
+            for (Long seasonId : seasonsPotentiallyToDelete) {
+                Relation seasonRelation = (Relation) getOsmElement(Relation.NAME, seasonId);
+                if (seasonRelation != null && seasonRelation.getState() != OsmElement.STATE_DELETED) {
+                    removeRelation(seasonRelation); // Handles dirty flag, undo, api storage
+                }
+            }
+
+            // --- 9. Handle Geometry Ways (optional deletion) ---
+            for(Long wayId : waysPotentiallyToDelete) {
+                Way currentWay = (Way) getOsmElement(Way.NAME, wayId);
+                if (currentWay != null && currentWay.getState() != OsmElement.STATE_DELETED) {
+                    boolean hasTags = currentWay.hasTags();
+                    List<Relation> wayParents = currentWay.getParentRelations();
+                    boolean hasOtherParents = wayParents != null && !wayParents.isEmpty();
+
+                    if (!hasTags && !hasOtherParents) {
+                        List<Node> nodesToRemove = new ArrayList<>();
+                        nodesToRemove.addAll(currentWay.getNodes());
+
+                        removeWay(currentWay); // Handles dirty flag, undo, api storage
+
+                        // Check and remove orphaned nodes
+                        for (Node node : nodesToRemove) {
+                            Node currentNode = (Node) getOsmElement(Node.NAME, node.getOsmId());
+                            if (currentNode != null && currentNode.getState() != OsmElement.STATE_DELETED) {
+                                boolean nodeHasTags = currentNode.hasTags();
+                                List<Way> nodeParentWays = currentStorage.getWays(currentNode);
+                                boolean nodeHasOtherWays = !nodeParentWays.isEmpty();
+
+                                if (!nodeHasTags && !nodeHasOtherWays) {
+                                    removeNode(currentNode); // Handles dirty flag, undo, api storage
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+        } finally {
+            unlock(); // Always ensure the lock is released
+        }
+    }
+
 }

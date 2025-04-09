@@ -2,8 +2,10 @@ package de.blau.android;
 
 import static de.blau.android.AgroConstants.CROP_TAG_CULTURE;
 import static de.blau.android.AgroConstants.CROP_TAG_CULTURE_VARIETIES;
+import static de.blau.android.AgroConstants.REMOVE_FIELD_MESSAGE;
 import static de.blau.android.TagHelper.getText;
 
+import android.app.AlertDialog;
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,6 +13,7 @@ import android.view.ViewGroup;
 import android.widget.BaseExpandableListAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 
@@ -152,6 +155,21 @@ public class CustomExpandableListAdapter extends BaseExpandableListAdapter {
                 main.editor(relation);
                 dismiss();
             }
+        });
+
+        ImageView remove = convertView.findViewById(R.id.remove);
+        remove.setOnClickListener(v -> {
+            new AlertDialog.Builder(context)
+                    .setTitle("Вы уверены, что хотите удалить поле?")
+                    .setMessage(REMOVE_FIELD_MESSAGE)
+                    .setIcon(android.R.drawable.ic_dialog_alert)
+                    .setPositiveButton("Удалить", (dialogInterface, which) -> {
+                        App.getDelegator().removeFieldRelation(relation);
+                        Toast.makeText(context, "Поле удалёно", Toast.LENGTH_SHORT).show();
+                        dismiss();
+                    })
+                    .setNegativeButton("Отмена", null)
+                    .show();
         });
 
         return convertView;

@@ -1,21 +1,17 @@
 package de.blau.android;
 
+import static de.blau.android.AgroConstants.REMOVE_SEASON_MESSAGE;
+
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
-import android.app.DatePickerDialog;
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.*;
 
-import java.util.Calendar;
 import java.util.List;
 
 public class SeasonDialog {
-
-    private static final String removeMessage = "После удаления будут также удалены все связанные с ним данные, включая поля, участки, зоны и другие объекты, которые были частью этого сезона." +
-            "Это действие необратимо — восстановить данные после удаления будет невозможно." +
-            "Вы уверены, что хотите продолжить?";
 
     public interface OnSeasonSelectedListener {
         void onSeasonSelected(Season season);
@@ -62,7 +58,7 @@ public class SeasonDialog {
             Season itemAtPosition = (Season) parent.getItemAtPosition(position);
             new AlertDialog.Builder(context)
                     .setTitle("Вы уверены, что хотите удалить сезон?")
-                    .setMessage(removeMessage)
+                    .setMessage(REMOVE_SEASON_MESSAGE)
                     .setIcon(android.R.drawable.ic_dialog_alert)
                     .setPositiveButton("Удалить", (dialogInterface, which) -> {
                         seasons.remove(itemAtPosition);
