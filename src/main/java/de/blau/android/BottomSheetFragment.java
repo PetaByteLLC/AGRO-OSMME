@@ -1,9 +1,37 @@
 package de.blau.android;
 
+import static android.app.Activity.RESULT_CANCELED;
 import static android.app.Activity.RESULT_OK;
-import static de.blau.android.AgroConstants.*;
+import static de.blau.android.AgroConstants.CROP_TAG_CLEANING_DATE;
+import static de.blau.android.AgroConstants.CROP_TAG_CULTURE;
+import static de.blau.android.AgroConstants.CROP_TAG_CULTURE_VARIETIES;
+import static de.blau.android.AgroConstants.CROP_TAG_IRRIGATION_TYPE;
+import static de.blau.android.AgroConstants.CROP_TAG_LAND_CATEGORY;
+import static de.blau.android.AgroConstants.CROP_TAG_PRODUCTIVITY;
+import static de.blau.android.AgroConstants.CROP_TAG_SOWING_DATE;
+import static de.blau.android.AgroConstants.CULTURE_DATA;
+import static de.blau.android.AgroConstants.DATE_FORMAT;
+import static de.blau.android.AgroConstants.IRRIGATION_TYPE_DATA;
+import static de.blau.android.AgroConstants.LAND_CATEGORY_DATA;
+import static de.blau.android.AgroConstants.SEASON_TAG_END;
+import static de.blau.android.AgroConstants.SEASON_TAG_START;
+import static de.blau.android.AgroConstants.TAG_IMAGE;
+import static de.blau.android.AgroConstants.TECHNOLOGY_DATA;
+import static de.blau.android.AgroConstants.TYPE_CROP;
+import static de.blau.android.AgroConstants.TYPE_FIELD;
+import static de.blau.android.AgroConstants.TYPE_SEASON;
+import static de.blau.android.AgroConstants.YIELD_TAG_AGGREGATOR;
+import static de.blau.android.AgroConstants.YIELD_TAG_CADASTRAL_NUMBER;
+import static de.blau.android.AgroConstants.YIELD_TAG_DISTRICT;
+import static de.blau.android.AgroConstants.YIELD_TAG_FARMER_MOBILE;
+import static de.blau.android.AgroConstants.YIELD_TAG_FARMER_NAME;
+import static de.blau.android.AgroConstants.YIELD_TAG_FARMER_SURNAME;
+import static de.blau.android.AgroConstants.YIELD_TAG_POSITION;
+import static de.blau.android.AgroConstants.YIELD_TAG_REGION;
+import static de.blau.android.AgroConstants.YIELD_TAG_TECHNOLOGY;
 import static de.blau.android.Main.REQUEST_IMAGE_CAPTURE;
 
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -17,7 +45,6 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.Spinner;
@@ -48,7 +75,7 @@ import de.blau.android.osm.Tags;
 import de.blau.android.osm.ViewBox;
 import de.blau.android.osm.Way;
 import de.blau.android.util.LatLon;
-import de.blau.android.util.ScreenMessage;
+import de.blau.android.util.SelectFile;
 
 public class BottomSheetFragment extends BottomSheetDialogFragment {
 
@@ -428,11 +455,22 @@ public class BottomSheetFragment extends BottomSheetDialogFragment {
         App.getPreferences(getContext()).saveSeasons(seasons);
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     @Override
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if(requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
-            imageAdapter.notifyDataSetChanged();
+        if (requestCode == REQUEST_IMAGE_CAPTURE) {
+            if (resultCode == RESULT_OK) imageAdapter.notifyDataSetChanged();
+            if (resultCode == RESULT_CANCELED) {
+                if (imageFiles != null && !imageFiles.isEmpty()) {
+                    imageFiles.get(imageFiles.size() - 1).delete();
+                }
+            }
         }
+//        else if (data != null) {
+//            if ((requestCode == SelectFile.READ_FILE || requestCode == SelectFile.SAVE_FILE) && resultCode == RESULT_OK) {
+//                SelectFile.handleResult(getActivity(), requestCode, data);
+//            }
+//        }
     }
 }
