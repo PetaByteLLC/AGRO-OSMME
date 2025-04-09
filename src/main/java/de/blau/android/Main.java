@@ -902,7 +902,7 @@ public class Main extends FullScreenAppCompatActivity
                     if (newVersion) {
                         Log.d(DEBUG_TAG, "post load state new version");
                         newVersion = false;
-                        NewVersion.showDialog(Main.this);
+//                        NewVersion.showDialog(Main.this);
                     }
                 });
             } else {
@@ -918,11 +918,11 @@ public class Main extends FullScreenAppCompatActivity
                         // newbie, display welcome dialog
                         Log.d(DEBUG_TAG, "showing welcome dialog");
                         newInstall = false;
-                        Newbie.showDialog(Main.this);
+//                        Newbie.showDialog(Main.this);
                     } else if (newVersion) {
                         Log.d(DEBUG_TAG, "new version");
                         newVersion = false;
-                        NewVersion.showDialog(Main.this);
+//                        NewVersion.showDialog(Main.this);
                     }
                 });
             }
