@@ -52,6 +52,7 @@ public class BottomSheetFragmentAllField extends BottomSheetDialogFragment {
         });
         BottomSheetBehavior<View> bottomSheetBehavior = BottomSheetBehavior.from((View) view.getParent());
         bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+        bottomSheetBehavior.setDraggable(false);
     }
 
     public void updateList() {
