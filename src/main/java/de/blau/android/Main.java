@@ -679,9 +679,6 @@ public class Main extends FullScreenAppCompatActivity
             Intent intent = new Intent(Main.this, LoginActivity.class);
             startActivity(intent);
             finish();
-        } else {
-//            onMenuDownloadCurrent(true);
-//            onMenuDownloadCurrent(true);
         }
     }
 
@@ -789,6 +786,13 @@ public class Main extends FullScreenAppCompatActivity
             upload();
         } else {
             first = true;
+            onMenuDownloadCurrent(true);
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+            onMenuDownloadCurrent(true);
         }
     }
 
