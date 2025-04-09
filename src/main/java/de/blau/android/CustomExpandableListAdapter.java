@@ -114,7 +114,7 @@ public class CustomExpandableListAdapter extends BaseExpandableListAdapter {
         Relation relation = getChild(groupPosition, childPosition);
 
         TextView title = convertView.findViewById(R.id.title);
-        String text = getTagValue(relation, Tags.KEY_NAME) + " " + getTagValue(relation, Tags.KEY_AREA);
+        String text = getTagValue(relation, Tags.KEY_NAME) + " " + getTagValue(relation, Tags.KEY_AREA + " га");
         title.setText(text.trim());
 
         TextView cropTextView = convertView.findViewById(R.id.crops);

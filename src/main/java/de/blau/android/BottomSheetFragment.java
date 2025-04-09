@@ -386,7 +386,7 @@ public class BottomSheetFragment extends BottomSheetDialogFragment {
     public static String getArea(Way way) {
         double areaSqMeters = calculateArea(way.getNodes());
         double areaHectares = areaSqMeters / 10000.0;
-        return String.format(Locale.US, "%.3f га", areaHectares);
+        return String.format(Locale.US, "%.3f", areaHectares);
     }
 
     private String formatCalendarToString(Calendar calendar) {
