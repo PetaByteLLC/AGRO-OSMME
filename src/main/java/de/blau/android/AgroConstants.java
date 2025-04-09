@@ -26,6 +26,8 @@ public class AgroConstants {
     public static final String SEASON_TAG_START = "start";
     public static final String SEASON_TAG_END = "end";
 
+    public static final String TAG_IMAGE = "image";
+
     public static final String CROP_TAG_CULTURE_VARIETIES = "cultureVarieties";
     public static final String CROP_TAG_SOWING_DATE = "sowingDate";
     public static final String CROP_TAG_CLEANING_DATE = "cleaningDate";

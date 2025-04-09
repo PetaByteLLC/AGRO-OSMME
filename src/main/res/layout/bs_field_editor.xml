@@ -214,38 +214,38 @@
             android:textColor="@color/ag_text_color"
             android:textColorHint="@color/ag_text_color" />
 
-<!--        <Spinner-->
-<!--            android:id="@+id/secondaryCulture"-->
-<!--            android:layout_width="match_parent"-->
-<!--            android:layout_height="40dp"-->
-<!--            android:layout_marginHorizontal="20dp"-->
-<!--            android:layout_marginTop="10dp"-->
-<!--            android:background="@drawable/edittext_background"-->
-<!--            android:choiceMode="singleChoice" />-->
+        <!--        <Spinner-->
+        <!--            android:id="@+id/secondaryCulture"-->
+        <!--            android:layout_width="match_parent"-->
+        <!--            android:layout_height="40dp"-->
+        <!--            android:layout_marginHorizontal="20dp"-->
+        <!--            android:layout_marginTop="10dp"-->
+        <!--            android:background="@drawable/edittext_background"-->
+        <!--            android:choiceMode="singleChoice" />-->
 
-<!--        <EditText-->
-<!--            android:id="@+id/secondarySowingDate"-->
-<!--            android:layout_width="match_parent"-->
-<!--            android:layout_height="40dp"-->
-<!--            android:layout_marginHorizontal="20dp"-->
-<!--            android:layout_marginTop="10dp"-->
-<!--            android:background="@drawable/edittext_background"-->
-<!--            android:hint="Дата вторичного посева"-->
-<!--            android:inputType="date"-->
-<!--            android:textColor="@color/ag_text_color"-->
-<!--            android:textColorHint="@color/ag_text_color" />-->
+        <!--        <EditText-->
+        <!--            android:id="@+id/secondarySowingDate"-->
+        <!--            android:layout_width="match_parent"-->
+        <!--            android:layout_height="40dp"-->
+        <!--            android:layout_marginHorizontal="20dp"-->
+        <!--            android:layout_marginTop="10dp"-->
+        <!--            android:background="@drawable/edittext_background"-->
+        <!--            android:hint="Дата вторичного посева"-->
+        <!--            android:inputType="date"-->
+        <!--            android:textColor="@color/ag_text_color"-->
+        <!--            android:textColorHint="@color/ag_text_color" />-->
 
-<!--        <EditText-->
-<!--            android:id="@+id/secondaryCropHarvestDate"-->
-<!--            android:layout_width="match_parent"-->
-<!--            android:layout_height="40dp"-->
-<!--            android:layout_marginHorizontal="20dp"-->
-<!--            android:layout_marginTop="10dp"-->
-<!--            android:background="@drawable/edittext_background"-->
-<!--            android:hint="Дата уборки вторичного посева"-->
-<!--            android:inputType="date"-->
-<!--            android:textColor="@color/ag_text_color"-->
-<!--            android:textColorHint="@color/ag_text_color" />-->
+        <!--        <EditText-->
+        <!--            android:id="@+id/secondaryCropHarvestDate"-->
+        <!--            android:layout_width="match_parent"-->
+        <!--            android:layout_height="40dp"-->
+        <!--            android:layout_marginHorizontal="20dp"-->
+        <!--            android:layout_marginTop="10dp"-->
+        <!--            android:background="@drawable/edittext_background"-->
+        <!--            android:hint="Дата уборки вторичного посева"-->
+        <!--            android:inputType="date"-->
+        <!--            android:textColor="@color/ag_text_color"-->
+        <!--            android:textColorHint="@color/ag_text_color" />-->
 
         <TextView
             android:layout_width="match_parent"
@@ -282,16 +282,14 @@
             android:text="Фото"
             android:textColor="@color/black" />
 
-        <GridView
+        <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/images"
             android:layout_width="match_parent"
-            android:layout_height="220dp"
+            android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
-            android:horizontalSpacing="16dp"
-            android:numColumns="2"
-            android:stretchMode="spacingWidth"
-            android:verticalSpacing="16dp"
-            tools:listitem="@layout/agro_photo" />
+            android:nestedScrollingEnabled="false"
+            tools:listitem="@layout/agro_photo"
+            android:paddingBottom="10dp"/>
 
         <Button
             android:id="@+id/btn_save"

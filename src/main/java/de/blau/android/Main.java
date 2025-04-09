@@ -247,7 +247,7 @@ public class Main extends FullScreenAppCompatActivity
     /**
      * Requests an activity-result.
      */
-    private static final int REQUEST_IMAGE_CAPTURE = 2;
+    public static final int REQUEST_IMAGE_CAPTURE = 2;
 
     /**
      * Requests an activity-result.
@@ -277,7 +277,7 @@ public class Main extends FullScreenAppCompatActivity
     /**
      * Date pattern used for the image file name.
      */
-    private static final String DATE_PATTERN_IMAGE_FILE_NAME_PART = "yyyyMMdd_HHmmss";
+    private static final String DATE_PATTERN_IMAGE_FILE_NAME_PART = "yyyyMMdd";
 
     /**
      * Id for requesting permissions
@@ -782,10 +782,10 @@ public class Main extends FullScreenAppCompatActivity
         findViewById(R.id.undo_button).setOnClickListener(v -> handleUndo());
         findViewById(R.id.next_button).setOnClickListener(v -> finishBuilding());
 
-        if (App.getLogic().hasChanges() && isConnected() && !first) {
+        boolean hasChanges = App.getLogic().hasChanges();
+        if (hasChanges && isConnected() && first) {
             upload();
-        } else {
-            first = true;
+        } else if (!hasChanges && isConnected() && first) {
             onMenuDownloadCurrent(true);
             try {
                 Thread.sleep(1000);
@@ -793,6 +793,8 @@ public class Main extends FullScreenAppCompatActivity
                 throw new RuntimeException(e);
             }
             onMenuDownloadCurrent(true);
+        } else {
+            first = false;
         }
     }
 
@@ -3053,7 +3055,7 @@ public class Main extends FullScreenAppCompatActivity
      * @throws IOException if reading the file went wrong
      */
     @NonNull
-    private File getImageFile() throws IOException {
+    public File getImageFile() throws IOException {
         File outDir = FileUtil.getPublicDirectory(FileUtil.getPublicDirectory(), Paths.DIRECTORY_PATH_PICTURES);
         String imageFileName = DateFormatter.getFormattedString(DATE_PATTERN_IMAGE_FILE_NAME_PART);
         // FIXME this forces the extension to jpg, but it could be a HEIC image

@@ -1,16 +1,23 @@
 package de.blau.android;
 
+import static android.app.Activity.RESULT_OK;
 import static de.blau.android.AgroConstants.*;
+import static de.blau.android.Main.REQUEST_IMAGE_CAPTURE;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.location.Location;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.EditText;
+import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.Spinner;
@@ -19,10 +26,15 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.content.FileProvider;
+import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 
+import java.io.File;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
@@ -36,6 +48,7 @@ import de.blau.android.osm.Tags;
 import de.blau.android.osm.ViewBox;
 import de.blau.android.osm.Way;
 import de.blau.android.util.LatLon;
+import de.blau.android.util.ScreenMessage;
 
 public class BottomSheetFragment extends BottomSheetDialogFragment {
 
@@ -48,6 +61,11 @@ public class BottomSheetFragment extends BottomSheetDialogFragment {
     private Spinner culture, technology, landCategory, irrigationType, season;
 
     private ImageView addSeason;
+    private Button btnUploadImage;
+
+    private RecyclerView images;
+    private List<File> imageFiles;
+    private ImageAdapter imageAdapter;
 
     public BottomSheetFragment(Way lastSelectedWay, Main main) {
         this.lastSelectedWay = lastSelectedWay;
@@ -106,6 +124,37 @@ public class BottomSheetFragment extends BottomSheetDialogFragment {
         technology = view.findViewById(R.id.technology);
         landCategory = view.findViewById(R.id.landCategory);
         irrigationType = view.findViewById(R.id.irrigationType);
+
+        imageFiles = new ArrayList<>();
+        images = view.findViewById(R.id.images);
+        images.setLayoutManager(new GridLayoutManager(getContext(), 2));
+        images.setNestedScrollingEnabled(false);
+
+        imageAdapter = new ImageAdapter(getContext(), imageFiles);
+        images.setAdapter(imageAdapter);
+
+
+        btnUploadImage = view.findViewById(R.id.btn_upload_image);
+        btnUploadImage.setOnClickListener(v -> {
+            if (getContext() == null) return;
+            Intent startCamera = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+            try {
+                String cameraApp = App.getPreferences(main).getCameraApp();
+                if (!cameraApp.isEmpty()) {
+                    startCamera.setPackage(cameraApp);
+                }
+                File imageFile = main.getImageFile();
+                Uri photoUri = FileProvider.getUriForFile(getContext(), getString(R.string.content_provider), imageFile);
+                if (photoUri != null) {
+                    startCamera.setFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+                    startCamera.putExtra(MediaStore.EXTRA_OUTPUT, photoUri);
+                    startActivityForResult(startCamera, REQUEST_IMAGE_CAPTURE);
+                }
+                imageFiles.add(imageFile);
+            } catch (Exception ignored) {
+
+            }
+        });
 
         DatePiker.setDataPicker(sowingDate, getContext());
         DatePiker.setDataPicker(cleaningDate, getContext());
@@ -271,6 +320,12 @@ public class BottomSheetFragment extends BottomSheetDialogFragment {
         yield.put(YIELD_TAG_TECHNOLOGY, technology);
         yield.put(Tags.KEY_AREA, getArea(lastSelectedWay));
 
+        if (imageFiles != null && !imageFiles.isEmpty()) {
+            for (int i = 0; i < imageFiles.size(); i++) {
+                yield.put(TAG_IMAGE + "_" + (i + 1), imageFiles.get(i).getAbsolutePath());
+            }
+        }
+
         Map<String, String> seasonTags = new HashMap<>();
         seasonTags.put(Tags.KEY_NAME, season.getName());
         seasonTags.put(SEASON_TAG_START, season.getStartDate());
@@ -373,4 +428,11 @@ public class BottomSheetFragment extends BottomSheetDialogFragment {
         App.getPreferences(getContext()).saveSeasons(seasons);
     }
 
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if(requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
+            imageAdapter.notifyDataSetChanged();
+        }
+    }
 }
