@@ -62,7 +62,7 @@ public class LoginActivity extends AppCompatActivity {
                         JSONObject responseObject = new JSONObject(responseBody);
                         String token = responseObject.getString("data");
 
-                        saveToken(token);
+                        saveData(token, username, password);
                         navigateToMain();
                     } else {
                         runOnUiThread(() -> Toast.makeText(this, "Ошибка авторизации", Toast.LENGTH_SHORT).show());
@@ -77,9 +77,11 @@ public class LoginActivity extends AppCompatActivity {
         }).start();
     }
 
-    private void saveToken(String token) {
+    private void saveData(String token, String username, String password) {
         Preferences prefs = App.getPreferences(this);
         prefs.setCgiToken(token);
+        prefs.setAgroUsername(username);
+        prefs.setAgroPassword(password);
     }
 
     private void navigateToMain() {

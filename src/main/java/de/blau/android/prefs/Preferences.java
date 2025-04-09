@@ -2234,4 +2234,20 @@ public class Preferences {
             return seasons;
         }
     }
+
+    public String getAgroUsername() {
+        return prefs.getString("agroUsername", null);
+    }
+
+    public String getAgroPassword() {
+        return prefs.getString("agroPassword", null);
+    }
+
+    public void setAgroUsername(String username) {
+        prefs.edit().putString("agroUsername", username).commit();
+    }
+
+    public void setAgroPassword(String password) {
+        prefs.edit().putString("agroPassword", password).commit();
+    }
 }
