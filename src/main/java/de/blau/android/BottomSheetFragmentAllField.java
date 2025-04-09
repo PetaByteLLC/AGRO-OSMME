@@ -16,8 +16,10 @@ import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 import de.blau.android.osm.Relation;
 
@@ -41,8 +43,8 @@ public class BottomSheetFragmentAllField extends BottomSheetDialogFragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        List<String> groups = getGroup();
-        newAdapter = new CustomExpandableListAdapter(getContext(), groups, getChildren(groups), main, this);
+        Set<String> groups = getGroup();
+        newAdapter = new CustomExpandableListAdapter(getContext(), new ArrayList<>(groups), getChildren(groups), main, this);
         ExpandableListView expandableListView = view.findViewById(R.id.expandableList);
         expandableListView.setAdapter(newAdapter);
         expandableListView.setOnChildClickListener((ExpandableListView parent, View v, int groupPosition, int childPosition, long id) -> {
@@ -59,8 +61,8 @@ public class BottomSheetFragmentAllField extends BottomSheetDialogFragment {
         newAdapter.notifyDataSetChanged();
     }
 
-    private List<String> getGroup() {
-        ArrayList<String> list = new ArrayList<>();
+    private Set<String> getGroup() {
+        Set<String> list = new HashSet<>();
         for (Relation relation : relations) {
             String region = relation.getTagWithKey(YIELD_TAG_REGION);
             if (region != null && !region.isEmpty()) {
@@ -71,7 +73,7 @@ public class BottomSheetFragmentAllField extends BottomSheetDialogFragment {
         return list;
     }
 
-    private HashMap<String, List<Relation>> getChildren(List<String> groups) {
+    private HashMap<String, List<Relation>> getChildren(Set<String> groups) {
         HashMap<String, List<Relation>> result = new HashMap<>();
 
         for (String group : groups) {
