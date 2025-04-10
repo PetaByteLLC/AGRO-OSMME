@@ -169,6 +169,15 @@
                     android:layout_marginTop="10dp"
                     android:background="@drawable/edittext_background"
                     android:choiceMode="singleChoice" />
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/images"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:nestedScrollingEnabled="false"
+                    tools:listitem="@layout/agro_photo"
+                    android:paddingBottom="10dp"/>
             </LinearLayout>
 
             <LinearLayout

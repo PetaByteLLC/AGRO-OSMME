@@ -5,6 +5,8 @@ import android.util.Base64;
 import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.model.GlideUrl;
+import com.bumptech.glide.load.model.LazyHeaders;
 
 import java.io.File;
 import java.io.IOException;
@@ -17,8 +19,9 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 
 public class FileUploader {
-    private static final String UPLOAD_URL = "https://agro.brisklyminds.com/agroadmin/ws/file/upload";
-    private static final String DOWNLOAD_URL_TEMPLATE = "https://agro.brisklyminds.com/agroadmin/ws/file/download/%s";
+    public static final String UPLOAD_URL = "https://agro.brisklyminds.com/agroadmin/ws/file/upload";
+    public static final String DOWNLOAD_URL= "https://agro.brisklyminds.com";
+    public static final String DOWNLOAD_URL_TEMPLATE = "https://agro.brisklyminds.com/agroadmin/ws/file/download/%s";
 
     public static String uploadFile(String path) throws IOException {
         File file = new File(path);
@@ -30,10 +33,16 @@ public class FileUploader {
 
     public static void loadImage(String url, ImageView imageView, Context context) {
         Glide.with(context)
-                .load(url)
+                .load(getGlideUrlWithAuth(url))
                 .placeholder(R.drawable.baseline_signal_wifi_statusbar_connected_no_internet_4_24)
                 .error(R.drawable.no_image)
                 .into(imageView);
+    }
+
+    public static GlideUrl getGlideUrlWithAuth(String url) {
+        return new GlideUrl(url, new LazyHeaders.Builder()
+                .addHeader("Authorization", getBasicAuthHeader())
+                .build());
     }
 
     // Загружает один файл и возвращает его id

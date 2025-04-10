@@ -3,6 +3,7 @@ package de.blau.android;
 import static de.blau.android.AgroConstants.*;
 import static de.blau.android.BottomSheetFragment.getArea;
 import static de.blau.android.TagHelper.getTagValue;
+import static de.blau.android.osm.FileUploader.DOWNLOAD_URL;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -24,14 +25,20 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
+import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.SortedMap;
 
 import de.blau.android.osm.OsmElement;
 import de.blau.android.osm.Relation;
@@ -68,6 +75,8 @@ public class BsEditYieldFragment extends BottomSheetDialogFragment {
     private Button cropAdd;
     private ArrayAdapter<Relation> cropAdapter;
 
+    private RecyclerView images;
+
     public BsEditYieldFragment(Relation yield, List<Relation> seasons, List<Relation> crops, Main main) {
         this.yield = yield;
         this.seasons = seasons;
@@ -101,6 +110,20 @@ public class BsEditYieldFragment extends BottomSheetDialogFragment {
         technology = view.findViewById(R.id.technology);
         cropList = view.findViewById(R.id.crop_list);
         cropAdd = view.findViewById(R.id.crop_add);
+
+        images = view.findViewById(R.id.images);
+        images.setLayoutManager(new GridLayoutManager(getContext(), 2));
+        images.setNestedScrollingEnabled(false);
+
+        Set<String> urls = new HashSet<>();
+        SortedMap<String, String> tags = yield.getTags();
+        for(String val : tags.values()) {
+            if (val == null) continue;
+            if (val.startsWith(DOWNLOAD_URL)) {
+                urls.add(val);
+            }
+        }
+        images.setAdapter(new ImageStringAdapter(getContext(), new ArrayList<>(urls)));
 
         label.setText((getTagValue(yield, Tags.KEY_NAME) + " " + getTagValue(yield, Tags.KEY_AREA)).trim());
         toggleButton.setOnClickListener(v -> {
