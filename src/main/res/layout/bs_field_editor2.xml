@@ -170,6 +170,18 @@
                     android:background="@drawable/edittext_background"
                     android:choiceMode="singleChoice" />
 
+                <Button
+                    android:id="@+id/btn_upload_image"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/radius"
+                    android:drawableTop="@drawable/outline_file_upload_24"
+                    android:layout_marginTop="10dp"
+                    android:paddingVertical="8dp"
+                    android:text="Загрузить фото"
+                    android:textAllCaps="false"
+                    android:textColor="#fff" />
+
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/images"
                     android:layout_width="match_parent"

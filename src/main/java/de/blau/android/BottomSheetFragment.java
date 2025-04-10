@@ -75,7 +75,6 @@ import de.blau.android.osm.Tags;
 import de.blau.android.osm.ViewBox;
 import de.blau.android.osm.Way;
 import de.blau.android.util.LatLon;
-import de.blau.android.util.SelectFile;
 
 public class BottomSheetFragment extends BottomSheetDialogFragment {
 
@@ -463,7 +462,9 @@ public class BottomSheetFragment extends BottomSheetDialogFragment {
             if (resultCode == RESULT_OK) imageAdapter.notifyDataSetChanged();
             if (resultCode == RESULT_CANCELED) {
                 if (imageFiles != null && !imageFiles.isEmpty()) {
-                    imageFiles.get(imageFiles.size() - 1).delete();
+                    int index = imageFiles.size() - 1;
+                    imageFiles.get(index).delete();
+                    imageFiles.remove(index);
                 }
             }
         }

@@ -1,6 +1,8 @@
 package de.blau.android;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -8,6 +10,7 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.io.File;
 import java.util.List;
 
 import de.blau.android.osm.FileUploader;
@@ -32,7 +35,17 @@ public class ImageStringAdapter extends RecyclerView.Adapter<ImageAdapter.ImageV
     @Override
     public void onBindViewHolder(@NonNull ImageAdapter.ImageViewHolder holder, int position) {
         String url = imageUrls.get(position);
-        FileUploader.loadImage(url, holder.imageView, context);
+        if (url.matches("https?://[^\\s\"']+")) {
+            FileUploader.loadImage(url, holder.imageView, context);
+        } else {
+            File imgFile = new File(url);
+            if (imgFile.exists()) {
+                Bitmap bitmap = BitmapFactory.decodeFile(imgFile.getAbsolutePath());
+                holder.imageView.setImageBitmap(bitmap);
+            } else {
+                holder.imageView.setImageResource(R.drawable.no_image);
+            }
+        }
     }
 
     @Override

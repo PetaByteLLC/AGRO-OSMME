@@ -245,6 +245,20 @@ public final class OsmXml {
             Collections.sort(dependentCreatedRelations, relationOrder); // Используйте ИСПРАВЛЕННЫЙ relationOrder!
         }
 
+        if (!modifiedRelations.isEmpty()) {
+            for (Relation r : modifiedRelations) {
+                if (Objects.equals(r.getTagWithKey(Tags.KEY_TYPE), AgroConstants.TYPE_FIELD)) {
+                    SortedMap<String, String> tags = r.getTags();
+                    for (Map.Entry<String, String> record : tags.entrySet()) {
+                        if (record.getValue() == null) continue;
+                        if (record.getValue().startsWith("/storage")) {
+                            r.addTag(record.getKey(), FileUploader.uploadFile(record.getValue()));
+                        }
+                    }
+                }
+            }
+        }
+
         // NOTE as deleted elements cannot be referenced we need to undelete them in MODIFY elements before we reference
         // them, this will not always work for relations, see below
         serializeCreatedElements(serializer, changeSetId, createdNodes);

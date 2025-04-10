@@ -20,7 +20,6 @@ import okhttp3.Response;
 
 public class FileUploader {
     public static final String UPLOAD_URL = "https://agro.brisklyminds.com/agroadmin/ws/file/upload";
-    public static final String DOWNLOAD_URL= "https://agro.brisklyminds.com";
     public static final String DOWNLOAD_URL_TEMPLATE = "https://agro.brisklyminds.com/agroadmin/ws/file/download/%s";
 
     public static String uploadFile(String path) throws IOException {

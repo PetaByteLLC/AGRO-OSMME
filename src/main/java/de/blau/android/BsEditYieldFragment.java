@@ -1,13 +1,19 @@
 package de.blau.android;
 
+import static android.app.Activity.RESULT_CANCELED;
+import static android.app.Activity.RESULT_OK;
 import static de.blau.android.AgroConstants.*;
 import static de.blau.android.BottomSheetFragment.getArea;
+import static de.blau.android.Main.REQUEST_IMAGE_CAPTURE;
 import static de.blau.android.TagHelper.getTagValue;
-import static de.blau.android.osm.FileUploader.DOWNLOAD_URL;
 
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,12 +31,14 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
+import androidx.core.content.FileProvider;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -76,6 +84,9 @@ public class BsEditYieldFragment extends BottomSheetDialogFragment {
     private ArrayAdapter<Relation> cropAdapter;
 
     private RecyclerView images;
+    private Button btnUploadImage;
+    private ImageStringAdapter imageStringAdapter;
+    private List<String> urls;
 
     public BsEditYieldFragment(Relation yield, List<Relation> seasons, List<Relation> crops, Main main) {
         this.yield = yield;
@@ -111,19 +122,23 @@ public class BsEditYieldFragment extends BottomSheetDialogFragment {
         cropList = view.findViewById(R.id.crop_list);
         cropAdd = view.findViewById(R.id.crop_add);
 
+        urls = new ArrayList<>();
+
         images = view.findViewById(R.id.images);
         images.setLayoutManager(new GridLayoutManager(getContext(), 2));
         images.setNestedScrollingEnabled(false);
 
-        Set<String> urls = new HashSet<>();
         SortedMap<String, String> tags = yield.getTags();
-        for(String val : tags.values()) {
-            if (val == null) continue;
-            if (val.startsWith(DOWNLOAD_URL)) {
-                urls.add(val);
+        for(Map.Entry<String, String> rec : tags.entrySet()) {
+            if (rec == null) continue;
+            if (rec.getValue() == null) continue;
+            if (rec.getKey() == null) continue;
+            if (rec.getKey().startsWith(TAG_IMAGE)) {
+                urls.add(rec.getValue());
             }
         }
-        images.setAdapter(new ImageStringAdapter(getContext(), new ArrayList<>(urls)));
+        imageStringAdapter = new ImageStringAdapter(getContext(), urls);
+        images.setAdapter(imageStringAdapter);
 
         label.setText((getTagValue(yield, Tags.KEY_NAME) + " " + getTagValue(yield, Tags.KEY_AREA)).trim());
         toggleButton.setOnClickListener(v -> {
@@ -210,6 +225,12 @@ public class BsEditYieldFragment extends BottomSheetDialogFragment {
             map.put(YIELD_TAG_CADASTRAL_NUMBER, cadastrNumber.getText().toString());
             map.put(YIELD_TAG_TECHNOLOGY, technology.getSelectedItem().toString());
 
+            if (urls != null && !urls.isEmpty()) {
+                for (int i = 0; i < urls.size(); i++) {
+                    map.put(TAG_IMAGE + "_" + (i + 1), urls.get(i));
+                }
+            }
+
             List<RelationMember> membersWithRole = yield.getMembersWithRole(ROLE_FIELD_GEOMETRY);
             if (!membersWithRole.isEmpty()) {
                 OsmElement element = membersWithRole.get(0).getElement();
@@ -220,6 +241,28 @@ public class BsEditYieldFragment extends BottomSheetDialogFragment {
 
             App.getDelegator().updateFieldRelationTags(yield, map);
             dismiss();
+        });
+
+        btnUploadImage = view.findViewById(R.id.btn_upload_image);
+        btnUploadImage.setOnClickListener(v -> {
+            if (getContext() == null) return;
+            Intent startCamera = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+            try {
+                String cameraApp = App.getPreferences(main).getCameraApp();
+                if (!cameraApp.isEmpty()) {
+                    startCamera.setPackage(cameraApp);
+                }
+                File imageFile = main.getImageFile();
+                Uri photoUri = FileProvider.getUriForFile(getContext(), getString(R.string.content_provider), imageFile);
+                if (photoUri != null) {
+                    startCamera.setFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+                    startCamera.putExtra(MediaStore.EXTRA_OUTPUT, photoUri);
+                    startActivityForResult(startCamera, REQUEST_IMAGE_CAPTURE);
+                }
+                urls.add(imageFile.getAbsolutePath());
+            } catch (Exception ignored) {
+
+            }
         });
 
         BottomSheetBehavior<View> bottomSheetBehavior = BottomSheetBehavior.from((View) view.getParent());
@@ -272,6 +315,22 @@ public class BsEditYieldFragment extends BottomSheetDialogFragment {
 
         if (getParentFragment() instanceof BottomSheetFragmentAllField) {
             ((BottomSheetFragmentAllField) getParentFragment()).updateList();
+        }
+    }
+
+    @SuppressLint("NotifyDataSetChanged")
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REQUEST_IMAGE_CAPTURE) {
+            if (resultCode == RESULT_OK) imageStringAdapter.notifyDataSetChanged();
+            if (resultCode == RESULT_CANCELED) {
+                if (urls != null && !urls.isEmpty()) {
+                    int index = urls.size() - 1;
+                    new File(urls.get(index)).delete();
+                    urls.remove(index);
+                }
+            }
         }
     }
 }
