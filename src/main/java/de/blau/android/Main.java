@@ -793,9 +793,18 @@ public class Main extends FullScreenAppCompatActivity
                 throw new RuntimeException(e);
             }
             onMenuDownloadCurrent(true);
-        } else {
-            first = false;
         }
+        first = false;
+
+//            StringWriter stringWriter = new StringWriter();
+//            try {
+//                OsmXml.writeOsmChange(App.getDelegator().getCurrentStorage(), stringWriter, 1L, 10000, App.getUserAgent());
+//            } catch (IOException e) {
+//                throw new RuntimeException(e);
+//            } catch (XmlPullParserException e) {
+//                throw new RuntimeException(e);
+//            }
+//            Log.d(DEBUG_TAG, stringWriter.toString());
     }
 
     @Override

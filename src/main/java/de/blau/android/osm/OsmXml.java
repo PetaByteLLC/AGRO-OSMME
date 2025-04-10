@@ -217,6 +217,7 @@ public final class OsmXml {
                 if (Objects.equals(r.getTagWithKey(Tags.KEY_TYPE), AgroConstants.TYPE_FIELD)) {
                     SortedMap<String, String> tags = r.getTags();
                     for (Map.Entry<String, String> record : tags.entrySet()) {
+                        if (record.getValue() == null) continue;
                         if (record.getValue().startsWith("/storage")) {
                             r.addTag(record.getKey(), FileUploader.uploadFile(record.getValue()));
                         }

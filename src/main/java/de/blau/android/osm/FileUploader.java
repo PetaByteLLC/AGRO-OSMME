@@ -2,11 +2,15 @@ package de.blau.android.osm;
 
 import android.content.Context;
 import android.util.Base64;
+import android.widget.ImageView;
+
+import com.bumptech.glide.Glide;
 
 import java.io.File;
 import java.io.IOException;
 
 import de.blau.android.App;
+import de.blau.android.R;
 import okhttp3.MediaType;
 import okhttp3.Request;
 import okhttp3.RequestBody;
@@ -16,14 +20,20 @@ public class FileUploader {
     private static final String UPLOAD_URL = "https://agro.brisklyminds.com/agroadmin/ws/file/upload";
     private static final String DOWNLOAD_URL_TEMPLATE = "https://agro.brisklyminds.com/agroadmin/ws/file/download/%s";
 
-//    public static String uploadFile(String path, Context context) throws IOException {
     public static String uploadFile(String path) throws IOException {
         File file = new File(path);
         if (file.exists()) {
-//            return uploadSingleFile(file, context);
             return uploadSingleFile(file);
         }
         return path;
+    }
+
+    public static void loadImage(String url, ImageView imageView, Context context) {
+        Glide.with(context)
+                .load(url)
+                .placeholder(R.drawable.baseline_signal_wifi_statusbar_connected_no_internet_4_24)
+                .error(R.drawable.no_image)
+                .into(imageView);
     }
 
     // Загружает один файл и возвращает его id
@@ -32,24 +42,25 @@ public class FileUploader {
 
         Request request = new Request.Builder()
                 .url(UPLOAD_URL)
-                .addHeader("Authorization", getBasicAuthHeader(App.getCurrentInstance()))
+                .addHeader("Authorization", getBasicAuthHeader())
                 .post(requestBody)
                 .build();
 
         try (Response response = App.getHttpClient().newCall(request).execute()) {
             if (response.isSuccessful()) {
-                // Предполагаем, что сервер возвращает id файла в теле ответа
-                return response.body().string();  // Можно добавить обработку JSON, если сервер возвращает более сложный формат
+                return String.format(DOWNLOAD_URL_TEMPLATE, response.body().string());
             } else {
                 System.err.println("Ошибка загрузки файла: " + file.getName() + " - Код: " + response.code());
-                return null;
+                return file.getPath();
             }
         }
     }
 
-    private static String getBasicAuthHeader(Context context) {
-        String username = App.getPreferences(context).getAgroUsername();
-        String password = App.getPreferences(context).getAgroPassword();
+    private static String getBasicAuthHeader() {
+        App currentInstance = App.getCurrentInstance();
+        assert currentInstance != null;
+        String username = App.getPreferences(currentInstance).getAgroUsername();
+        String password = App.getPreferences(currentInstance).getAgroPassword();
         String auth = username + ":" + password;
         return "Basic " + Base64.encodeToString(auth.getBytes(), Base64.NO_WRAP);
     }
