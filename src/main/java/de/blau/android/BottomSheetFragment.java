@@ -83,7 +83,7 @@ public class BottomSheetFragment extends BottomSheetDialogFragment {
     private final List<Season> seasons;
 
     private EditText name, region, district, aggregator, farmerName, farmerMobile, cadastrNumber,
-            cultureVarieties, sowingDate, cleaningDate, productivity, farmerSurName;
+            cultureVarieties, sowingDate, cleaningDate, productivity, farmerSurName, area;
     private Spinner culture, technology, landCategory, irrigationType, season;
 
     private ImageView addSeason;
@@ -150,6 +150,7 @@ public class BottomSheetFragment extends BottomSheetDialogFragment {
         technology = view.findViewById(R.id.technology);
         landCategory = view.findViewById(R.id.landCategory);
         irrigationType = view.findViewById(R.id.irrigationType);
+        area = view.findViewById(R.id.area);
 
         imageFiles = new ArrayList<>();
         images = view.findViewById(R.id.images);
@@ -271,6 +272,7 @@ public class BottomSheetFragment extends BottomSheetDialogFragment {
             String farmerSurNameValue = farmerSurName.getText().toString();
             String farmerMobileValue = farmerMobile.getText().toString();
             String cadastrNumberValue = cadastrNumber.getText().toString();
+            String areaValue = area.getText().toString();
             Season seasonValue = (Season) season.getSelectedItem();
             String cultureVarietiesValue = cultureVarieties.getText().toString();
             String sowingDateValue = sowingDate.getText().toString();
@@ -289,13 +291,15 @@ public class BottomSheetFragment extends BottomSheetDialogFragment {
                 save(nameValue, regionValue, districtValue, aggregatorValue, farmerNameValue, farmerMobileValue,
                         cadastrNumberValue, seasonValue, cultureVarietiesValue, sowingDateValue, cleaningDateValue,
                         productivityValue, cultureValue, technologyValue, landCategoryValue, irrigationTypeValue,
-                        farmerSurNameValue);
+                        farmerSurNameValue, areaValue);
             } catch (NullPointerException exception) {
                 Toast.makeText(getContext(),
                         String.format("Поле \"%s\" обязательно для заполнения", exception.getMessage()),
                         Toast.LENGTH_SHORT).show();
             }
         });
+
+        area.setText(getArea(lastSelectedWay));
 
         BottomSheetBehavior<View> bottomSheetBehavior = BottomSheetBehavior.from((View) view.getParent());
         bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
@@ -331,7 +335,7 @@ public class BottomSheetFragment extends BottomSheetDialogFragment {
     private void save(String name, String region, String district, String aggregator, String farmerName, String farmerMobile,
                       String cadastrNumber, Season season, String cultureVarieties, String sowingDate,
                       String cleaningDate, String productivity, String culture, String technology, String landCategory,
-                      String irrigationType, String farmerSurName) {
+                      String irrigationType, String farmerSurName, String area) {
         Map<String, String> yield = new HashMap<>();
         yield.put(Tags.KEY_NAME, name);
         yield.put(YIELD_TAG_REGION, region);
@@ -344,7 +348,7 @@ public class BottomSheetFragment extends BottomSheetDialogFragment {
         yield.put(YIELD_TAG_POSITION, getPosition());
         yield.put(Tags.KEY_TYPE, TYPE_FIELD);
         yield.put(YIELD_TAG_TECHNOLOGY, technology);
-        yield.put(Tags.KEY_AREA, getArea(lastSelectedWay));
+        yield.put(Tags.KEY_AREA, area);
 
         if (imageFiles != null && !imageFiles.isEmpty()) {
             for (int i = 0; i < imageFiles.size(); i++) {

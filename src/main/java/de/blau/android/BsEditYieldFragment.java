@@ -68,6 +68,7 @@ public class BsEditYieldFragment extends BottomSheetDialogFragment {
     private LinearLayout editTextContainer;
 
     private EditText name;
+    private EditText area;
     private EditText region;
     private EditText district;
     private EditText farmerSurName;
@@ -121,6 +122,7 @@ public class BsEditYieldFragment extends BottomSheetDialogFragment {
         technology = view.findViewById(R.id.technology);
         cropList = view.findViewById(R.id.crop_list);
         cropAdd = view.findViewById(R.id.crop_add);
+        area = view.findViewById(R.id.area);
 
         urls = new ArrayList<>();
 
@@ -200,6 +202,17 @@ public class BsEditYieldFragment extends BottomSheetDialogFragment {
             cropFragment.show(getChildFragmentManager(), cropFragment.getTag());
         });
 
+        List<RelationMember> membersWithRole = yield.getMembersWithRole(ROLE_FIELD_GEOMETRY);
+        if (!membersWithRole.isEmpty()) {
+            OsmElement element = membersWithRole.get(0).getElement();
+            if (element != null) {
+                String newArea = getArea((Way) element);
+                double oldVal = Double.parseDouble(getTagValue(yield, Tags.KEY_AREA));
+                double newVal = Double.parseDouble(newArea);
+                area.setText(oldVal == newVal ? getTagValue(yield, Tags.KEY_AREA) : newArea);
+            }
+        }
+
         name.setText(getTagValue(yield, Tags.KEY_NAME));
         region.setText(getTagValue(yield, YIELD_TAG_REGION));
         district.setText(getTagValue(yield, YIELD_TAG_DISTRICT));
@@ -216,6 +229,7 @@ public class BsEditYieldFragment extends BottomSheetDialogFragment {
         saveBtn.setOnClickListener(v -> {
             Map<String, String> map = new HashMap<>();
             map.put(Tags.KEY_NAME, name.getText().toString());
+            map.put(Tags.KEY_AREA, area.getText().toString());
             map.put(YIELD_TAG_REGION, region.getText().toString());
             map.put(YIELD_TAG_DISTRICT, district.getText().toString());
             map.put(YIELD_TAG_AGGREGATOR, aggregator.getText().toString());
@@ -231,13 +245,13 @@ public class BsEditYieldFragment extends BottomSheetDialogFragment {
                 }
             }
 
-            List<RelationMember> membersWithRole = yield.getMembersWithRole(ROLE_FIELD_GEOMETRY);
-            if (!membersWithRole.isEmpty()) {
-                OsmElement element = membersWithRole.get(0).getElement();
-                if (element != null) {
-                    map.put(Tags.KEY_AREA, getArea((Way) element));
-                }
-            }
+//            List<RelationMember> membersWithRole = yield.getMembersWithRole(ROLE_FIELD_GEOMETRY);
+//            if (!membersWithRole.isEmpty()) {
+//                OsmElement element = membersWithRole.get(0).getElement();
+//                if (element != null) {
+//                    map.put(Tags.KEY_AREA, getArea((Way) element));
+//                }
+//            }
 
             App.getDelegator().updateFieldRelationTags(yield, map);
             dismiss();
