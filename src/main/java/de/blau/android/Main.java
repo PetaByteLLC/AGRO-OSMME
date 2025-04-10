@@ -3389,7 +3389,7 @@ public class Main extends FullScreenAppCompatActivity
      */
     public void performCurrentViewHttpLoad(boolean add) {
         if (map.getTaskLayer() != null) { // always adds bugs for now
-            downLoadBugs(map.getViewBox().copy());
+//            downLoadBugs(map.getViewBox().copy());
         }
         int nodeCount = App.getDelegator().getCurrentStorage().getNodeCount();
         if (add && nodeCount >= prefs.getDataWarnLimit()) {
