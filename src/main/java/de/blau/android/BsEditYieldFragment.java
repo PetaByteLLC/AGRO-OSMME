@@ -142,7 +142,7 @@ public class BsEditYieldFragment extends BottomSheetDialogFragment {
         imageStringAdapter = new ImageStringAdapter(getContext(), urls);
         images.setAdapter(imageStringAdapter);
 
-        label.setText((getTagValue(yield, Tags.KEY_NAME) + " " + getTagValue(yield, Tags.KEY_AREA)).trim());
+        label.setText((getTagValue(yield, Tags.KEY_NAME)).trim());
         toggleButton.setOnClickListener(v -> {
             if (areEditTextsVisible) {
                 collapseEditTexts();
