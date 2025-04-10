@@ -25,6 +25,7 @@ public class SeasonDialog {
         EditText start = view.findViewById(R.id.season_start);
         EditText end = view.findViewById(R.id.season_end);
         Button addButton = view.findViewById(R.id.add_button);
+        Button importBtn = view.findViewById(R.id.importBtn);
 
         DatePiker.setDataPicker(start, context);
         DatePiker.setDataPicker(end, context);
@@ -90,6 +91,15 @@ public class SeasonDialog {
             } else {
                 Toast.makeText(context, "Заполните необходимые поля", Toast.LENGTH_SHORT).show();
             }
+        });
+
+        importBtn.setOnClickListener(v -> {
+            ((Main) context).importSeasons();
+            List<Season> newSeasons = App.getPreferences(context).getSeasons();
+            for (Season season : newSeasons) {
+                if (!seasons.contains(season)) seasons.add(season);
+            }
+            adapter.notifyDataSetChanged();
         });
 
         dialog.show();

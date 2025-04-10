@@ -516,9 +516,10 @@ public class Server {
     public InputStream getStreamForBox(@Nullable final Context context, @NonNull final BoundingBox box) throws IOException {
         Log.d(DEBUG_TAG, "getStreamForBox");
         URL url = new URL(getReadOnlyUrl() + "map?bbox=" + box.toApiString());
+//        assert context != null;
 //        String username = App.getPreferences(context).getAgroUsername();
 //        if (username == null) throw new NullPointerException("Not logged in system!");
-//        URL url = new URL("http://agro.brisklyminds.com/agroadmin/ws/public/api/map?bbox=" + box.toApiString() + "&username" + username);
+//        URL url = new URL("http://agro.brisklyminds.com/agroadmin/ws/public/api/map?bbox=" + box.toApiString() + "&username=" + username);
         return openConnection(context, url, timeout, timeout);
     }
 

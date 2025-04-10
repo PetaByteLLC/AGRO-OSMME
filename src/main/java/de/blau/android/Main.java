@@ -12,12 +12,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Deque;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Queue;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import org.xmlpull.v1.XmlPullParserException;
@@ -664,8 +666,6 @@ public class Main extends FullScreenAppCompatActivity
 
         getOnBackPressedDispatcher().addCallback(this, onBackPressedCallback);
 
-//        setExistSeason(logic);
-
         invisibleUnlockButton();
         App.getLogic().hideCrosshairs();
         invalidateMap();
@@ -682,25 +682,18 @@ public class Main extends FullScreenAppCompatActivity
         }
     }
 
-//    private void setExistSeason(Logic logic) {
-//        List<Relation> relations = logic.getRelations();
-//        List<Season> seasons = new ArrayList<>();
-//        for (Relation relation : relations) {
-//            if (Objects.equals(relation.getTagWithKey(Tags.KEY_TYPE), StorageDelegator.TYPE_SEASON)) {
-//                if (seasons.isEmpty()) {
-//                    seasons.add(new Season(relation.getTagWithKey("start"), relation.getTagWithKey(Tags.KEY_NAME), relation.getTagWithKey("end")));
-//                    continue;
-//                }
-//                for (Season season : seasons) {
-//                    if (!Objects.equals(season.getName(), relation.getTagWithKey(Tags.KEY_NAME))) {
-//                        seasons.add(new Season(relation.getTagWithKey("start"), relation.getTagWithKey(Tags.KEY_NAME), relation.getTagWithKey("end")));
-//                    }
-//                }
-//            }
-//        }
-//
-//        prefs.saveSeasons(seasons);
-//    }
+    public void importSeasons() {
+        List<Relation> relations = App.getLogic().getRelations();
+        if (relations != null && !relations.isEmpty()) {
+            Set<Season> seasons = new HashSet<>();
+            for (Relation relation : relations) {
+                if (Objects.equals(relation.getTagWithKey(Tags.KEY_TYPE), TYPE_SEASON)) {
+                    seasons.add(new Season(relation.getTagWithKey("start"), relation.getTagWithKey(Tags.KEY_NAME), relation.getTagWithKey("end")));
+                }
+            }
+            prefs.saveSeasons(new ArrayList<>(seasons));
+        }
+    }
 
     /**
      * Set how we should handle screen orientation changes based of our preferences

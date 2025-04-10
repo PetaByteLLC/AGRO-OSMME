@@ -203,7 +203,8 @@ public class BsEditYieldFragment extends BottomSheetDialogFragment {
         });
 
         List<RelationMember> membersWithRole = yield.getMembersWithRole(ROLE_FIELD_GEOMETRY);
-        if (!membersWithRole.isEmpty()) {
+        String areaValue = getTagValue(yield, Tags.KEY_AREA);
+        if (!membersWithRole.isEmpty() && !areaValue.isEmpty()) {
             OsmElement element = membersWithRole.get(0).getElement();
             if (element != null) {
                 String newArea = getArea((Way) element);
