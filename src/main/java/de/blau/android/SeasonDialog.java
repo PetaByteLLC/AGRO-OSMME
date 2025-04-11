@@ -99,7 +99,8 @@ public class SeasonDialog {
             for (Season season : newSeasons) {
                 if (!seasons.contains(season)) seasons.add(season);
             }
-            adapter.notifyDataSetChanged();
+            dialog.dismiss();
+            Toast.makeText(context, "Сезоны синхронизированы из загруженных данных", Toast.LENGTH_SHORT).show();
         });
 
         dialog.show();
