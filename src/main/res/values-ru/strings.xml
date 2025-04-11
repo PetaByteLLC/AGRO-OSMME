@@ -528,7 +528,7 @@
   <string name="toast_unsaved_changes">Сначала передайте ваши несохранённые изменения.</string>
   <string name="clear_anyway">Очистить все равно?</string>
   <string name="toast_upload_success">Передано на сервер OSM.</string>
-  <string name="toast_not_in_edit_range">Пожалуйста, увеличьте масштаб для редактирования (Громкость ↑/↓ или \"Линза\")</string>
+  <string name="toast_not_in_edit_range">Пожалуйста, увеличьте масштаб для редактирования</string>
   <string name="toast_unlock_to_edit">Разблокируйте для редактирования</string>
   <string name="toast_save_done">Сохранено</string>
   <string name="toast_save_failed">Не удалось сохранить</string>
