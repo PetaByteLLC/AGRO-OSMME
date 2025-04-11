@@ -20,15 +20,15 @@ public class Season {
     }
 
     public String getName() {
-        return name;
+        return name == null ? "" : name;
     }
 
     public String getStartDate() {
-        return startDate;
+        return startDate == null ? "" : startDate;
     }
 
     public String getEndDate() {
-        return endDate;
+        return endDate == null ? "" : endDate;
     }
 
     public void setStartDate(String startDate) {
@@ -59,6 +59,6 @@ public class Season {
     @NonNull
     @Override
     public String toString() {
-        return getName();
+        return getName() + " (" + getStartDate() + " " + getEndDate() + ")";
     }
 }

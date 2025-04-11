@@ -1,7 +1,7 @@
 package de.blau.android;
 
 import static de.blau.android.AgroConstants.*;
-import static de.blau.android.DatePiker.formatCalendarToString;
+import static de.blau.android.DatePiker.createSeason;
 import static de.blau.android.TagHelper.getTagValue;
 
 import android.app.AlertDialog;
@@ -25,7 +25,6 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -33,7 +32,6 @@ import java.util.Objects;
 
 import de.blau.android.osm.OsmElement;
 import de.blau.android.osm.Relation;
-import de.blau.android.osm.StorageDelegator;
 import de.blau.android.osm.Tags;
 
 public class BsEditCropFragment extends BottomSheetDialogFragment {
@@ -120,23 +118,7 @@ public class BsEditCropFragment extends BottomSheetDialogFragment {
                         Season newSeason = new Season(name.getText().toString());
                         newSeason.setStartDate(start.getText().toString());
                         newSeason.setEndDate(end.getText().toString());
-
-                        if (newSeason.getName().matches("^\\d{4}$") &&
-                                newSeason.getStartDate().isEmpty() &&
-                                newSeason.getEndDate().isEmpty()) {
-                            int yearValue = Integer.parseInt(newSeason.getName());
-                            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-                                newSeason.setStartDate(java.time.LocalDate.of(yearValue, 1, 1).toString());
-                                newSeason.setEndDate(java.time.LocalDate.of(yearValue, 12, 31).toString());
-                            } else {
-                                Calendar calendarStart = Calendar.getInstance();
-                                calendarStart.set(yearValue, Calendar.JANUARY, 1);
-                                Calendar calendarEnd = Calendar.getInstance();
-                                calendarEnd.set(yearValue, Calendar.DECEMBER, 31);
-                                newSeason.setStartDate(formatCalendarToString(calendarStart));
-                                newSeason.setEndDate(formatCalendarToString(calendarEnd));
-                            }
-                        }
+                        createSeason(newSeason);
                         seasonSelector.add(newSeason);
                         seasonAdapter.notifyDataSetChanged();
                         season.setSelection(seasonSelector.size() - 1);

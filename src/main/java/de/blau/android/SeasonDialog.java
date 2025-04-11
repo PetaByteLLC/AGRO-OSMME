@@ -1,6 +1,7 @@
 package de.blau.android;
 
 import static de.blau.android.AgroConstants.REMOVE_SEASON_MESSAGE;
+import static de.blau.android.DatePiker.createSeason;
 
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
@@ -81,10 +82,10 @@ public class SeasonDialog {
             String endDate = end.getText().toString().trim();
             if (!name.isEmpty()) {
                 Season newSeason = new Season(startDate, name, endDate);
+                createSeason(newSeason);
                 seasons.add(newSeason);
                 App.getPreferences(context).saveSeasons(seasons);
                 adapter.notifyDataSetChanged();
-
                 input.setText("");
                 start.setText("");
                 end.setText("");

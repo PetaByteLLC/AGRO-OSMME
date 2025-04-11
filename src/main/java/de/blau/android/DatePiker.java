@@ -38,4 +38,23 @@ public class DatePiker {
         // Форматируем строку как "yyyy-MM-dd"
         return String.format(DATE_FORMAT, year, month, day);
     }
+
+    public static void createSeason(Season newSeason) {
+        if (newSeason.getName().matches("^\\d{4}$") &&
+                newSeason.getStartDate().isEmpty() &&
+                newSeason.getEndDate().isEmpty()) {
+            int yearValue = Integer.parseInt(newSeason.getName());
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                newSeason.setStartDate(java.time.LocalDate.of(yearValue, 1, 1).toString());
+                newSeason.setEndDate(java.time.LocalDate.of(yearValue, 12, 31).toString());
+            } else {
+                Calendar calendarStart = Calendar.getInstance();
+                calendarStart.set(yearValue, Calendar.JANUARY, 1);
+                Calendar calendarEnd = Calendar.getInstance();
+                calendarEnd.set(yearValue, Calendar.DECEMBER, 31);
+                newSeason.setStartDate(formatCalendarToString(calendarStart));
+                newSeason.setEndDate(formatCalendarToString(calendarEnd));
+            }
+        }
+    }
 }

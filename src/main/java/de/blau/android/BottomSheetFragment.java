@@ -29,6 +29,7 @@ import static de.blau.android.AgroConstants.YIELD_TAG_FARMER_SURNAME;
 import static de.blau.android.AgroConstants.YIELD_TAG_POSITION;
 import static de.blau.android.AgroConstants.YIELD_TAG_REGION;
 import static de.blau.android.AgroConstants.YIELD_TAG_TECHNOLOGY;
+import static de.blau.android.DatePiker.createSeason;
 import static de.blau.android.Main.REQUEST_IMAGE_CAPTURE;
 
 import android.annotation.SuppressLint;
@@ -217,22 +218,7 @@ public class BottomSheetFragment extends BottomSheetDialogFragment {
                         newSeason.setStartDate(start.getText().toString());
                         newSeason.setEndDate(end.getText().toString());
 
-                        if (newSeason.getName().matches("^\\d{4}$") &&
-                                newSeason.getStartDate().isEmpty() &&
-                                newSeason.getEndDate().isEmpty()) {
-                            int yearValue = Integer.parseInt(newSeason.getName());
-                            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-                                newSeason.setStartDate(java.time.LocalDate.of(yearValue, 1, 1).toString());
-                                newSeason.setEndDate(java.time.LocalDate.of(yearValue, 12, 31).toString());
-                            } else {
-                                Calendar calendarStart = Calendar.getInstance();
-                                calendarStart.set(yearValue, Calendar.JANUARY, 1);
-                                Calendar calendarEnd = Calendar.getInstance();
-                                calendarEnd.set(yearValue, Calendar.DECEMBER, 31);
-                                newSeason.setStartDate(formatCalendarToString(calendarStart));
-                                newSeason.setEndDate(formatCalendarToString(calendarEnd));
-                            }
-                        }
+                        createSeason(newSeason);
                         seasons.add(newSeason);
                         seasonAdapter.notifyDataSetChanged();
                         season.setSelection(seasons.size() - 1);
