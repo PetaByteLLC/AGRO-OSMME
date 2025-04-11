@@ -5,12 +5,9 @@
     android:background="@drawable/radius2"
     android:orientation="vertical">
 
-    <ExpandableListView
-        android:id="@+id/expandableList"
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/list"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:childDivider="#919EAB"
-        android:dividerHeight="1dp"
-        />
+        android:layout_height="match_parent"/>
 
 </LinearLayout>

@@ -5355,17 +5355,20 @@ public class Main extends FullScreenAppCompatActivity
     private class AllFieldListener implements OnClickListener {
         @Override
         public void onClick(View v) {
-            List<Relation> relations = App.getLogic().getRelations();
-            List<Relation> relationList = new ArrayList<>();
-
-            for (Relation relation : relations) {
-                if (Objects.equals(relation.getTagWithKey(Tags.KEY_TYPE), TYPE_FIELD)) {
-                    relationList.add(relation);
-                }
-            }
-
-            BottomSheetFragmentAllField bottomSheetFragment = new BottomSheetFragmentAllField(relationList, Main.this);
+            BottomSheetFragmentAllField bottomSheetFragment = new BottomSheetFragmentAllField(Main.this);
             bottomSheetFragment.show(getSupportFragmentManager(), bottomSheetFragment.getTag());
         }
+    }
+
+    public List<Relation> getAllFields() {
+        List<Relation> relations = App.getLogic().getRelations();
+        List<Relation> relationList = new ArrayList<>();
+
+        for (Relation relation : relations) {
+            if (Objects.equals(relation.getTagWithKey(Tags.KEY_TYPE), TYPE_FIELD)) {
+                relationList.add(relation);
+            }
+        }
+        return relationList;
     }
 }

@@ -36,7 +36,8 @@ public class AgroConstants {
     public static final String CROP_TAG_LAND_CATEGORY = "landCategory";
     public static final String CROP_TAG_IRRIGATION_TYPE = "irrigationType";
 
-    public static final String[] CULTURE_DATA = {"Выращиваемая культура", "Пшеница", "Зерновые", "Ячмень", "Кукуруза", "Хлопок-сырец", "Сахарная свекла"};
+    public static final String OTHER_CULTURE = "Несколько культур";
+    public static final String[] CULTURE_DATA = {"Выращиваемая культура", "Пшеницa", "Зерновые", "Ячмень", "Кукуруза", "Хлопок-сырец", "Сахарная свекла"};
     public static final String[] TECHNOLOGY_DATA = {"Технология возделывания", "яровая", "озимая"};
     public static final String[] LAND_CATEGORY_DATA = {"Категория угодья", "орошаемая", "богара"};
     public static final String[] IRRIGATION_TYPE_DATA = {"Тип полива", "каналы/гравитация", "установки"};

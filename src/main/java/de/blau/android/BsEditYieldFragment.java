@@ -327,7 +327,7 @@ public class BsEditYieldFragment extends BottomSheetDialogFragment {
         }
 
         if (getParentFragment() instanceof BottomSheetFragmentAllField) {
-            ((BottomSheetFragmentAllField) getParentFragment()).updateList();
+            ((BottomSheetFragmentAllField) getParentFragment()).dismiss();
         }
     }
 
