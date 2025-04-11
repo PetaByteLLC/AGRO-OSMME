@@ -4389,6 +4389,8 @@ public class Main extends FullScreenAppCompatActivity
             showNextPanel(true);
             STATE = 2;
             ScreenMessage.toastTopWarning(Main.this, "Измените положение точек для редактирования");
+        } else {
+            ScreenMessage.toastTopInfo(Main.this, R.string.toast_not_in_edit_range);
         }
     }
 
