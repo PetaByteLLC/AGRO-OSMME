@@ -3946,47 +3946,47 @@ public class Main extends FullScreenAppCompatActivity
 
         @Override
         public boolean onLongClick(final View v, final float x, final float y) {
-            final Logic logic = App.getLogic();
-            clickedNodesAndWays = getClickedOsmElements(logic, x, y);
-            int elementCount = clickedNodesAndWays.size();
-            if (logic.isLocked()) {
-                // display context menu
-                getClickedObjects(x, y);
-                int clickedObjectsCount = clickedObjects.size();
-                int itemCount = elementCount + clickedObjectsCount;
-                if (itemCount == 1) {
-                    if (clickedObjectsCount == 1) {
-                        clickedObjects.get(0).onSelected(Main.this);
-                    } else if (elementCount == 1) {
-                        ElementInfo.showDialog(Main.this, clickedNodesAndWays.get(0));
-                    }
-                } else if (itemCount > 1) {
-                    showDisambiguationMenu(v, x, y);
-                }
-                return true;
-            }
-            if (!logic.isInEditZoomRange()) {
-                ScreenMessage.barWarningShort(Main.this, R.string.toast_not_in_edit_range);
-                return false;
-            }
-            if (prefs.areSimpleActionsEnabled()) {
-                if (getEasyEditManager().usesLongClick()) {
-                    if (elementCount == 1 && getEasyEditManager().handleLongClick(v, clickedNodesAndWays.get(0))) {
-                        return true;
-                    }
-                    if (elementCount > 1) {
-                        longClick = true; // another ugly flag
-                        showDisambiguationMenu(v, x, y);
-                        return true;
-                    }
-                } // fall through to beep
-            } else if (getEasyEditManager().handleLongClick(v, x, y)) {
-                // editing with the screen moving under you is a pain
-                setFollowGPS(false);
-                return true;
-            }
-            Tip.showDialog(Main.this, R.string.tip_longpress_simple_mode_key, R.string.tip_longpress_simple_mode);
-            Sound.beep();
+//            final Logic logic = App.getLogic();
+//            clickedNodesAndWays = getClickedOsmElements(logic, x, y);
+//            int elementCount = clickedNodesAndWays.size();
+//            if (logic.isLocked()) {
+//                // display context menu
+//                getClickedObjects(x, y);
+//                int clickedObjectsCount = clickedObjects.size();
+//                int itemCount = elementCount + clickedObjectsCount;
+//                if (itemCount == 1) {
+//                    if (clickedObjectsCount == 1) {
+//                        clickedObjects.get(0).onSelected(Main.this);
+//                    } else if (elementCount == 1) {
+//                        ElementInfo.showDialog(Main.this, clickedNodesAndWays.get(0));
+//                    }
+//                } else if (itemCount > 1) {
+//                    showDisambiguationMenu(v, x, y);
+//                }
+//                return true;
+//            }
+//            if (!logic.isInEditZoomRange()) {
+//                ScreenMessage.barWarningShort(Main.this, R.string.toast_not_in_edit_range);
+//                return false;
+//            }
+//            if (prefs.areSimpleActionsEnabled()) {
+//                if (getEasyEditManager().usesLongClick()) {
+//                    if (elementCount == 1 && getEasyEditManager().handleLongClick(v, clickedNodesAndWays.get(0))) {
+//                        return true;
+//                    }
+//                    if (elementCount > 1) {
+//                        longClick = true; // another ugly flag
+//                        showDisambiguationMenu(v, x, y);
+//                        return true;
+//                    }
+//                } // fall through to beep
+//            } else if (getEasyEditManager().handleLongClick(v, x, y)) {
+//                // editing with the screen moving under you is a pain
+//                setFollowGPS(false);
+//                return true;
+//            }
+//            Tip.showDialog(Main.this, R.string.tip_longpress_simple_mode_key, R.string.tip_longpress_simple_mode);
+//            Sound.beep();
             return false;
         }
 
