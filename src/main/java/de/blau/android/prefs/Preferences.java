@@ -2243,11 +2243,19 @@ public class Preferences {
         return prefs.getString("agroPassword", null);
     }
 
+    public String getAgroUserRole() {
+        return prefs.getString("agroUserRole", null);
+    }
+
     public void setAgroUsername(String username) {
         prefs.edit().putString("agroUsername", username).commit();
     }
 
     public void setAgroPassword(String password) {
         prefs.edit().putString("agroPassword", password).commit();
+    }
+
+    public void setAgroUserRole(String role) {
+        prefs.edit().putString("agroUserRole", role).commit();
     }
 }

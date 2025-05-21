@@ -12,6 +12,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 import de.blau.android.osm.Server;
@@ -50,38 +51,55 @@ public class LoginActivity extends AppCompatActivity {
                 .url("https://agro.brisklyminds.com/agroadmin/ws/token/get")
                 .header("Authorization", encodedAuth)
                 .build();
+        Request requestRole = new Request.Builder()
+                .url("https://agro.brisklyminds.com/agroadmin/ws/user/data")
+                .header("Authorization", encodedAuth)
+                .build();
+        Toast errorToast = Toast.makeText(this, "Ошибка авторизации", Toast.LENGTH_SHORT);
         new Thread(() -> {
-            try {
-                Response response = client.newCall(request).execute();
+            try (Response response = client.newCall(request).execute();
+                 Response responseRole = client.newCall(requestRole).execute()) {
 
-                if (response.isSuccessful()) {
+                if (response.isSuccessful() && responseRole.isSuccessful()) {
+                    Objects.requireNonNull(response.body());
+                    Objects.requireNonNull(responseRole.body());
+                    
                     String responseBody = response.body().string();
+                    String responseRoleBody = responseRole.body().string();
                     String contentType = response.header("Content-Type");
+                    String contentTypeRole = responseRole.header("Content-Type");
+
+                    Objects.requireNonNull(responseRoleBody);
+                    Objects.requireNonNull(contentTypeRole);
 
                     if (contentType != null && contentType.contains("application/json")) {
                         JSONObject responseObject = new JSONObject(responseBody);
                         String token = responseObject.getString("data");
-
-                        saveData(token, username, password);
+                        JSONObject responseRoleObject = new JSONObject(responseRoleBody);
+                        String role = responseRoleObject.getString("role");
+                        saveData(token, username, password, role);
                         navigateToMain();
                     } else {
-                        runOnUiThread(() -> Toast.makeText(this, "Ошибка авторизации", Toast.LENGTH_SHORT).show());
+                        runOnUiThread(errorToast::show);
                     }
                 } else {
-                    runOnUiThread(() -> Toast.makeText(this, "Ошибка авторизации", Toast.LENGTH_SHORT).show());
+                    runOnUiThread(errorToast::show);
                 }
 
+            } catch (NullPointerException e) {
+                runOnUiThread(errorToast::show);
             } catch (IOException | JSONException e) {
                 runOnUiThread(() -> Toast.makeText(this, "Ошибка сети", Toast.LENGTH_SHORT).show());
             }
         }).start();
     }
 
-    private void saveData(String token, String username, String password) {
+    private void saveData(String token, String username, String password, String role) {
         Preferences prefs = App.getPreferences(this);
         prefs.setCgiToken(token);
         prefs.setAgroUsername(username);
         prefs.setAgroPassword(password);
+        prefs.setAgroUserRole(role);
     }
 
     private void navigateToMain() {

@@ -13,6 +13,7 @@ import static de.blau.android.AgroConstants.CULTURE_DATA;
 import static de.blau.android.AgroConstants.DATE_FORMAT;
 import static de.blau.android.AgroConstants.IRRIGATION_TYPE_DATA;
 import static de.blau.android.AgroConstants.LAND_CATEGORY_DATA;
+import static de.blau.android.AgroConstants.ROLE_FARMER;
 import static de.blau.android.AgroConstants.SEASON_TAG_END;
 import static de.blau.android.AgroConstants.SEASON_TAG_START;
 import static de.blau.android.AgroConstants.TAG_IMAGE;
@@ -68,6 +69,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 
 import de.blau.android.osm.BoundingBox;
 import de.blau.android.osm.Node;
@@ -286,6 +288,15 @@ public class BottomSheetFragment extends BottomSheetDialogFragment {
         });
 
         area.setText(getArea(lastSelectedWay));
+
+        String userRole = main.getUserRole();
+        Objects.requireNonNull(userRole);
+
+        if (Objects.equals(userRole, ROLE_FARMER)) {
+            farmerName.setVisibility(View.GONE);
+            farmerSurName.setVisibility(View.GONE);
+            farmerMobile.setVisibility(View.GONE);
+        }
 
         BottomSheetBehavior<View> bottomSheetBehavior = BottomSheetBehavior.from((View) view.getParent());
         bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);

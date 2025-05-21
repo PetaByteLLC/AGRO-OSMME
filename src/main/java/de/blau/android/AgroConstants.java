@@ -53,4 +53,12 @@ public class AgroConstants {
     public static final String REMOVE_CROP_MESSAGE = "После удаления будут также удалены все связанные с ним данные, включая поля, участки, зоны и другие объекты, которые были частью этого посев." +
             "\nЭто действие необратимо — восстановить данные после удаления будет невозможно." +
             "\nВы уверены, что хотите продолжить?";
+
+    public static final String ROLE_ADMIN = "admins";
+    public static final String ROLE_BANK = "bank";
+    public static final String ROLE_FARMER = "farmer";
+    public static final String ROLE_GAZR = "gazr";
+    public static final String ROLE_MINISTRY = "ministry";
+    public static final String ROLE_SCOUT = "scout";
+    public static final String ROLE_ZEM_BALANCE = "zemBalance";
 }

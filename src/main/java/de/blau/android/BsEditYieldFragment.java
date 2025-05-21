@@ -44,6 +44,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.SortedMap;
 
 import de.blau.android.osm.OsmElement;
@@ -277,6 +278,15 @@ public class BsEditYieldFragment extends BottomSheetDialogFragment {
 
             }
         });
+
+        String userRole = main.getUserRole();
+        Objects.requireNonNull(userRole);
+
+        if (Objects.equals(userRole, ROLE_FARMER)) {
+            farmerName.setVisibility(View.GONE);
+            farmerSurName.setVisibility(View.GONE);
+            farmerMobile.setVisibility(View.GONE);
+        }
 
         BottomSheetBehavior<View> bottomSheetBehavior = BottomSheetBehavior.from((View) view.getParent());
         bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);

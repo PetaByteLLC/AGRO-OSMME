@@ -682,6 +682,10 @@ public class Main extends FullScreenAppCompatActivity
         }
     }
 
+    public String getUserRole() {
+        return prefs.getAgroUserRole();
+    }
+
     public void importSeasons() {
         List<Relation> relations = App.getLogic().getRelations();
         if (relations != null && !relations.isEmpty()) {
@@ -2134,7 +2138,7 @@ public class Main extends FullScreenAppCompatActivity
         seasonTextView.setOnClickListener(v -> {
             SeasonDialog.show(this, selectedSeason -> {
                 if (selectedSeason != null) {
-                    ScreenMessage.toastTopWarning(Main.this, "Вы выбрали: " + selectedSeason.getName());
+//                    ScreenMessage.toastTopWarning(Main.this, "Вы выбрали: " + selectedSeason.getName());
                     currentSeason = selectedSeason;
                     invalidateOptionsMenu();
                 } else {
