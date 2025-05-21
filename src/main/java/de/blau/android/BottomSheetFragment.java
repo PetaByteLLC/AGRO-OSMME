@@ -10,7 +10,7 @@ import static de.blau.android.AgroConstants.CROP_TAG_LAND_CATEGORY;
 import static de.blau.android.AgroConstants.CROP_TAG_PRODUCTIVITY;
 import static de.blau.android.AgroConstants.CROP_TAG_SOWING_DATE;
 import static de.blau.android.AgroConstants.CULTURE_DATA;
-import static de.blau.android.AgroConstants.DATE_FORMAT;
+import static de.blau.android.AgroConstants.DATE_STRING_FORMAT;
 import static de.blau.android.AgroConstants.IRRIGATION_TYPE_DATA;
 import static de.blau.android.AgroConstants.LAND_CATEGORY_DATA;
 import static de.blau.android.AgroConstants.ROLE_FARMER;
@@ -420,7 +420,7 @@ public class BottomSheetFragment extends BottomSheetDialogFragment {
         int year = calendar.get(Calendar.YEAR);
         int month = calendar.get(Calendar.MONTH) + 1; // Месяцы начинаются с 0
         int day = calendar.get(Calendar.DAY_OF_MONTH);
-        return String.format(DATE_FORMAT, year, month, day);
+        return String.format(DATE_STRING_FORMAT, year, month, day);
     }
 
     private String getPosition() {

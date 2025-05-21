@@ -42,7 +42,8 @@ public class AgroConstants {
     public static final String[] LAND_CATEGORY_DATA = {"Категория угодья", "орошаемая", "богара"};
     public static final String[] IRRIGATION_TYPE_DATA = {"Тип полива", "каналы/гравитация", "установки"};
 
-    public static final String DATE_FORMAT = "%04d-%02d-%02d";
+    public static final String DATE_STRING_FORMAT = "%04d-%02d-%02d";
+    public static final String DATE_FORMAT = "yyyy-MM-dd";
 
     public static final String REMOVE_SEASON_MESSAGE = "После удаления будут также удалены все связанные с ним данные, включая поля, участки, зоны и другие объекты, которые были частью этого сезона." +
             "\nЭто действие необратимо — восстановить данные после удаления будет невозможно." +

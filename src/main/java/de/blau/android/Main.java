@@ -8,8 +8,12 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
+import java.text.ParseException;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -2126,9 +2130,38 @@ public class Main extends FullScreenAppCompatActivity
         List<Season> seasons = prefs.getSeasons();
         if (currentSeason == null) {
             if (!seasons.isEmpty()) {
-                Season season = seasons.get(seasons.size() - 1);
-                seasonTextView.setText(season.getName());
-                currentSeason = season;
+                Calendar calToday = Calendar.getInstance();
+                calToday.set(Calendar.HOUR_OF_DAY, 0);
+                calToday.set(Calendar.MINUTE, 0);
+                calToday.set(Calendar.SECOND, 0);
+                calToday.set(Calendar.MILLISECOND, 0);
+                Date todayDateOnly = calToday.getTime();
+
+                for (Season season : seasons) {
+                    try {
+                        Calendar calStart = Calendar.getInstance();
+                        calStart.setTime(DatePiker.parseStringToDate(season.getStartDate(), DATE_FORMAT));
+                        calStart.set(Calendar.HOUR_OF_DAY, 0);
+                        calStart.set(Calendar.MINUTE, 0);
+                        calStart.set(Calendar.SECOND, 0);
+                        calStart.set(Calendar.MILLISECOND, 0);
+                        Date seasonStartDateOnly = calStart.getTime();
+
+                        Calendar calEnd = Calendar.getInstance();
+                        calEnd.setTime(DatePiker.parseStringToDate(season.getEndDate(), DATE_FORMAT));
+                        calEnd.set(Calendar.HOUR_OF_DAY, 0);
+                        calEnd.set(Calendar.MINUTE, 0);
+                        calEnd.set(Calendar.SECOND, 0);
+                        calEnd.set(Calendar.MILLISECOND, 0);
+                        Date seasonEndDateOnly = calEnd.getTime();
+
+                        if (!todayDateOnly.before(seasonStartDateOnly) && !todayDateOnly.after(seasonEndDateOnly)) {
+                            seasonTextView.setText(season.getName());
+                            currentSeason = season;
+                            break;
+                        }
+                    } catch (ParseException ignore) {}
+                }
             } else {
                 seasonTextView.setText("Сезон не выбран");
             }
