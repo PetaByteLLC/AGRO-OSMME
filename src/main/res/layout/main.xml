@@ -85,7 +85,7 @@
     <RelativeLayout
         android:id="@+id/next_panel"
         android:layout_width="match_parent"
-        android:layout_height="50dp"
+        android:layout_height="0dp"
         android:background="@drawable/radius2">
         <TextView
             android:layout_width="match_parent"
