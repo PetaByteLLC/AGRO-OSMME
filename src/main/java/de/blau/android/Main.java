@@ -782,7 +782,7 @@ public class Main extends FullScreenAppCompatActivity
 
         findViewById(R.id.undo_button).setOnClickListener(v -> handleUndo());
         findViewById(R.id.next_button).setOnClickListener(v -> finishBuilding());
-
+        findViewById(R.id.remove_node_button).setOnClickListener(v -> deleteNeedlessNode());
 //        boolean hasChanges = App.getLogic().hasChanges();
 //        if (hasChanges && isConnected() && first) {
 //            upload();
@@ -5409,5 +5409,21 @@ public class Main extends FullScreenAppCompatActivity
             }
         }
         return relationList;
+    }
+
+    private void deleteNeedlessNode() {
+        Logic logic = App.getLogic();
+        Objects.requireNonNull(logic);
+        Node selectedNode = logic.getSelectedNode();
+        Way selectedWay = logic.getSelectedWay();
+        Objects.requireNonNull(selectedWay);
+        if (selectedNode != null) {
+            App.getDelegator().removeNodeFromWay(selectedWay, selectedNode);
+            logic.setSelectedNode(null);
+            invalidateMap();
+            ScreenMessage.toastTopInfo(Main.this, "Удалено");
+        } else {
+            ScreenMessage.toastTopInfo(Main.this, "Выберите одну из точек для удаления");
+        }
     }
 }

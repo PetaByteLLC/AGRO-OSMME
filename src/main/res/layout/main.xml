@@ -85,7 +85,7 @@
     <RelativeLayout
         android:id="@+id/next_panel"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
+        android:layout_height="50dp"
         android:background="@drawable/radius2">
         <TextView
             android:layout_width="match_parent"
@@ -102,6 +102,15 @@
             android:textStyle="bold"
             android:paddingTop="25dp"
             android:paddingStart="10dp"/>
+        <ImageButton
+            android:id="@+id/remove_node_button"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:contentDescription="@string/remove"
+            android:src="@drawable/baseline_delete_outline_24"
+            android:layout_alignParentEnd="true"
+            android:layout_marginEnd="200dp"
+            android:backgroundTintMode="screen"/>
         <ImageButton
             android:id="@+id/undo_button"
             android:layout_width="wrap_content"
