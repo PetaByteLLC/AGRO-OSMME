@@ -1357,7 +1357,7 @@ public class Logic {
             if (rotating) {
                 startX = x;
                 startY = y;
-            } else if ((selectedNodeCount == 1 || selectedTask != null) && selectedWayCount == 0) { // single node or
+            } else if ((selectedNodeCount == 1 || selectedTask != null) && selectedWayCount == 1) { // single node or
                                                                                                     // task dragging
                 DataStyle currentStyle = map.getDataStyle().getCurrent();
                 float tolerance = largeDragArea ? currentStyle.getLargDragToleranceRadius() : currentStyle.getNodeToleranceValue();
@@ -1503,7 +1503,7 @@ public class Logic {
                 final int selectedWayCount = currentSelection.wayCount();
                 final int selectedNodeCount = currentSelection.nodeCount();
                 // checkpoint created where draggingNode is set
-                if ((draggingNode && ((selectedNodeCount == 1 && selectedWayCount == 0) || selectedWayCount == 1)) || draggingHandle || draggingNote) {
+                if ((draggingNode && (selectedWayCount == 1)) || draggingHandle || draggingNote) {
                     if (draggingHandle) { // create node only if we are really dragging
                         if (handleNode == null && selectedHandle != null && selectedWayCount > 0) {
                             Log.d(DEBUG_TAG, "creating node at handle position");
@@ -4729,40 +4729,40 @@ public class Logic {
      * @param server current server configuration
      */
     public void checkForMail(@NonNull final FragmentActivity activity, @NonNull final Server server) {
-        new ExecutorTask<Void, Void, Integer>(executorService, uiHandler) {
-            @Override
-            protected Integer doInBackground(Void params) {
-                int result = 0;
-
-                UserDetails userDetails = server.getUserDetails();
-                if (userDetails != null) {
-                    result = userDetails.getUnreadMessages();
-                }
-                return result;
-            }
-
-            @Override
-            protected void onPostExecute(Integer result) {
-                if (result > 0) {
-                    try {
-                        if (activity != null) {
-                            ScreenMessage.barInfo(activity, activity.getResources().getQuantityString(R.plurals.toast_unread_mail, result, result),
-                                    R.string.read_mail, v -> {
-                                        try {
-                                            activity.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(Urls.OSM_LOGIN)));
-                                        } catch (Exception ex) {
-                                            // never crash
-                                            Log.e(DEBUG_TAG, "Linking to the OSM login page failed " + ex.getMessage());
-                                        }
-                                    });
-                        }
-                    } catch (java.util.IllegalFormatFlagsException iffex) {
-                        // do nothing ... this is stop bugs in the Android format parsing crashing the upload, happens
-                        // at least with the PL string
-                    }
-                }
-            }
-        }.execute();
+//        new ExecutorTask<Void, Void, Integer>(executorService, uiHandler) {
+//            @Override
+//            protected Integer doInBackground(Void params) {
+//                int result = 0;
+//
+//                UserDetails userDetails = server.getUserDetails();
+//                if (userDetails != null) {
+//                    result = userDetails.getUnreadMessages();
+//                }
+//                return result;
+//            }
+//
+//            @Override
+//            protected void onPostExecute(Integer result) {
+//                if (result > 0) {
+//                    try {
+//                        if (activity != null) {
+//                            ScreenMessage.barInfo(activity, activity.getResources().getQuantityString(R.plurals.toast_unread_mail, result, result),
+//                                    R.string.read_mail, v -> {
+//                                        try {
+//                                            activity.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(Urls.OSM_LOGIN)));
+//                                        } catch (Exception ex) {
+//                                            // never crash
+//                                            Log.e(DEBUG_TAG, "Linking to the OSM login page failed " + ex.getMessage());
+//                                        }
+//                                    });
+//                        }
+//                    } catch (java.util.IllegalFormatFlagsException iffex) {
+//                        // do nothing ... this is stop bugs in the Android format parsing crashing the upload, happens
+//                        // at least with the PL string
+//                    }
+//                }
+//            }
+//        }.execute();
     }
 
     /**

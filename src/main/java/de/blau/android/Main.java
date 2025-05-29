@@ -4309,6 +4309,8 @@ public class Main extends FullScreenAppCompatActivity
 
     private boolean click(float x, float y) {
         Logic logic = App.getLogic();
+        if (logic == null) return false;
+
         if (STATE == 1) {
             if (logic.getClickableElements() != null) { // way follow
                 return false;
@@ -4326,6 +4328,11 @@ public class Main extends FullScreenAppCompatActivity
 
         if (STATE == 2) {
             Node clickedNode = logic.getClickedNode(x, y);
+
+            Way selectedWay = logic.getSelectedWay();
+            if (selectedWay != null & clickedNode != null)
+                if (!selectedWay.hasNode(clickedNode)) return false;
+
             logic.setSelectedNode(clickedNode);
             return true;
         }
@@ -4356,14 +4363,7 @@ public class Main extends FullScreenAppCompatActivity
         }
 
         if (STATE == 2) {
-            Node selectedNode = logic.getSelectedNode();
-            if (selectedNode == null) {
-                ScreenMessage.toastTopWarning(this, "Выберите одну из точек точку");
-                return;
-            }
-            List<Way> ways = logic.getWaysForNode(selectedNode);
-            if (ways.isEmpty()) return;
-            Way way = ways.get(0);
+            Way way = logic.getSelectedWay();
             List<Relation> parentRelations = way.getParentRelations();
             editData(parentRelations.get(0));
         }
@@ -4419,8 +4419,7 @@ public class Main extends FullScreenAppCompatActivity
             List<RelationMember> membersWithRole = relation.getMembersWithRole(ROLE_FIELD_GEOMETRY);
             if (membersWithRole.isEmpty()) return;
             Way way = (Way) membersWithRole.get(0).getElement();
-            logic.setSelectedNode(way.getLastNode());
-
+            logic.setSelectedWay(way);
             updateActionbarEditMode();
             map.invalidate();
             visibleLockButton();
