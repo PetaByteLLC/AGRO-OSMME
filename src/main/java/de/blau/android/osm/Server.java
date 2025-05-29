@@ -39,6 +39,8 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.FragmentActivity;
+
+import de.blau.android.AgroConstants;
 import de.blau.android.App;
 import de.blau.android.Authorize;
 import de.blau.android.ErrorCodes;
@@ -519,7 +521,7 @@ public class Server {
         assert context != null;
         String username = App.getPreferences(context).getAgroUsername();
         if (username == null) throw new NullPointerException("Not logged in system!");
-        URL url = new URL("http://agro.brisklyminds.com/agroadmin/ws/public/api/map?bbox=" + box.toApiString() + "&username=" + username);
+        URL url = new URL(AgroConstants.URL + "/ws/public/api/map?bbox=" + box.toApiString() + "&username=" + username);
         return openConnection(context, url, timeout, timeout);
     }
 

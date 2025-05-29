@@ -48,11 +48,11 @@ public class LoginActivity extends AppCompatActivity {
         String auth = username + ":" + password;
         String encodedAuth = "Basic " + Base64.encodeToString(auth.getBytes(), Base64.NO_WRAP);
         Request request = new Request.Builder()
-                .url("https://agro.brisklyminds.com/agroadmin/ws/token/get")
+                .url(AgroConstants.URL + "/ws/token/get")
                 .header("Authorization", encodedAuth)
                 .build();
         Request requestRole = new Request.Builder()
-                .url("https://agro.brisklyminds.com/agroadmin/ws/user/data")
+                .url(AgroConstants.URL + "/ws/user/data")
                 .header("Authorization", encodedAuth)
                 .build();
         Toast errorToast = Toast.makeText(this, "Ошибка авторизации", Toast.LENGTH_SHORT);

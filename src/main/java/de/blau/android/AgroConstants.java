@@ -4,6 +4,7 @@ import de.blau.android.osm.Tags;
 
 public class AgroConstants {
 
+    public static final String URL = "https://agrotest.brisklyminds.com/agroadmin";
     // --- КОНСТАНТЫ ---
     public static final String TYPE_FIELD = "agromap_field"; // Тип для Relation Поля
     public static final String TYPE_SEASON = "agricultural_season";

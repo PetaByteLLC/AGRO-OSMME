@@ -783,19 +783,19 @@ public class Main extends FullScreenAppCompatActivity
         findViewById(R.id.undo_button).setOnClickListener(v -> handleUndo());
         findViewById(R.id.next_button).setOnClickListener(v -> finishBuilding());
 
-        boolean hasChanges = App.getLogic().hasChanges();
-        if (hasChanges && isConnected() && first) {
-            upload();
-        } else if (!hasChanges && isConnected() && first) {
-            onMenuDownloadCurrent(true);
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
-            onMenuDownloadCurrent(true);
-        }
-        first = false;
+//        boolean hasChanges = App.getLogic().hasChanges();
+//        if (hasChanges && isConnected() && first) {
+//            upload();
+//        } else if (!hasChanges && isConnected() && first) {
+//            onMenuDownloadCurrent(true);
+//            try {
+//                Thread.sleep(1000);
+//            } catch (InterruptedException e) {
+//                throw new RuntimeException(e);
+//            }
+//            onMenuDownloadCurrent(true);
+//        }
+//        first = false;
 
 //            StringWriter stringWriter = new StringWriter();
 //            try {
@@ -2807,6 +2807,7 @@ public class Main extends FullScreenAppCompatActivity
             case R.id.logout:
                 Runnable reset2 = () -> {
                     prefs.setCgiToken(null);
+                    prefs.saveSeasons(new ArrayList<>());
                     delegator.reset(true);
                     invalidateOptionsMenu();
                     map.invalidate();

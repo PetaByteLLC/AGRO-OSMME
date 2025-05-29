@@ -5,8 +5,10 @@ import static de.blau.android.contract.Constants.LOG_TAG_LEN;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 import android.annotation.SuppressLint;
@@ -2220,19 +2222,17 @@ public class Preferences {
 
     public List<Season> getSeasons() {
         String json = prefs.getString(KEY_SEASONS, null);
-
         ArrayList<Season> seasons = new ArrayList<>();
-        if (json != null) {
+        try {
             Gson gson = new Gson();
-            for (Season s : gson.fromJson(json, Season[].class)) {
-                seasons.add(s);
-            }
+            Collections.addAll(seasons, gson.fromJson(json, Season[].class));
+            if (seasons.isEmpty()) throw new NullPointerException();
             return seasons;
-        } else {
-            // Список по умолчанию
-            seasons.add(new Season("01-01-2025", "2025", "31-12-2025"));
-            return seasons;
-        }
+        } catch (NullPointerException ignore) {}
+
+        // Список по умолчанию
+        seasons.add(new Season("01-01-2025", "2025", "31-12-2025"));
+        return seasons;
     }
 
     public String getAgroUsername() {

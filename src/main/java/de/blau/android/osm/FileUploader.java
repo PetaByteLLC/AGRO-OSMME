@@ -11,6 +11,7 @@ import com.bumptech.glide.load.model.LazyHeaders;
 import java.io.File;
 import java.io.IOException;
 
+import de.blau.android.AgroConstants;
 import de.blau.android.App;
 import de.blau.android.R;
 import okhttp3.MediaType;
@@ -19,8 +20,8 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 
 public class FileUploader {
-    public static final String UPLOAD_URL = "https://agro.brisklyminds.com/agroadmin/ws/file/upload";
-    public static final String DOWNLOAD_URL_TEMPLATE = "https://agro.brisklyminds.com/agroadmin/ws/file/download/%s";
+    public static final String UPLOAD_URL = AgroConstants.URL + "/ws/file/upload";
+    public static final String DOWNLOAD_URL_TEMPLATE = AgroConstants.URL + "/ws/file/download/%s";
 
     public static String uploadFile(String path) throws IOException {
         File file = new File(path);
