@@ -1,12 +1,15 @@
 package de.blau.android;
 
+import android.content.ActivityNotFoundException;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Base64;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.browser.customtabs.CustomTabsIntent;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -24,7 +27,7 @@ import okhttp3.Response;
 public class LoginActivity extends AppCompatActivity {
 
     private EditText usernameInput, passwordInput;
-    private Button loginButton;
+    private Button loginButton, googleButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,12 +37,34 @@ public class LoginActivity extends AppCompatActivity {
         usernameInput = findViewById(R.id.etUsername);
         passwordInput = findViewById(R.id.etPassword);
         loginButton = findViewById(R.id.btnLogin);
+        googleButton = findViewById(R.id.google_sign_in_button);
 
         loginButton.setOnClickListener(v -> {
             String username = usernameInput.getText().toString();
             String password = passwordInput.getText().toString();
             login(username, password);
         });
+
+        googleButton.setOnClickListener( v -> oauth2());
+    }
+
+    private void oauth2() {
+        String backendAuthUrl = AgroConstants.URL + "/login/google-link/mobile";
+        CustomTabsIntent customTabsIntent = new CustomTabsIntent.Builder().build();
+        try {
+            customTabsIntent.launchUrl(LoginActivity.this, Uri.parse(backendAuthUrl));
+        } catch (ActivityNotFoundException e) {
+            Toast.makeText(LoginActivity.this, "Chrome Custom Tabs не найдены. Открываем в браузере...", Toast.LENGTH_SHORT).show();
+            try {
+                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(backendAuthUrl));
+                startActivity(browserIntent);
+                finish();
+            } catch (ActivityNotFoundException ex) {
+                Toast.makeText(LoginActivity.this, "Подходящий браузер не найден.", Toast.LENGTH_LONG).show();
+            }
+        } catch (Exception e) {
+            Toast.makeText(LoginActivity.this, "Не удалось открыть ссылку. Проверьте URL.", Toast.LENGTH_LONG).show();
+        }
     }
 
     private void login(String username, String password) {
@@ -63,7 +88,7 @@ public class LoginActivity extends AppCompatActivity {
                 if (response.isSuccessful() && responseRole.isSuccessful()) {
                     Objects.requireNonNull(response.body());
                     Objects.requireNonNull(responseRole.body());
-                    
+
                     String responseBody = response.body().string();
                     String responseRoleBody = responseRole.body().string();
                     String contentType = response.header("Content-Type");
@@ -77,7 +102,7 @@ public class LoginActivity extends AppCompatActivity {
                         String token = responseObject.getString("data");
                         JSONObject responseRoleObject = new JSONObject(responseRoleBody);
                         String role = responseRoleObject.getString("role");
-                        saveData(token, username, password, role);
+                        saveData(token, role);
                         navigateToMain();
                     } else {
                         runOnUiThread(errorToast::show);
@@ -94,11 +119,9 @@ public class LoginActivity extends AppCompatActivity {
         }).start();
     }
 
-    private void saveData(String token, String username, String password, String role) {
+    private void saveData(String token, String role) {
         Preferences prefs = App.getPreferences(this);
         prefs.setCgiToken(token);
-        prefs.setAgroUsername(username);
-        prefs.setAgroPassword(password);
         prefs.setAgroUserRole(role);
     }
 
