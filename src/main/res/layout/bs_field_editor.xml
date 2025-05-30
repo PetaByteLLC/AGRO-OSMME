@@ -224,6 +224,17 @@
             android:textColor="@color/ag_text_color"
             android:textColorHint="@color/ag_text_color" />
 
+        <EditText
+            android:id="@+id/additionalInformation"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/edittext_background"
+            android:hint="Дополнительная информация"
+            android:inputType="text"
+            android:textColor="@color/ag_text_color"
+            android:textColorHint="@color/ag_text_color" />
+
         <!--        <Spinner-->
         <!--            android:id="@+id/secondaryCulture"-->
         <!--            android:layout_width="match_parent"-->

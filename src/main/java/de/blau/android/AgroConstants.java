@@ -23,6 +23,7 @@ public class AgroConstants {
     public static final String YIELD_TAG_CADASTRAL_NUMBER = "cadastrNumber";
     public static final String YIELD_TAG_POSITION = "position";
     public static final String YIELD_TAG_TECHNOLOGY = "technology";
+    public static final String YIELD_TAG_ADDITIONAL_INFORMATION = "additionalInformation";
 
     public static final String SEASON_TAG_START = "start";
     public static final String SEASON_TAG_END = "end";

@@ -75,6 +75,7 @@ public class BsEditYieldFragment extends BottomSheetDialogFragment {
     private EditText farmerMobile;
     private EditText cadastrNumber;
     private EditText aggregator;
+    private EditText additionalInformation;
     private Spinner technology;
 
     private boolean areEditTextsVisible;
@@ -118,6 +119,7 @@ public class BsEditYieldFragment extends BottomSheetDialogFragment {
         farmerMobile = view.findViewById(R.id.farmerMobile);
         cadastrNumber = view.findViewById(R.id.cadastrNumber);
         aggregator = view.findViewById(R.id.aggregator);
+        additionalInformation = view.findViewById(R.id.additionalInformation);
         technology = view.findViewById(R.id.technology);
         cropList = view.findViewById(R.id.crop_list);
         cropAdd = view.findViewById(R.id.crop_add);
@@ -221,6 +223,7 @@ public class BsEditYieldFragment extends BottomSheetDialogFragment {
         farmerSurName.setText(getTagValue(yield, YIELD_TAG_FARMER_SURNAME));
         farmerMobile.setText(getTagValue(yield, YIELD_TAG_FARMER_MOBILE));
         cadastrNumber.setText(getTagValue(yield, YIELD_TAG_CADASTRAL_NUMBER));
+        additionalInformation.setText(getTagValue(yield, YIELD_TAG_ADDITIONAL_INFORMATION));
         try {
             technology.setSelection(Arrays.asList(TECHNOLOGY_DATA).indexOf(yield.getTagWithKey(YIELD_TAG_TECHNOLOGY)));
         } catch (NullPointerException ignore) {
@@ -236,6 +239,7 @@ public class BsEditYieldFragment extends BottomSheetDialogFragment {
             map.put(YIELD_TAG_FARMER_NAME, farmerName.getText().toString());
             map.put(YIELD_TAG_FARMER_SURNAME, farmerSurName.getText().toString());
             map.put(YIELD_TAG_FARMER_MOBILE, farmerMobile.getText().toString());
+            map.put(YIELD_TAG_ADDITIONAL_INFORMATION, additionalInformation.getText().toString());
             map.put(YIELD_TAG_CADASTRAL_NUMBER, cadastrNumber.getText().toString());
             map.put(YIELD_TAG_TECHNOLOGY, technology.getSelectedItem().toString());
 
@@ -331,6 +335,7 @@ public class BsEditYieldFragment extends BottomSheetDialogFragment {
         main.invalidateMap();
         App.getLogic().deselectAll();
         App.getLogic().setLocked(true);
+        App.getLogic().setState(0);
         main.invisibleUnlockButton();
         if (getActivity() != null) {
             getActivity().invalidateOptionsMenu();

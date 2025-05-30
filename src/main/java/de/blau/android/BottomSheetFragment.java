@@ -21,6 +21,7 @@ import static de.blau.android.AgroConstants.TECHNOLOGY_DATA;
 import static de.blau.android.AgroConstants.TYPE_CROP;
 import static de.blau.android.AgroConstants.TYPE_FIELD;
 import static de.blau.android.AgroConstants.TYPE_SEASON;
+import static de.blau.android.AgroConstants.YIELD_TAG_ADDITIONAL_INFORMATION;
 import static de.blau.android.AgroConstants.YIELD_TAG_AGGREGATOR;
 import static de.blau.android.AgroConstants.YIELD_TAG_CADASTRAL_NUMBER;
 import static de.blau.android.AgroConstants.YIELD_TAG_DISTRICT;
@@ -86,7 +87,7 @@ public class BottomSheetFragment extends BottomSheetDialogFragment {
     private final List<Season> seasons;
 
     private EditText name, region, district, aggregator, farmerName, farmerMobile, cadastrNumber,
-            cultureVarieties, sowingDate, cleaningDate, productivity, farmerSurName, area;
+            cultureVarieties, sowingDate, cleaningDate, productivity, farmerSurName, area, additionalInformation;
     private Spinner culture, technology, landCategory, irrigationType, season;
 
     private ImageView addSeason;
@@ -154,6 +155,7 @@ public class BottomSheetFragment extends BottomSheetDialogFragment {
         landCategory = view.findViewById(R.id.landCategory);
         irrigationType = view.findViewById(R.id.irrigationType);
         area = view.findViewById(R.id.area);
+        additionalInformation = view.findViewById(R.id.additionalInformation);
 
         imageFiles = new ArrayList<>();
         images = view.findViewById(R.id.images);
@@ -261,6 +263,7 @@ public class BottomSheetFragment extends BottomSheetDialogFragment {
             String farmerMobileValue = farmerMobile.getText().toString();
             String cadastrNumberValue = cadastrNumber.getText().toString();
             String areaValue = area.getText().toString();
+            String additionalInformationValue = additionalInformation.getText().toString();
             Season seasonValue = (Season) season.getSelectedItem();
             String cultureVarietiesValue = cultureVarieties.getText().toString();
             String sowingDateValue = sowingDate.getText().toString();
@@ -279,7 +282,7 @@ public class BottomSheetFragment extends BottomSheetDialogFragment {
                 save(nameValue, regionValue, districtValue, aggregatorValue, farmerNameValue, farmerMobileValue,
                         cadastrNumberValue, seasonValue, cultureVarietiesValue, sowingDateValue, cleaningDateValue,
                         productivityValue, cultureValue, technologyValue, landCategoryValue, irrigationTypeValue,
-                        farmerSurNameValue, areaValue);
+                        farmerSurNameValue, areaValue, additionalInformationValue);
             } catch (NullPointerException exception) {
                 Toast.makeText(getContext(),
                         String.format("Поле \"%s\" обязательно для заполнения", exception.getMessage()),
@@ -332,7 +335,7 @@ public class BottomSheetFragment extends BottomSheetDialogFragment {
     private void save(String name, String region, String district, String aggregator, String farmerName, String farmerMobile,
                       String cadastrNumber, Season season, String cultureVarieties, String sowingDate,
                       String cleaningDate, String productivity, String culture, String technology, String landCategory,
-                      String irrigationType, String farmerSurName, String area) {
+                      String irrigationType, String farmerSurName, String area, String additionalInformationValue) {
         Map<String, String> yield = new HashMap<>();
         yield.put(Tags.KEY_NAME, name);
         yield.put(YIELD_TAG_REGION, region);
@@ -346,6 +349,7 @@ public class BottomSheetFragment extends BottomSheetDialogFragment {
         yield.put(Tags.KEY_TYPE, TYPE_FIELD);
         yield.put(YIELD_TAG_TECHNOLOGY, technology);
         yield.put(Tags.KEY_AREA, area);
+        yield.put(YIELD_TAG_ADDITIONAL_INFORMATION, additionalInformationValue);
 
         if (imageFiles != null && !imageFiles.isEmpty()) {
             for (int i = 0; i < imageFiles.size(); i++) {
@@ -438,6 +442,7 @@ public class BottomSheetFragment extends BottomSheetDialogFragment {
         main.invalidateMap();
         App.getLogic().deselectAll();
         App.getLogic().setLocked(true);
+        App.getLogic().setState(0);
         main.invisibleUnlockButton();
         if (getActivity() != null) {
             getActivity().invalidateOptionsMenu(); // Обновляем меню в активности

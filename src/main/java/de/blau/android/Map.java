@@ -725,7 +725,7 @@ public class Map extends SurfaceView implements IMapView {
             paintStats(canvas, 1 / (time / 1000f));
         }
 
-        if (!Objects.equals(logic.getState(), 0)) {
+        if (Objects.equals(logic.getState(), 1) | Objects.equals(logic.getState(), 2)) {
             paintAreaStats(canvas, logic.getSelectedWay());
         }
     }
@@ -733,7 +733,7 @@ public class Map extends SurfaceView implements IMapView {
     private void paintAreaStats(Canvas canvas, Way selectedWay) {
         String text;
         if (selectedWay == null) {
-            text = "0.00";
+            text = "0.000";
         } else {
             text = getArea(selectedWay);
         }
