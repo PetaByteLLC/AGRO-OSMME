@@ -154,7 +154,7 @@ public class EasyEditManager {
      */
     public boolean draggingEnabled() {
         synchronized (actionModeCallbackLock) {
-            return main.STATE == 2;
+            return logic.getState() == 2;
         }
     }
 

@@ -508,8 +508,6 @@ public class Main extends FullScreenAppCompatActivity
 
     private static final float LARGE_FAB_ELEVATION = 16; // used for re-enabling elevation on the FABs
 
-    public int STATE = 0;
-
     public Main() {
         permissions = new LinkedHashMap<>();
         permissions.put(Manifest.permission.ACCESS_FINE_LOCATION, new PermissionStatus());
@@ -3947,11 +3945,18 @@ public class Main extends FullScreenAppCompatActivity
 
         @Override
         public boolean onLongClick(final View v, final float x, final float y) {
-//            final Logic logic = App.getLogic();
-//            clickedNodesAndWays = getClickedOsmElements(logic, x, y);
-//            int elementCount = clickedNodesAndWays.size();
-//            if (logic.isLocked()) {
-//                // display context menu
+            final Logic logic = App.getLogic();
+            clickedNodesAndWays = getClickedOsmElements(logic, x, y);
+            if (logic.isLocked()) {
+                getClickedObjects(x, y);
+                for(OsmElement osmElement : clickedNodesAndWays) {
+                    if (osmElement instanceof Way) {
+                        editor((Way) osmElement);
+                        return true;
+                    }
+                }
+            }
+                // display context menu
 //                getClickedObjects(x, y);
 //                int clickedObjectsCount = clickedObjects.size();
 //                int itemCount = elementCount + clickedObjectsCount;
@@ -4311,7 +4316,7 @@ public class Main extends FullScreenAppCompatActivity
         Logic logic = App.getLogic();
         if (logic == null) return false;
 
-        if (STATE == 1) {
+        if (logic.getState() == 1) {
             if (logic.getClickableElements() != null) { // way follow
                 return false;
             }
@@ -4326,7 +4331,7 @@ public class Main extends FullScreenAppCompatActivity
             return true;
         }
 
-        if (STATE == 2) {
+        if (logic.getState() == 2) {
             Node clickedNode = logic.getClickedNode(x, y);
 
             Way selectedWay = logic.getSelectedWay();
@@ -4354,15 +4359,14 @@ public class Main extends FullScreenAppCompatActivity
         Logic logic = App.getLogic();
         if (logic == null) return;
 
-        if (STATE == 1) {
+        if (logic.getState() == 1) {
             final Way lastSelectedWay = logic.getSelectedWay();
-            final Node lastSelectedNode = logic.getSelectedNode();
-            finishPath(lastSelectedWay, lastSelectedNode);
+            finishPath(lastSelectedWay);
             showNextPanel(false);
             return;
         }
 
-        if (STATE == 2) {
+        if (logic.getState() == 2) {
             Way way = logic.getSelectedWay();
             List<Relation> parentRelations = way.getParentRelations();
             editData(parentRelations.get(0));
@@ -4390,16 +4394,16 @@ public class Main extends FullScreenAppCompatActivity
         editYield(relation, getSupportFragmentManager());
     }
 
-    protected void finishPath(@Nullable final Way lastSelectedWay, @Nullable final Node lastSelectedNode) {
+    protected void finishPath(@Nullable final Way lastSelectedWay) {
         getEasyEditManager().finish();
         App.getLogic().removeCheckpoint(this, createdWay != null ? R.string.undo_action_moveobjects : R.string.undo_action_movenode);
         if (!addedNodes.isEmpty() && !dontTag) {
-            editor(lastSelectedWay, lastSelectedNode);
+            editor(lastSelectedWay);
             delayedResetHasProblem(lastSelectedWay);
         }
     }
 
-    private void editor(@Nullable final Way lastSelectedWay, @Nullable final Node lastSelectedNode) {
+    private void editor(@Nullable final Way lastSelectedWay) {
         if (lastSelectedWay == null) {
             ScreenMessage.toastTopWarning(this, "Не хватает точек");
             return;
@@ -4424,7 +4428,7 @@ public class Main extends FullScreenAppCompatActivity
             map.invalidate();
             visibleLockButton();
             showNextPanel(true);
-            STATE = 2;
+            logic.setState(2);
             ScreenMessage.toastTopWarning(Main.this, "Измените положение точек для редактирования");
         } else {
             ScreenMessage.toastTopInfo(Main.this, R.string.toast_not_in_edit_range);
@@ -5327,7 +5331,7 @@ public class Main extends FullScreenAppCompatActivity
             if (!logic.isInEditZoomRange()) {
                 ScreenMessage.toastTopInfo(Main.this, R.string.toast_not_in_edit_range);
             } else {
-                STATE = 1;
+                logic.setState(1);
                 App.getLogic().deselectAll();
                 App.getLogic().setLocked(false);
                 updateActionbarEditMode();
@@ -5357,7 +5361,7 @@ public class Main extends FullScreenAppCompatActivity
             logic.setSelectedNode(null);
             logic.setSelectedWay(null);
             logic.setSelectedRelation(null);
-            STATE = 0;
+            logic.setState(0);
             removeNeedlessNodes();
         });
         hideBottomBar();

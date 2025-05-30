@@ -1,5 +1,6 @@
 package de.blau.android;
 
+import static de.blau.android.BottomSheetFragment.getArea;
 import static de.blau.android.contract.Constants.LOG_TAG_LEN;
 
 import java.io.IOException;
@@ -7,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -722,6 +724,25 @@ public class Map extends SurfaceView implements IMapView {
             time = System.currentTimeMillis() - time;
             paintStats(canvas, 1 / (time / 1000f));
         }
+
+        if (!Objects.equals(logic.getState(), 0)) {
+            paintAreaStats(canvas, logic.getSelectedWay());
+        }
+    }
+
+    private void paintAreaStats(Canvas canvas, Way selectedWay) {
+        String text;
+        if (selectedWay == null) {
+            text = "0.00";
+        } else {
+            text = getArea(selectedWay);
+        }
+
+        Paint infotextPaint = getDataStyle().getInternal(DataStyle.INFOTEXT).getPaint();
+        infotextPaint.setTextSize(70);
+        float textSize = infotextPaint.getTextSize();
+
+        canvas.drawText(text, ((float) getWidth() / 2) - textSize, ((float) getHeight() / 2), infotextPaint);
     }
 
     @Override

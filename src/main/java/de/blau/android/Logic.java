@@ -356,6 +356,8 @@ public class Logic {
 
     private boolean editingStateRead = false; // set to true after we have read the editing state
 
+    private int STATE = 0;
+
     /**
      * Initiate all needed values. Starts Tracker and delegate the first values for the map.
      * 
@@ -6445,5 +6447,13 @@ public class Logic {
     @NonNull
     public Handler getHandler() {
         return uiHandler;
+    }
+
+    public int getState() {
+        return STATE;
+    }
+
+    public void setState(int newState) {
+        this.STATE = newState;
     }
 }
