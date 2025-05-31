@@ -102,7 +102,7 @@ public class LoginActivity extends AppCompatActivity {
                         String token = responseObject.getString("data");
                         JSONObject responseRoleObject = new JSONObject(responseRoleBody);
                         String role = responseRoleObject.getString("role");
-                        saveData(token, role);
+                        saveData(token, username, password, role);
                         navigateToMain();
                     } else {
                         runOnUiThread(errorToast::show);
@@ -119,10 +119,12 @@ public class LoginActivity extends AppCompatActivity {
         }).start();
     }
 
-    private void saveData(String token, String role) {
+    private void saveData(String token, String username, String password, String role) {
         Preferences prefs = App.getPreferences(this);
         prefs.setCgiToken(token);
         prefs.setAgroUserRole(role);
+        prefs.setAgroPassword(password);
+        prefs.setAgroPassword(username);
     }
 
     private void navigateToMain() {
