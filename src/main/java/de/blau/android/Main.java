@@ -3951,7 +3951,7 @@ public class Main extends FullScreenAppCompatActivity
                 getClickedObjects(x, y);
                 for(OsmElement osmElement : clickedNodesAndWays) {
                     if (osmElement instanceof Way) {
-                        editor((Way) osmElement);
+                        editorField((Way) osmElement);
                         return true;
                     }
                 }
@@ -4423,6 +4423,26 @@ public class Main extends FullScreenAppCompatActivity
             List<RelationMember> membersWithRole = relation.getMembersWithRole(ROLE_FIELD_GEOMETRY);
             if (membersWithRole.isEmpty()) return;
             Way way = (Way) membersWithRole.get(0).getElement();
+            logic.setSelectedWay(way);
+            updateActionbarEditMode();
+            map.invalidate();
+            visibleLockButton();
+            showNextPanel(true);
+            logic.setState(2);
+            ScreenMessage.toastTopWarning(Main.this, "Измените положение точек для редактирования");
+        } else {
+            ScreenMessage.toastTopInfo(Main.this, R.string.toast_not_in_edit_range);
+        }
+    }
+
+    public void editorField(Way way) {
+        final Logic logic = App.getLogic();
+        if (logic.isInEditZoomRange()) {
+            addedNodes = new ArrayList<>();
+            logic.deselectAll();
+            logic.setLocked(false);
+
+            if (way == null) return;
             logic.setSelectedWay(way);
             updateActionbarEditMode();
             map.invalidate();
