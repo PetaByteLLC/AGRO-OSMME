@@ -24,6 +24,7 @@ public class AgroConstants {
     public static final String YIELD_TAG_POSITION = "position";
     public static final String YIELD_TAG_TECHNOLOGY = "technology";
     public static final String YIELD_TAG_ADDITIONAL_INFORMATION = "additionalInformation";
+    public static final String YIELD_TAG_CATEGORY_TYPE = "categoryType";
 
     public static final String SEASON_TAG_START = "start";
     public static final String SEASON_TAG_END = "end";
@@ -43,6 +44,7 @@ public class AgroConstants {
     public static final String[] TECHNOLOGY_DATA = {"Технология возделывания", "яровая", "озимая"};
     public static final String[] LAND_CATEGORY_DATA = {"Категория угодья", "орошаемая", "богара"};
     public static final String[] IRRIGATION_TYPE_DATA = {"Тип полива", "каналы/гравитация", "установки"};
+    public static final String[] FIELD_TAG_CATEGORY_TYPE_DATA = {"Земли сельскохозяйственного назначения", "Земли населенных пунктов", "Земли промышленности, транспорта, связи, энергетик", "Земли особо охраняемых природных территорий", "Земли лесного фонда", "Земли водного фонда", "Земли запаса"};
 
     public static final String DATE_STRING_FORMAT = "%04d-%02d-%02d";
     public static final String DATE_FORMAT = "yyyy-MM-dd";
