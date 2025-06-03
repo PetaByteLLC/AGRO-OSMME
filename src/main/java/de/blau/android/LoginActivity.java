@@ -124,7 +124,7 @@ public class LoginActivity extends AppCompatActivity {
         prefs.setCgiToken(token);
         prefs.setAgroUserRole(role);
         prefs.setAgroPassword(password);
-        prefs.setAgroPassword(username);
+        prefs.setAgroUsername(username);
     }
 
     private void navigateToMain() {
