@@ -21,6 +21,8 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
@@ -50,13 +52,18 @@ public class BottomSheetFragmentAllField extends BottomSheetDialogFragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        regions = getGroup(main.getAllFields());
-
-        if (regions.isEmpty()) {
-            Toast.makeText(getContext(), "По этому сезоны данных нету", Toast.LENGTH_SHORT).show();
+        Season currentSeason = main.currentSeason;
+        if (currentSeason == null || currentSeason.getName() == null) {
+            Toast.makeText(getContext(), "Сезон не выбран!", Toast.LENGTH_SHORT).show();
             dismiss();
+            return;
         }
-
+        regions = getGroup(main.getAllFields(), currentSeason.getName());
+        if (regions.isEmpty()) {
+            Toast.makeText(getContext(), "По этому сезоны данных нет.", Toast.LENGTH_SHORT).show();
+            dismiss();
+            return;
+        }
         regionAdapter = new RegionAdapter(regions, new FieldAdapter.OnFieldClickListener() {
             @Override
             public void remove(Relation relation) {
@@ -117,63 +124,86 @@ public class BottomSheetFragmentAllField extends BottomSheetDialogFragment {
         regionAdapter.updateData();
     }
 
-    private List<Region> getGroup(List<Relation> relations) {
-        Set<String> regions = new HashSet<>();
-        for (Relation yield : relations) {
-            String regionValue = yield.getTagWithKey(YIELD_TAG_REGION);
-            if (regionValue != null && !regionValue.isEmpty()) {
-                regions.add(regionValue);
+    private Set<String> getCulturesForYield(Relation yield, String currentSeasonName) {
+        Set<String> culturesFound = new HashSet<>();
+        if (yield == null) return culturesFound;
+        List<Relation> seasons = yield.getParentRelations();
+        if (seasons == null) return culturesFound;
+        for (Relation season : seasons) {
+            if (season == null) continue;
+            if (currentSeasonName != null) {
+                String seasonNameFromTag = season.getTagWithKey(Tags.KEY_NAME);
+                if (!Objects.equals(currentSeasonName, seasonNameFromTag)) {
+                    continue;
+                }
             }
+            List<Relation> crops = season.getParentRelations();
+            if (crops == null) continue;
+            for (Relation crop : crops) {
+                if (crop == null) continue;
+                String cultureValue = crop.getTagWithKey(CROP_TAG_CULTURE);
+                if (cultureValue != null && !cultureValue.isEmpty()) {
+                    culturesFound.add(cultureValue);
+                }
+            }
+        }
+        return culturesFound;
+    }
+
+    public List<Region> getGroup(List<Relation> allYieldRelations, String currentSeasonName) {
+        if (allYieldRelations == null || allYieldRelations.isEmpty()) {
+            return Collections.emptyList();
+        }
+        java.util.Map<String, java.util.Map<String, List<Relation>>> groupedByRegionAndCulture = new HashMap<>();
+        for (Relation yield : allYieldRelations) {
+            if (yield == null) continue;
+            String regionValue = yield.getTagWithKey(YIELD_TAG_REGION);
+            if (regionValue == null || regionValue.isEmpty()) {
+                continue;
+            }
+            Set<String> culturesForThisYield = getCulturesForYield(yield, currentSeasonName);
+            if (culturesForThisYield.isEmpty()) {
+                continue;
+            }
+            String effectiveCultureName;
+            if (culturesForThisYield.size() == 1) {
+                effectiveCultureName = culturesForThisYield.iterator().next();
+            } else {
+                effectiveCultureName = OTHER_CULTURE;
+            }
+
+            java.util.Map<String, List<Relation>> culturesMap = groupedByRegionAndCulture.get(regionValue);
+            if (culturesMap == null) {
+                culturesMap = new HashMap<>();
+                groupedByRegionAndCulture.put(regionValue, culturesMap);
+            }
+
+            List<Relation> yieldsList = culturesMap.get(effectiveCultureName);
+            if (yieldsList == null) {
+                yieldsList = new ArrayList<>();
+                culturesMap.put(effectiveCultureName, yieldsList);
+            }
+            yieldsList.add(yield);
         }
 
-        List<Region> regionList = new ArrayList<>();
-        for (String region : regions) {
-            Set<Culture> cultureList = new HashSet<>();
-            Set<String> yieldCultures = new HashSet<>();
-            List<Relation> yields = new ArrayList<>();
-            for (Relation yield : relations) {
-                if (!Objects.equals(yield.getTagWithKey(YIELD_TAG_REGION), region)) continue;
-                List<Relation> seasons = yield.getParentRelations();
-                if (seasons != null) {
-                    for (Relation season : seasons) {
-                        if (main.currentSeason != null) {
-                            if (!Objects.equals(main.currentSeason.getName(), season.getTagWithKey(Tags.KEY_NAME)))
-                                continue;
-                        }
-                        if (season == null) continue;
-                        if (season.getParentRelations() == null) continue;
-                        for (Relation crop : season.getParentRelations()) {
-                            String cultureValue = crop.getTagWithKey(CROP_TAG_CULTURE);
-                            if (cultureValue == null) continue;
-                            if (cultureValue.isEmpty()) continue;
-                            if (yieldCultures.add(cultureValue)) {
-                                if (yields.isEmpty()) {
-                                    yields.add(yield);
-                                } else {
-                                    for (Relation oldYield : yields) {
-                                        if (Objects.equals(oldYield.getOsmId(), yield.getOsmId()))
-                                            continue;
-                                        yields.add(yield);
-                                    }
-                                }
-                            }
-                        }
-                    }
+        List<Region> resultRegionList = new ArrayList<>();
+        for (java.util.Map.Entry<String, java.util.Map<String, List<Relation>>> regionEntry : groupedByRegionAndCulture.entrySet()) {
+            String regionName = regionEntry.getKey();
+            java.util.Map<String, List<Relation>> culturesInRegionMap = regionEntry.getValue();
+            List<Culture> cultureListForCurrentRegion = new ArrayList<>();
+            for (java.util.Map.Entry<String, List<Relation>> cultureEntry : culturesInRegionMap.entrySet()) {
+                String cultureName = cultureEntry.getKey();
+                List<Relation> fieldsForCulture = cultureEntry.getValue();
+                if (!fieldsForCulture.isEmpty()) {
+                    cultureListForCurrentRegion.add(new Culture(cultureName, fieldsForCulture));
                 }
             }
-            if (yieldCultures.size() == 1) {
-                for (String culture : yieldCultures) {
-                    cultureList.add(new Culture(culture, yields));
-                    break;
-                }
+            if (!cultureListForCurrentRegion.isEmpty()) {
+                resultRegionList.add(new Region(regionName, cultureListForCurrentRegion));
             }
-            if (yieldCultures.size() > 1) {
-                cultureList.add(new Culture(OTHER_CULTURE, yields));
-            }
-            if (!cultureList.isEmpty())
-                regionList.add(new Region(region, new ArrayList<>(cultureList)));
         }
-        return regionList;
+        return resultRegionList;
     }
+
 
 }

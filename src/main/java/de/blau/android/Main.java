@@ -2160,6 +2160,9 @@ public class Main extends FullScreenAppCompatActivity
                         }
                     } catch (ParseException ignore) {}
                 }
+                if (currentSeason == null) {
+                    seasonTextView.setText("Сезон не выбран");
+                }
             } else {
                 seasonTextView.setText("Сезон не выбран");
             }

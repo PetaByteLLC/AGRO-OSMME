@@ -11,6 +11,7 @@ import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -260,6 +261,7 @@ public class BsEditYieldFragment extends BottomSheetDialogFragment {
             }
 
             Map<String, String> map = new HashMap<>();
+            map.put(YIELD_TAG_POSITION, getPosition());
             map.put(Tags.KEY_NAME, name.getText().toString());
             map.put(Tags.KEY_AREA, area.getText().toString());
             map.put(YIELD_TAG_REGION, region.getText().toString());
@@ -268,8 +270,8 @@ public class BsEditYieldFragment extends BottomSheetDialogFragment {
             map.put(YIELD_TAG_FARMER_NAME, farmerName.getText().toString());
             map.put(YIELD_TAG_FARMER_SURNAME, farmerSurName.getText().toString());
             map.put(YIELD_TAG_FARMER_MOBILE, farmerMobile.getText().toString());
-            map.put(YIELD_TAG_ADDITIONAL_INFORMATION, additionalInformation.getText().toString());
             map.put(YIELD_TAG_CADASTRAL_NUMBER, cadastrNumber.getText().toString());
+            map.put(YIELD_TAG_ADDITIONAL_INFORMATION, additionalInformation.getText().toString());
 
             if (urls != null && !urls.isEmpty()) {
                 for (int i = 0; i < urls.size(); i++) {
@@ -417,6 +419,15 @@ public class BsEditYieldFragment extends BottomSheetDialogFragment {
                 district.setText(matchingFeature.getAdm2Ky());
             }
         }
+    }
+
+    private String getPosition() {
+        de.blau.android.Map logicMap = App.getLogic().getMap();
+        if (logicMap == null) return "";
+        if (logicMap.getTracker() == null) return "";
+        Location lastLocation = logicMap.getTracker().getLastLocation();
+        if (lastLocation == null) return "";
+        return String.format("%s, %s;", lastLocation.getLatitude(), lastLocation.getLongitude());
     }
 
     @SuppressLint("NotifyDataSetChanged")
