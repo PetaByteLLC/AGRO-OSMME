@@ -2231,7 +2231,7 @@ public class Preferences {
         } catch (NullPointerException ignore) {}
 
         // Список по умолчанию
-        seasons.add(new Season("01-01-2025", "2025", "31-12-2025"));
+        seasons.add(new Season("2025-01-01", "2025", "2025-12-31"));
         return seasons;
     }
 

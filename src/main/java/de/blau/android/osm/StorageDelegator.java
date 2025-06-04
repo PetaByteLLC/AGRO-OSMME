@@ -27,6 +27,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.UUID;
 import java.util.concurrent.locks.ReentrantLock;
 
 import android.app.Activity;
@@ -4984,4 +4985,53 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
         }
     }
 
+    public Relation createFieldRelation(Way fieldWay) {
+        try {
+            lock();
+
+            setElementCreated(fieldWay);
+            Relation fieldRelation = factory.createRelationWithNewId();
+            Map<String, String> fieldRelationTags = new HashMap<>();
+            fieldRelationTags.put(Tags.KEY_TYPE, TYPE_FIELD);
+            fieldRelationTags.put(Tags.KEY_NAME, "Поле " + UUID.randomUUID());
+            fieldRelation.setTags(fieldRelationTags);
+            RelationMember fieldWayMember = new RelationMember(ROLE_FIELD_GEOMETRY, fieldWay);
+            fieldRelation.addMember(fieldWayMember);
+            setElementCreated(fieldRelation);
+            fieldWay.addParentRelation(fieldRelation);
+            setElementModified(fieldWay);
+            onParentRelationChanged(fieldWay);
+//
+//            // 3. Создаем Сезон (Relation)
+//            Relation seasonRelation = factory.createRelationWithNewId();
+//            seasonTags.put(Tags.KEY_TYPE, TYPE_SEASON);
+//            seasonRelation.setTags(seasonTags);
+//            // Добавляем Relation Поля как члена Сезона
+//            RelationMember fieldRelationMember = new RelationMember(ROLE_FIELD, fieldRelation);
+//            seasonRelation.addMember(fieldRelationMember);
+//            // Добавляем Сезон в хранилища ПОСЛЕ добавления члена
+//            setElementCreated(seasonRelation);
+//            // Обратная ссылка для Поля
+//            fieldRelation.addParentRelation(seasonRelation);
+//            setElementModified(fieldRelation); // Поле изменено (добавлен родитель)
+//            onParentRelationChanged(fieldRelation);
+//
+//            // 4. Создаем Посев (Relation)
+//            Relation cropRelation = factory.createRelationWithNewId();
+//            cropTags.put(Tags.KEY_TYPE, TYPE_CROP);
+//            cropRelation.setTags(cropTags);
+//            // Добавляем Relation Сезона как члена Посева
+//            RelationMember seasonRelationMember = new RelationMember(ROLE_SEASON, seasonRelation);
+//            cropRelation.addMember(seasonRelationMember);
+//            // Добавляем Посев в хранилища ПОСЛЕ добавления члена
+//            setElementCreated(cropRelation);
+//            // Обратная ссылка для Сезона
+//            seasonRelation.addParentRelation(cropRelation);
+//            setElementModified(seasonRelation); // Сезон изменен (добавлен родитель)
+//            onParentRelationChanged(seasonRelation);
+            return fieldRelation;
+        } finally {
+            unlock();
+        }
+    }
 }

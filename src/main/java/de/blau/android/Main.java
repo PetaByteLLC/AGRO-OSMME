@@ -4374,7 +4374,7 @@ public class Main extends FullScreenAppCompatActivity
     }
 
 
-    public void editYield(Relation clickedRelation, FragmentManager fragmentManager) {
+    public void editYield(Relation clickedRelation, FragmentManager fragmentManager, boolean visibleGeneralPanel) {
         List<Relation> seasons = clickedRelation.getParentRelations();
         if (seasons == null || seasons.isEmpty()) seasons = new ArrayList<>();
 
@@ -4385,13 +4385,13 @@ public class Main extends FullScreenAppCompatActivity
             crops.addAll(season.getParentRelations());
         }
 
-        BsEditYieldFragment bsEditYieldFragment = new BsEditYieldFragment(clickedRelation, seasons, crops, this);
+        BsEditYieldFragment bsEditYieldFragment = new BsEditYieldFragment(clickedRelation, seasons, crops, this, visibleGeneralPanel);
         bsEditYieldFragment.show(fragmentManager, bsEditYieldFragment.getTag());
     }
 
     private void editData(Relation relation) {
         if (relation == null) return;
-        editYield(relation, getSupportFragmentManager());
+        editYield(relation, getSupportFragmentManager(), false);
     }
 
     protected void finishPath(@Nullable final Way lastSelectedWay) {
@@ -4408,8 +4408,11 @@ public class Main extends FullScreenAppCompatActivity
             ScreenMessage.toastTopWarning(this, "Не хватает точек");
             return;
         }
-        BottomSheetFragment bottomSheetFragment = new BottomSheetFragment(lastSelectedWay, this);
-        bottomSheetFragment.show(getSupportFragmentManager(), bottomSheetFragment.getTag());
+
+        Relation fieldRelation = App.getDelegator().createFieldRelation(lastSelectedWay);
+        editYield(fieldRelation, getSupportFragmentManager(), true);
+//        BottomSheetFragment bottomSheetFragment = new BottomSheetFragment(lastSelectedWay, this);
+//        bottomSheetFragment.show(getSupportFragmentManager(), bottomSheetFragment.getTag());
     }
 
     public void editor(Relation relation) {

@@ -24,7 +24,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ListView;
-import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -33,6 +32,7 @@ import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
 import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
@@ -40,18 +40,20 @@ import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.SortedMap;
 
+import de.blau.android.osm.BoundingBox;
 import de.blau.android.osm.OsmElement;
 import de.blau.android.osm.Relation;
 import de.blau.android.osm.RelationMember;
 import de.blau.android.osm.Tags;
+import de.blau.android.osm.ViewBox;
 import de.blau.android.osm.Way;
+import de.blau.android.util.LatLon;
 
 public class BsEditYieldFragment extends BottomSheetDialogFragment {
 
@@ -76,7 +78,6 @@ public class BsEditYieldFragment extends BottomSheetDialogFragment {
     private EditText cadastrNumber;
     private EditText aggregator;
     private EditText additionalInformation;
-    private Spinner technology;
 
     private boolean areEditTextsVisible;
 
@@ -89,11 +90,12 @@ public class BsEditYieldFragment extends BottomSheetDialogFragment {
     private ImageStringAdapter imageStringAdapter;
     private List<String> urls;
 
-    public BsEditYieldFragment(Relation yield, List<Relation> seasons, List<Relation> crops, Main main) {
+    public BsEditYieldFragment(Relation yield, List<Relation> seasons, List<Relation> crops, Main main, boolean areEditTextsVisible) {
         this.yield = yield;
         this.seasons = seasons;
         this.crops = crops;
         this.main = main;
+        this.areEditTextsVisible = !areEditTextsVisible;
     }
 
     @Override
@@ -117,22 +119,65 @@ public class BsEditYieldFragment extends BottomSheetDialogFragment {
         farmerSurName = view.findViewById(R.id.farmerSurName);
         farmerName = view.findViewById(R.id.farmerName);
         farmerMobile = view.findViewById(R.id.farmerMobile);
-        cadastrNumber = view.findViewById(R.id.cadastrNumber);
+        cadastrNumber = view.findViewById(R.id.cadastrId);
         aggregator = view.findViewById(R.id.aggregator);
         additionalInformation = view.findViewById(R.id.additionalInformation);
-        technology = view.findViewById(R.id.technology);
         cropList = view.findViewById(R.id.crop_list);
         cropAdd = view.findViewById(R.id.crop_add);
         area = view.findViewById(R.id.area);
-
-        urls = new ArrayList<>();
-
         images = view.findViewById(R.id.images);
+        btnUploadImage = view.findViewById(R.id.btn_upload_image);
+
+        List<RelationMember> membersWithRole = yield.getMembersWithRole(ROLE_FIELD_GEOMETRY);
+        if (membersWithRole.isEmpty()) return;
+        Way way = (Way) membersWithRole.get(0).getElement();
+
+        imagePanel();
+
+        yieldPanel();
+
+        cropPanel();
+
+        setArea(way);
+
+        editLogic();
+
+        saveBtnLogic();
+
+        imageBtnLogic();
+
+        roleCheck();
+
+        coordinate(view, way);
+
+        setRegionAndDistrict(way);
+
+        BottomSheetBehavior<View> bottomSheetBehavior = BottomSheetBehavior.from((View) view.getParent());
+        bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+        bottomSheetBehavior.setDraggable(false);
+//
+//        if (getDialog() != null) {
+//            getDialog().setCancelable(false);
+//            getDialog().setCanceledOnTouchOutside(false);
+//        }
+    }
+
+    private void coordinate(@NonNull View view, Way way) {
+        if (way == null) return;
+        RecyclerView recyclerView = view.findViewById(R.id.coordinate_list);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        recyclerView.setHasFixedSize(true);
+        CoordinateAdapter adapter = new CoordinateAdapter(way.getNodes());
+        recyclerView.setAdapter(adapter);
+    }
+
+    private void imagePanel() {
+        urls = new ArrayList<>();
         images.setLayoutManager(new GridLayoutManager(getContext(), 2));
         images.setNestedScrollingEnabled(false);
 
         SortedMap<String, String> tags = yield.getTags();
-        for(Map.Entry<String, String> rec : tags.entrySet()) {
+        for (Map.Entry<String, String> rec : tags.entrySet()) {
             if (rec == null) continue;
             if (rec.getValue() == null) continue;
             if (rec.getKey() == null) continue;
@@ -142,20 +187,102 @@ public class BsEditYieldFragment extends BottomSheetDialogFragment {
         }
         imageStringAdapter = new ImageStringAdapter(getContext(), urls);
         images.setAdapter(imageStringAdapter);
+    }
 
-        label.setText((getTagValue(yield, Tags.KEY_NAME)).trim());
-        toggleButton.setOnClickListener(v -> {
-            if (areEditTextsVisible) {
-                collapseEditTexts();
-            } else {
-                expandEditTexts();
+    private void editLogic() {
+        name.setText(getTagValue(yield, Tags.KEY_NAME));
+        region.setText(getTagValue(yield, YIELD_TAG_REGION));
+        district.setText(getTagValue(yield, YIELD_TAG_DISTRICT));
+        aggregator.setText(getTagValue(yield, YIELD_TAG_AGGREGATOR));
+        farmerName.setText(getTagValue(yield, YIELD_TAG_FARMER_NAME));
+        farmerSurName.setText(getTagValue(yield, YIELD_TAG_FARMER_SURNAME));
+        farmerMobile.setText(getTagValue(yield, YIELD_TAG_FARMER_MOBILE));
+        cadastrNumber.setText(getTagValue(yield, YIELD_TAG_CADASTRAL_NUMBER));
+        additionalInformation.setText(getTagValue(yield, YIELD_TAG_ADDITIONAL_INFORMATION));
+    }
+
+    private void setArea(Way way) {
+        String areaValue = getTagValue(yield, Tags.KEY_AREA);
+        if (way == null) return;
+        if (areaValue.isEmpty()) {
+            area.setText(getArea(way));
+        } else {
+            String newArea = getArea(way);
+            double oldVal = Double.parseDouble(areaValue);
+            double newVal = Double.parseDouble(newArea);
+            area.setText(oldVal == newVal ? getTagValue(yield, Tags.KEY_AREA) : newArea);
+        }
+    }
+
+    private void roleCheck() {
+        String userRole = main.getUserRole();
+        Objects.requireNonNull(userRole);
+
+        if (Objects.equals(userRole, ROLE_FARMER)) {
+            farmerName.setVisibility(View.GONE);
+            farmerSurName.setVisibility(View.GONE);
+            farmerMobile.setVisibility(View.GONE);
+        }
+    }
+
+    private void imageBtnLogic() {
+        btnUploadImage.setOnClickListener(v -> {
+            if (getContext() == null) return;
+            Intent startCamera = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+            try {
+                String cameraApp = App.getPreferences(main).getCameraApp();
+                if (!cameraApp.isEmpty()) {
+                    startCamera.setPackage(cameraApp);
+                }
+                File imageFile = main.getImageFile();
+                Uri photoUri = FileProvider.getUriForFile(getContext(), getString(R.string.content_provider), imageFile);
+                if (photoUri != null) {
+                    startCamera.setFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+                    startCamera.putExtra(MediaStore.EXTRA_OUTPUT, photoUri);
+                    startActivityForResult(startCamera, REQUEST_IMAGE_CAPTURE);
+                }
+                urls.add(imageFile.getAbsolutePath());
+            } catch (Exception ignored) {
+
             }
         });
+    }
 
-        ArrayAdapter<String> technologyAdapter = new ArrayAdapter<String>(getActivity(), R.layout.agro_simple_spinner_item, TECHNOLOGY_DATA);
-        technologyAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        technology.setAdapter(technologyAdapter);
+    private void saveBtnLogic() {
+        saveBtn.setOnClickListener(v -> {
 
+            if (Objects.equals(yield.getState(), OsmElement.STATE_CREATED)) {
+                if (crops == null || crops.isEmpty()) {
+                    Toast.makeText(getContext(), "Добавьте хотя бы один элемент севооборота.",
+                            Toast.LENGTH_SHORT).show();
+                    return;
+                }
+            }
+
+            Map<String, String> map = new HashMap<>();
+            map.put(Tags.KEY_NAME, name.getText().toString());
+            map.put(Tags.KEY_AREA, area.getText().toString());
+            map.put(YIELD_TAG_REGION, region.getText().toString());
+            map.put(YIELD_TAG_DISTRICT, district.getText().toString());
+            map.put(YIELD_TAG_AGGREGATOR, aggregator.getText().toString());
+            map.put(YIELD_TAG_FARMER_NAME, farmerName.getText().toString());
+            map.put(YIELD_TAG_FARMER_SURNAME, farmerSurName.getText().toString());
+            map.put(YIELD_TAG_FARMER_MOBILE, farmerMobile.getText().toString());
+            map.put(YIELD_TAG_ADDITIONAL_INFORMATION, additionalInformation.getText().toString());
+            map.put(YIELD_TAG_CADASTRAL_NUMBER, cadastrNumber.getText().toString());
+
+            if (urls != null && !urls.isEmpty()) {
+                for (int i = 0; i < urls.size(); i++) {
+                    map.put(TAG_IMAGE + "_" + (i + 1), urls.get(i));
+                }
+            }
+
+            App.getDelegator().updateFieldRelationTags(yield, map);
+            dismiss();
+        });
+    }
+
+    private void cropPanel() {
         cropAdapter = new ArrayAdapter<Relation>(this.getActivity(), R.layout.crop_list_item, crops) {
             @NonNull
             @Override
@@ -191,7 +318,8 @@ public class BsEditYieldFragment extends BottomSheetDialogFragment {
                     .setPositiveButton("Удалить", (dialogInterface, which) -> {
                         App.getDelegator().removeRelation(clickedRelation);
                         Toast.makeText(getContext(), "Посев удалён", Toast.LENGTH_SHORT).show();
-                        dismiss();
+                        crops.remove(clickedRelation);
+                        updateCropList();
                     })
                     .setNegativeButton("Отмена", null)
                     .show();
@@ -202,104 +330,24 @@ public class BsEditYieldFragment extends BottomSheetDialogFragment {
             BsEditCropFragment cropFragment = new BsEditCropFragment(null, yield, seasons, main, true);
             cropFragment.show(getChildFragmentManager(), cropFragment.getTag());
         });
+    }
 
-        List<RelationMember> membersWithRole = yield.getMembersWithRole(ROLE_FIELD_GEOMETRY);
-        String areaValue = getTagValue(yield, Tags.KEY_AREA);
-        if (!membersWithRole.isEmpty() && !areaValue.isEmpty()) {
-            OsmElement element = membersWithRole.get(0).getElement();
-            if (element != null) {
-                String newArea = getArea((Way) element);
-                double oldVal = Double.parseDouble(getTagValue(yield, Tags.KEY_AREA));
-                double newVal = Double.parseDouble(newArea);
-                area.setText(oldVal == newVal ? getTagValue(yield, Tags.KEY_AREA) : newArea);
-            }
+    private void yieldPanel() {
+        if (!areEditTextsVisible) {
+            label.setText("Создание поля");
+        } else {
+            label.setText("Редактирование поля");
         }
+        toggleButton.setOnClickListener(v -> showHidePanel());
+        showHidePanel();
+    }
 
-        name.setText(getTagValue(yield, Tags.KEY_NAME));
-        region.setText(getTagValue(yield, YIELD_TAG_REGION));
-        district.setText(getTagValue(yield, YIELD_TAG_DISTRICT));
-        aggregator.setText(getTagValue(yield, YIELD_TAG_AGGREGATOR));
-        farmerName.setText(getTagValue(yield, YIELD_TAG_FARMER_NAME));
-        farmerSurName.setText(getTagValue(yield, YIELD_TAG_FARMER_SURNAME));
-        farmerMobile.setText(getTagValue(yield, YIELD_TAG_FARMER_MOBILE));
-        cadastrNumber.setText(getTagValue(yield, YIELD_TAG_CADASTRAL_NUMBER));
-        additionalInformation.setText(getTagValue(yield, YIELD_TAG_ADDITIONAL_INFORMATION));
-        try {
-            technology.setSelection(Arrays.asList(TECHNOLOGY_DATA).indexOf(yield.getTagWithKey(YIELD_TAG_TECHNOLOGY)));
-        } catch (NullPointerException ignore) {
+    private void showHidePanel() {
+        if (areEditTextsVisible) {
+            collapseEditTexts();
+        } else {
+            expandEditTexts();
         }
-
-        saveBtn.setOnClickListener(v -> {
-            Map<String, String> map = new HashMap<>();
-            map.put(Tags.KEY_NAME, name.getText().toString());
-            map.put(Tags.KEY_AREA, area.getText().toString());
-            map.put(YIELD_TAG_REGION, region.getText().toString());
-            map.put(YIELD_TAG_DISTRICT, district.getText().toString());
-            map.put(YIELD_TAG_AGGREGATOR, aggregator.getText().toString());
-            map.put(YIELD_TAG_FARMER_NAME, farmerName.getText().toString());
-            map.put(YIELD_TAG_FARMER_SURNAME, farmerSurName.getText().toString());
-            map.put(YIELD_TAG_FARMER_MOBILE, farmerMobile.getText().toString());
-            map.put(YIELD_TAG_ADDITIONAL_INFORMATION, additionalInformation.getText().toString());
-            map.put(YIELD_TAG_CADASTRAL_NUMBER, cadastrNumber.getText().toString());
-            map.put(YIELD_TAG_TECHNOLOGY, technology.getSelectedItem().toString());
-
-            if (urls != null && !urls.isEmpty()) {
-                for (int i = 0; i < urls.size(); i++) {
-                    map.put(TAG_IMAGE + "_" + (i + 1), urls.get(i));
-                }
-            }
-
-//            List<RelationMember> membersWithRole = yield.getMembersWithRole(ROLE_FIELD_GEOMETRY);
-//            if (!membersWithRole.isEmpty()) {
-//                OsmElement element = membersWithRole.get(0).getElement();
-//                if (element != null) {
-//                    map.put(Tags.KEY_AREA, getArea((Way) element));
-//                }
-//            }
-
-            App.getDelegator().updateFieldRelationTags(yield, map);
-            dismiss();
-        });
-
-        btnUploadImage = view.findViewById(R.id.btn_upload_image);
-        btnUploadImage.setOnClickListener(v -> {
-            if (getContext() == null) return;
-            Intent startCamera = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-            try {
-                String cameraApp = App.getPreferences(main).getCameraApp();
-                if (!cameraApp.isEmpty()) {
-                    startCamera.setPackage(cameraApp);
-                }
-                File imageFile = main.getImageFile();
-                Uri photoUri = FileProvider.getUriForFile(getContext(), getString(R.string.content_provider), imageFile);
-                if (photoUri != null) {
-                    startCamera.setFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
-                    startCamera.putExtra(MediaStore.EXTRA_OUTPUT, photoUri);
-                    startActivityForResult(startCamera, REQUEST_IMAGE_CAPTURE);
-                }
-                urls.add(imageFile.getAbsolutePath());
-            } catch (Exception ignored) {
-
-            }
-        });
-
-        String userRole = main.getUserRole();
-        Objects.requireNonNull(userRole);
-
-        if (Objects.equals(userRole, ROLE_FARMER)) {
-            farmerName.setVisibility(View.GONE);
-            farmerSurName.setVisibility(View.GONE);
-            farmerMobile.setVisibility(View.GONE);
-        }
-
-        BottomSheetBehavior<View> bottomSheetBehavior = BottomSheetBehavior.from((View) view.getParent());
-        bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
-        bottomSheetBehavior.setDraggable(false);
-//
-//        if (getDialog() != null) {
-//            getDialog().setCancelable(false);
-//            getDialog().setCanceledOnTouchOutside(false);
-//        }
     }
 
     public void updateCropList() {
@@ -343,6 +391,31 @@ public class BsEditYieldFragment extends BottomSheetDialogFragment {
 
         if (getParentFragment() instanceof BottomSheetFragmentAllField) {
             ((BottomSheetFragmentAllField) getParentFragment()).dismiss();
+        }
+
+        if (Objects.equals(yield.getState(), OsmElement.STATE_CREATED)) {
+            if (crops == null || crops.isEmpty()) {
+                App.getDelegator().removeFieldRelation(yield);
+                Toast.makeText(getContext(), "Поле удалёно", Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
+    private void setRegionAndDistrict(Way way) {
+        if (way == null) return;
+        BoundingBox bounds = way.getBounds();
+        if (bounds.isValid()) {
+            final ViewBox box = new ViewBox(bounds);
+            double[] centerCoords = box.getCenter();
+            if (centerCoords.length >= 2) {
+                double centerLat = centerCoords[1];
+                double centerLon = centerCoords[0];
+                LatLon location = new LatLon(centerLat, centerLon);
+                ReferenceDataManager.ReferenceFeature matchingFeature = ReferenceDataManager.findFeatureContainingPoint(location);
+                if (matchingFeature == null) return;
+                region.setText(matchingFeature.getAdm1Ky());
+                district.setText(matchingFeature.getAdm2Ky());
+            }
         }
     }
 

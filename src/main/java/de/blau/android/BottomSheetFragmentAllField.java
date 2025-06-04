@@ -75,7 +75,7 @@ public class BottomSheetFragmentAllField extends BottomSheetDialogFragment {
 
             @Override
             public void editMetaData(Relation relation) {
-                main.editYield(relation, getChildFragmentManager());
+                main.editYield(relation, getChildFragmentManager(), false);
             }
 
             @Override
