@@ -10,7 +10,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.*;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 public class SeasonDialog {
 
@@ -80,9 +84,25 @@ public class SeasonDialog {
             String name = input.getText().toString().trim();
             String startDate = start.getText().toString().trim();
             String endDate = end.getText().toString().trim();
-            if (!name.isEmpty()) {
+
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+            try {
+                if (!startDate.isEmpty() && !endDate.isEmpty()) {
+                    Date startStr = sdf.parse(startDate);
+                    Date endStr = sdf.parse(endDate);
+
+                    if (startStr.after(endStr)) {
+                        Toast.makeText(context, "Дата начала позже даты конца\nДата конца раньше даты начала", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                }
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+
+            if (!name.isEmpty() && !startDate.isEmpty() && !endDate.isEmpty()) {
                 Season newSeason = new Season(startDate, name, endDate);
-                createSeason(newSeason);
+//                createSeason(newSeason);
                 seasons.add(newSeason);
                 App.getPreferences(context).saveSeasons(seasons);
                 adapter.notifyDataSetChanged();

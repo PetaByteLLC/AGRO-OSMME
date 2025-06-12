@@ -24,9 +24,13 @@ import androidx.annotation.Nullable;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 
@@ -112,20 +116,48 @@ public class BsEditCropFragment extends BottomSheetDialogFragment {
             DatePiker.setDataPicker(start, getContext());
             DatePiker.setDataPicker(end, getContext());
             AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-            builder.setTitle("Создания сезона")
+            builder.setTitle("Создание сезона")
                     .setView(dialogView)
-                    .setPositiveButton("Создать", (dialog, which) -> {
-                        Season newSeason = new Season(name.getText().toString());
-                        newSeason.setStartDate(start.getText().toString());
-                        newSeason.setEndDate(end.getText().toString());
-                        createSeason(newSeason);
-                        seasonSelector.add(newSeason);
-                        seasonAdapter.notifyDataSetChanged();
-                        season.setSelection(seasonSelector.size() - 1);
-                    })
-                    .setNegativeButton("Отмена", null)
-                    .create()
-                    .show();
+                    .setPositiveButton("Создать", null)
+                    .setNegativeButton("Отмена", null);
+
+            AlertDialog dialog = builder.create();
+            dialog.show();
+
+            Button createButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
+            createButton.setOnClickListener(view1 -> {
+                String startStr = start.getText().toString();
+                String endStr = end.getText().toString();
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+
+                try {
+                    if (!startStr.isEmpty() && !endStr.isEmpty()) {
+                        Date startDate = sdf.parse(startStr);
+                        Date endDate = sdf.parse(endStr);
+
+                        if (startDate.after(endDate)) {
+                            start.setError("Дата начала позже даты конца");
+                            end.setError("Дата конца раньше даты начала");
+                            return;
+                        }
+                    } else {
+                        if (startStr.isEmpty()) start.setError("Заполните поле");
+                        if (endStr.isEmpty()) end.setError("Заполните поле");
+                        return;
+                    }
+                    Season newSeason = new Season(name.getText().toString());
+                    newSeason.setStartDate(startStr);
+                    newSeason.setEndDate(endStr);
+//                    createSeason(newSeason);
+                    seasonSelector.add(newSeason);
+                    seasonAdapter.notifyDataSetChanged();
+                    season.setSelection(seasonSelector.size() - 1);
+                    dialog.dismiss();
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
+            });
+
         });
 
         if (main.currentSeason != null) {
