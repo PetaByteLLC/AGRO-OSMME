@@ -203,6 +203,25 @@ public class BsEditCropFragment extends BottomSheetDialogFragment {
             String landCategoryValue = landCategory.getSelectedItem().toString();
             String irrigationTypeValue = irrigationType.getSelectedItem().toString();
             Season seasonValue = (Season) season.getSelectedItem();
+
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+            try {
+                sowingDate.setError(null);
+                cleaningDate.setError(null);
+                if (!sowingDateValue.isEmpty() && !cleaningDateValue.isEmpty()) {
+                    Date startDate = sdf.parse(sowingDateValue);
+                    Date endDate = sdf.parse(cleaningDateValue);
+
+                    if (startDate.after(endDate)) {
+                        sowingDate.setError("дата посева не должна быть позже даты сбора");
+                        cleaningDate.setError("дата сбора не должна быть раньше даты посева");
+                        return;
+                    }
+                }
+            } catch (ParseException e) {
+                return;
+            }
+
             try {
                 if (culture.getSelectedItem() == null)
                     throw new NullPointerException("Выращиваемая культура");
