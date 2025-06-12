@@ -82,9 +82,9 @@ public class BsEditYieldFragment extends BottomSheetDialogFragment {
 
     private boolean areEditTextsVisible;
 
-    private ListView cropList;
+    private RecyclerView cropList;
     private Button cropAdd;
-    private ArrayAdapter<Relation> cropAdapter;
+    private CropAdapter cropAdapter;
 
     private RecyclerView images;
     private Button btnUploadImage;
@@ -285,48 +285,34 @@ public class BsEditYieldFragment extends BottomSheetDialogFragment {
     }
 
     private void cropPanel() {
-        cropAdapter = new ArrayAdapter<Relation>(this.getActivity(), R.layout.crop_list_item, crops) {
-            @NonNull
-            @Override
-            public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
-                if (convertView == null) {
-                    convertView = LayoutInflater.from(getContext()).inflate(R.layout.crop_list_item, parent, false);
+        cropList.setLayoutManager(new LinearLayoutManager(getContext()));
+        cropList.setNestedScrollingEnabled(false);
+
+        cropAdapter = new CropAdapter(
+                getContext(),
+                crops,
+                relation -> {
+                    // onItemClick
+                    BsEditCropFragment cropFragment = new BsEditCropFragment(relation, yield, seasons, main, false);
+                    cropFragment.show(getChildFragmentManager(), cropFragment.getTag());
+                },
+                relation -> {
+                    // onItemLongClick
+                    new AlertDialog.Builder(getContext())
+                            .setTitle("Вы уверены, что хотите удалить посев?")
+                            .setMessage(REMOVE_CROP_MESSAGE)
+                            .setIcon(android.R.drawable.ic_dialog_alert)
+                            .setPositiveButton("Удалить", (dialogInterface, which) -> {
+                                App.getDelegator().removeRelation(relation);
+                                Toast.makeText(getContext(), "Посев удалён", Toast.LENGTH_SHORT).show();
+                                crops.remove(relation);
+                                updateCropList();
+                            })
+                            .setNegativeButton("Отмена", null)
+                            .show();
                 }
-                Relation relation = getItem(position);
-
-                TextView culture = convertView.findViewById(R.id.culture);
-                culture.setText(getTagValue(relation, CROP_TAG_CULTURE));
-
-                TextView season = convertView.findViewById(R.id.season);
-                List<OsmElement> parentRelations = relation.getMemberElements();
-                Relation parentRelation = (Relation) parentRelations.get(0);
-                season.setText("Сезон " + getTagValue(parentRelation, Tags.KEY_NAME));
-                return convertView;
-            }
-        };
+        );
         cropList.setAdapter(cropAdapter);
-        cropList.setOnItemClickListener((p, v, pos, id) -> {
-            Relation clickedRelation = (Relation) p.getItemAtPosition(pos);
-            BsEditCropFragment cropFragment = new BsEditCropFragment(clickedRelation, yield, seasons, main, false);
-            cropFragment.show(getChildFragmentManager(), cropFragment.getTag());
-        });
-
-        cropList.setOnItemLongClickListener((p, v, pos, id) -> {
-            Relation clickedRelation = (Relation) p.getItemAtPosition(pos);
-            new AlertDialog.Builder(getContext())
-                    .setTitle("Вы уверены, что хотите удалить посев?")
-                    .setMessage(REMOVE_CROP_MESSAGE)
-                    .setIcon(android.R.drawable.ic_dialog_alert)
-                    .setPositiveButton("Удалить", (dialogInterface, which) -> {
-                        App.getDelegator().removeRelation(clickedRelation);
-                        Toast.makeText(getContext(), "Посев удалён", Toast.LENGTH_SHORT).show();
-                        crops.remove(clickedRelation);
-                        updateCropList();
-                    })
-                    .setNegativeButton("Отмена", null)
-                    .show();
-            return true;
-        });
 
         cropAdd.setOnClickListener(v -> {
             BsEditCropFragment cropFragment = new BsEditCropFragment(null, yield, seasons, main, true);
