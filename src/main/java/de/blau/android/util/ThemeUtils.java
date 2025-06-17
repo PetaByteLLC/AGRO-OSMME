@@ -125,7 +125,7 @@ public final class ThemeUtils {
      * @return a themed Inflater
      */
     public static LayoutInflater getLayoutInflater(@NonNull Context caller) {
-        Context context = getThemedContext(caller, R.style.Theme_DialogLight, R.style.Theme_DialogDark);
+        Context context = new ContextThemeWrapper(caller, R.style.Theme_DialogLight);
         return (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
     }
 

@@ -683,8 +683,6 @@ public class Main extends FullScreenAppCompatActivity
             startActivity(intent);
             finish();
         }
-
-        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
     }
 
     public String getUserRole() {
