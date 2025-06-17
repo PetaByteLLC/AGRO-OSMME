@@ -22,50 +22,44 @@ import de.blau.android.util.LatLon;
 public class ReferenceDataManager {
 
     private static final String TAG = "RefDataManager_Simple";
-    private static final String GEOJSON_FILE = "RD.geojson"; // Убедитесь, что имя верно
+    private static final String GEOJSON_FILE = "districts2.geojson";
 
-    // --- Данные и флаги загрузки ---
     private static volatile List<ReferenceFeature> referenceFeatures = null;
     private static volatile boolean loadAttempted = false;
     private static volatile boolean loadSuccessful = false;
 
-    // --- Класс для хранения района: только свойства и BBox ---
     public static class ReferenceFeature {
         final Map<String, String> properties;
-        final BoundingBox boundingBox; // BoundingBox из Vespucci
+        final BoundingBox boundingBox;
 
         public ReferenceFeature(Map<String, String> props, BoundingBox bbox) {
             this.properties = props != null ? props : new HashMap<>();
-            this.boundingBox = bbox; // Может быть null если не рассчитался
+            this.boundingBox = bbox;
         }
 
-        // Проверка попадания точки в BBox
+
         public boolean containsPoint(LatLon point) {
             if (this.boundingBox == null || !this.boundingBox.isValid() || point == null) {
                 return false;
             }
-            // --- ВАЖНО: ПРОВЕРЬТЕ ФОРМАТ КООРДИНАТ ---
-            // Убедитесь, что BoundingBox.contains ожидает double-градусы
-            // и преобразуйте point.getLat/getLon если они возвращают int E7
-            double latDouble = point.getLat(); // ЗАМЕНИТЬ НА (double)point.getLat() / 1.0E7 если нужно
-            double lonDouble = point.getLon(); // ЗАМЕНИТЬ НА (double)point.getLon() / 1.0E7 если нужно
+
+            double latDouble = point.getLat();
+            double lonDouble = point.getLon();
             return this.boundingBox.contains(latDouble, lonDouble);
         }
 
-        // Геттеры для нужных атрибутов
-        public String getAdm1Ky() { return properties.get("ADM1_KY"); }
-        public String getAdm2Ky() { return properties.get("ADM2_KY"); }
+        public String getAdm1Ky() { return properties.get("pname_r"); }
+        public String getAdm2Ky() { return properties.get("dname_r"); }
     }
 
-    // --- Проверка статуса загрузки ---
     public static boolean isDataLoadedSuccessfully() {
         return loadSuccessful && referenceFeatures != null;
     }
 
-    // --- Загрузка данных (должна быть вызвана асинхронно!) ---
+
     public static synchronized void loadData(Context context) {
         if (loadSuccessful) return;
-        if (loadAttempted && !loadSuccessful) return; // Не повторяем неудавшуюся попытку
+        if (loadAttempted && !loadSuccessful) return;
 
         Log.i(TAG, "Attempting to load reference data (simple bbox)...");
         loadAttempted = true;
@@ -115,7 +109,6 @@ public class ReferenceDataManager {
         }
     }
 
-    // --- ПОИСК: Найти первый BBox, содержащий точку ---
     public static ReferenceFeature findFeatureContainingPoint(LatLon point) {
         if (!isDataLoadedSuccessfully()) {
             Log.w(TAG, "findFeature failed: Data not loaded.");
@@ -132,7 +125,6 @@ public class ReferenceDataManager {
 
         Log.d(TAG, "Searching for BBox containing: " + point);
         for (ReferenceFeature feature : referenceFeatures) {
-            // Используем метод проверки точки в BBox
             if (feature.containsPoint(point)) {
                 Log.i(TAG, "MATCH (BBox): Found feature " + feature.getAdm2Ky());
                 return feature; // Возвращаем первый найденный
@@ -143,7 +135,6 @@ public class ReferenceDataManager {
         return null;
     }
 
-    // --- Вспомогательный парсинг атрибутов ---
     private static Map<String, String> parseProperties(JSONObject propertiesJson) {
         if (propertiesJson == null) return new HashMap<>();
         Map<String, String> props = new HashMap<>();
@@ -155,7 +146,6 @@ public class ReferenceDataManager {
         return props;
     }
 
-    // --- Вспомогательный расчет BoundingBox из GeoJSON геометрии ---
     private static BoundingBox calculateBoundsFromGeometry(JSONObject geometryJson) {
         if (geometryJson == null) return null;
         double[] bbox_ref = {90.0, -90.0, 180.0, -180.0, 0.0}; // minLat, maxLat, minLon, maxLon, foundFlag
@@ -164,10 +154,7 @@ public class ReferenceDataManager {
             boolean coordsFound = (bbox_ref[4] > 0.5);
             if (coordsFound) {
                 double minLat = bbox_ref[0], maxLat = bbox_ref[1], minLon = bbox_ref[2], maxLon = bbox_ref[3];
-                // --- ВАЖНО: Используйте ПРАВИЛЬНЫЙ конструктор BoundingBox! ---
-                // Замените на реальный вызов конструктора из Vespucci
-                // Убедитесь, что передаете double градусы, если конструктор их ожидает
-                return new BoundingBox(minLat, minLon, maxLat, maxLon); // ПРИМЕР!
+                return new BoundingBox(minLat, minLon, maxLat, maxLon);
             }
         } catch (JSONException e) {
             Log.e(TAG, "Error calculating bounds from geometry", e);
@@ -175,11 +162,10 @@ public class ReferenceDataManager {
         return null; // Не удалось рассчитать BBox
     }
 
-    // Рекурсивный обход координат для поиска min/max
     private static void processCoordsForBounds(JSONArray coords, double[] bbox_ref) throws JSONException {
         if (coords == null || coords.length() == 0) return;
         Object first = coords.opt(0);
-        if (!(first instanceof JSONArray)) { // Дошли до [lon, lat]
+        if (!(first instanceof JSONArray)) {
             if (coords.length() >= 2) {
                 double lon = coords.getDouble(0);
                 double lat = coords.getDouble(1);
@@ -187,11 +173,10 @@ public class ReferenceDataManager {
                 bbox_ref[1] = Math.max(bbox_ref[1], lat); // maxLat
                 bbox_ref[2] = Math.min(bbox_ref[2], lon); // minLon
                 bbox_ref[3] = Math.max(bbox_ref[3], lon); // maxLon
-                bbox_ref[4] = 1.0; // Флаг, что нашли координаты
+                bbox_ref[4] = 1.0;
             }
             return;
         }
-        // Рекурсивный вызов для вложенных массивов
         for (int i = 0; i < coords.length(); i++) {
             processCoordsForBounds(coords.optJSONArray(i), bbox_ref);
         }
