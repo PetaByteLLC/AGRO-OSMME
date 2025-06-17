@@ -87,6 +87,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatDelegate;
 import androidx.appcompat.view.ActionMode;
 import androidx.appcompat.widget.ActionMenuView;
 import androidx.appcompat.widget.PopupMenu;
@@ -682,6 +683,8 @@ public class Main extends FullScreenAppCompatActivity
             startActivity(intent);
             finish();
         }
+
+        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
     }
 
     public String getUserRole() {
