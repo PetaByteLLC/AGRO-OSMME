@@ -1,14 +1,13 @@
 package de.blau.android.prefs;
 
+import static de.blau.android.DatePiker.forCurrentYear;
 import static de.blau.android.contract.Constants.LOG_TAG_LEN;
 
-import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 
 import android.annotation.SuppressLint;
@@ -2231,7 +2230,7 @@ public class Preferences {
         } catch (NullPointerException ignore) {}
 
         // Список по умолчанию
-        seasons.add(new Season("2025-01-01", "2025", "2025-12-31"));
+        seasons.add(forCurrentYear());
         return seasons;
     }
 

@@ -80,4 +80,13 @@ public class DatePiker {
 
         return formatter.parse(dateString);
     }
+
+    public static Season forCurrentYear() {
+        Calendar calendar = Calendar.getInstance();
+        int currentYear = calendar.get(Calendar.YEAR);
+        String startOfYear = currentYear + "-01-01";
+        String yearAsString = String.valueOf(currentYear);
+        String endOfYear = currentYear + "-12-31";
+        return new Season(startOfYear, yearAsString, endOfYear);
+    }
 }

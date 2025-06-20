@@ -4,7 +4,7 @@ import de.blau.android.osm.Tags;
 
 public class AgroConstants {
 
-    public static final String BASE_URL = "https://agro.brisklyminds.com";
+    public static final String BASE_URL = "https://agrotest.brisklyminds.com";
     public static final String URL = BASE_URL + "/agroadmin";
     // --- КОНСТАНТЫ ---
     public static final String TYPE_FIELD = "agromap_field"; // Тип для Relation Поля
