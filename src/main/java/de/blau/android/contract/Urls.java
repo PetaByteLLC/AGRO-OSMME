@@ -1,5 +1,7 @@
 package de.blau.android.contract;
 
+import static de.blau.android.AgroConstants.BASE_URL;
+
 /**
  * Url constants for APIs etc Convention: the constants starting with DEFAULT have a user configurable way of supplying
  * other values
@@ -12,7 +14,7 @@ public final class Urls {
         // empty
     }
 
-    public static final String DEFAULT_API               = "https://agrotest.brisklyminds.com/api/0.6/";
+    public static final String DEFAULT_API               = BASE_URL + "/api/0.6/";
     public static final String DEFAULT_API_NAME          = "OpenStreetMap";
     public static final String DEFAULT_API_NO_HTTPS      = "";
     public static final String DEFAULT_API_NO_HTTPS_NAME = "OpenStreetMap no https";
