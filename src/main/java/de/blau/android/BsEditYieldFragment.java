@@ -59,7 +59,7 @@ import de.blau.android.util.LatLon;
 public class BsEditYieldFragment extends BottomSheetDialogFragment {
 
     private final Relation yield;
-    private final List<Relation> seasons;
+    private List<Relation> seasons;
     private final List<Relation> crops;
     private final Main main;
 
@@ -344,6 +344,7 @@ public class BsEditYieldFragment extends BottomSheetDialogFragment {
 
     public void updateCropList(Relation newCrop) {
         crops.add(newCrop);
+        seasons = yield.getParentRelations();
         cropAdapter.notifyDataSetChanged();
     }
 
