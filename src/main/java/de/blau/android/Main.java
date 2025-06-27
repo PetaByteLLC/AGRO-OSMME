@@ -2,12 +2,15 @@ package de.blau.android;
 
 import static de.blau.android.AgroConstants.*;
 import static de.blau.android.contract.Constants.LOG_TAG_LEN;
+import static de.blau.android.osm.FileUploader.getBasicAuthHeader;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.text.ParseException;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -782,29 +785,13 @@ public class Main extends FullScreenAppCompatActivity
         findViewById(R.id.undo_button).setOnClickListener(v -> handleUndo());
         findViewById(R.id.next_button).setOnClickListener(v -> finishBuilding());
         findViewById(R.id.remove_node_button).setOnClickListener(v -> deleteNeedlessNode());
-//        boolean hasChanges = App.getLogic().hasChanges();
-//        if (hasChanges && isConnected() && first) {
-//            upload();
-//        } else if (!hasChanges && isConnected() && first) {
-//            onMenuDownloadCurrent(true);
-//            try {
-//                Thread.sleep(1000);
-//            } catch (InterruptedException e) {
-//                throw new RuntimeException(e);
-//            }
-//            onMenuDownloadCurrent(true);
-//        }
-//        first = false;
-
-//            StringWriter stringWriter = new StringWriter();
-//            try {
-//                OsmXml.writeOsmChange(App.getDelegator().getCurrentStorage(), stringWriter, 1L, 10000, App.getUserAgent());
-//            } catch (IOException e) {
-//                throw new RuntimeException(e);
-//            } catch (XmlPullParserException e) {
-//                throw new RuntimeException(e);
-//            }
-//            Log.d(DEBUG_TAG, stringWriter.toString());
+        boolean hasChanges = App.getLogic().hasChanges();
+        if (hasChanges && isConnected() && first) {
+            upload();
+        } else if (!hasChanges && isConnected() && first) {
+            onMenuDownloadCurrent(true);
+        }
+        first = false;
     }
 
     @Override
@@ -1997,6 +1984,22 @@ public class Main extends FullScreenAppCompatActivity
         MenuItem allFieldItem = menu.findItem(R.id.all_fields);
         allFieldItem.setActionView(R.layout.agro_button_fields);
         allFieldItem.getActionView().setOnClickListener(new AllFieldListener());
+
+        MenuItem exportPolygonItem = menu.findItem(R.id.exportPolygon);
+        exportPolygonItem.setOnMenuItemClickListener((m) -> {
+            if (isConnected()) {
+                DownloadManager.Request request = new DownloadManager.Request(Uri.parse(EXPORT_URL));
+                request.addRequestHeader("Authorization", getBasicAuthHeader());
+                request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
+                request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, "exported.geojson");
+
+                DownloadManager downloadManager = (DownloadManager) getSystemService(Context.DOWNLOAD_SERVICE);
+                downloadManager.enqueue(request);
+            } else {
+                ScreenMessage.toastTopInfo(Main.this, "Нету подключения к интернету");
+            }
+            return true;
+        });
 
 //        MenuItem profileItem = menu.findItem(R.id.profile);
 //        profileItem.setActionView(R.layout.agro_button_profile);

@@ -6,6 +6,7 @@ public class AgroConstants {
 
     public static final String BASE_URL = "https://agrotest.brisklyminds.com";
     public static final String URL = BASE_URL + "/agroadmin";
+    public static final String EXPORT_URL = URL + "/ws/fields/export";
     // --- КОНСТАНТЫ ---
     public static final String TYPE_FIELD = "agromap_field"; // Тип для Relation Поля
     public static final String TYPE_SEASON = "agricultural_season";

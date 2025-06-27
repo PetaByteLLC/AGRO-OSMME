@@ -65,7 +65,7 @@ public class FileUploader {
         }
     }
 
-    private static String getBasicAuthHeader() {
+    public static String getBasicAuthHeader() {
         App currentInstance = App.getCurrentInstance();
         assert currentInstance != null;
         String username = App.getPreferences(currentInstance).getAgroUsername();

@@ -182,6 +182,9 @@
                 </menu>
             </item>
             <item
+                android:id="@+id/exportPolygon"
+                android:title="Экспорт"/>
+            <item
                 android:id="@+id/logout"
                 android:title="@string/logout" />
         </menu>
