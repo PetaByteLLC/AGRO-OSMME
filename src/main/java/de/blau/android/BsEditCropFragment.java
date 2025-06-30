@@ -49,6 +49,7 @@ public class BsEditCropFragment extends BottomSheetDialogFragment {
     private ImageView addSeason;
 
     private Spinner culture;
+    private Spinner technology;
     private EditText cultureVarieties;
     private Spinner season;
     private Spinner landCategory;
@@ -83,6 +84,7 @@ public class BsEditCropFragment extends BottomSheetDialogFragment {
         cultureVarieties = view.findViewById(R.id.cultureVarieties);
 
         season = view.findViewById(R.id.season);
+        technology = view.findViewById(R.id.technology);
         landCategory = view.findViewById(R.id.landCategory);
         irrigationType = view.findViewById(R.id.irrigationType);
         sowingDate = view.findViewById(R.id.sowingDate);
@@ -93,6 +95,10 @@ public class BsEditCropFragment extends BottomSheetDialogFragment {
         ArrayAdapter<String> cultureAdapter = new ArrayAdapter<String>(getActivity(), R.layout.agro_simple_spinner_item, CULTURE_DATA);
         cultureAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         culture.setAdapter(cultureAdapter);
+
+        ArrayAdapter<String> technologyAdapter = new ArrayAdapter<String>(getActivity(), R.layout.agro_simple_spinner_item, TECHNOLOGY_DATA);
+        technologyAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        technology.setAdapter(technologyAdapter);
 
         ArrayAdapter<String> landCategoryAdapter = new ArrayAdapter<String>(getActivity(), R.layout.agro_simple_spinner_item, LAND_CATEGORY_DATA);
         landCategoryAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -179,6 +185,7 @@ public class BsEditCropFragment extends BottomSheetDialogFragment {
             productivity.setText(getTagValue(crop, CROP_TAG_PRODUCTIVITY));
             try {
                 culture.setSelection(Arrays.asList(CULTURE_DATA).indexOf(crop.getTagWithKey(CROP_TAG_CULTURE)));
+                technology.setSelection(Arrays.asList(TECHNOLOGY_DATA).indexOf(crop.getTagWithKey(CROP_TAG_TECHNOLOGY)));
                 landCategory.setSelection(Arrays.asList(LAND_CATEGORY_DATA).indexOf(crop.getTagWithKey(CROP_TAG_LAND_CATEGORY)));
                 irrigationType.setSelection(Arrays.asList(IRRIGATION_TYPE_DATA).indexOf(crop.getTagWithKey(CROP_TAG_IRRIGATION_TYPE)));
                 OsmElement osmElement = crop.getMemberElements().get(0);
@@ -201,6 +208,7 @@ public class BsEditCropFragment extends BottomSheetDialogFragment {
             String productivityValue = productivity.getText().toString();
             String landCategoryValue = landCategory.getSelectedItem().toString();
             String irrigationTypeValue = irrigationType.getSelectedItem().toString();
+            String technologyValue = technology.getSelectedItem().toString();
             Season seasonValue = (Season) season.getSelectedItem();
 
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
@@ -234,6 +242,7 @@ public class BsEditCropFragment extends BottomSheetDialogFragment {
                 map.put(CROP_TAG_SOWING_DATE, sowingDateValue);
                 map.put(CROP_TAG_CLEANING_DATE, cleaningDateValue);
                 map.put(CROP_TAG_PRODUCTIVITY, productivityValue);
+                map.put(CROP_TAG_TECHNOLOGY, technologyValue);
                 map.put(CROP_TAG_LAND_CATEGORY, landCategory.getSelectedItemPosition() != 0 ? landCategoryValue : "");
                 map.put(CROP_TAG_IRRIGATION_TYPE, irrigationType.getSelectedItemPosition() != 0 ? irrigationTypeValue : "");
                 map.put(Tags.KEY_TYPE, TYPE_CROP);

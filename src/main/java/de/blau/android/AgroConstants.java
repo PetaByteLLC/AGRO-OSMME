@@ -38,6 +38,7 @@ public class AgroConstants {
     public static final String CROP_TAG_CLEANING_DATE = "cleaningDate";
     public static final String CROP_TAG_PRODUCTIVITY = "productivity";
     public static final String CROP_TAG_CULTURE = "culture";
+    public static final String CROP_TAG_TECHNOLOGY = "technology";
     public static final String CROP_TAG_LAND_CATEGORY = "landCategory";
     public static final String CROP_TAG_IRRIGATION_TYPE = "irrigationType";
 
