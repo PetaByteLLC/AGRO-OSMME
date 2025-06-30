@@ -2001,6 +2001,12 @@ public class Main extends FullScreenAppCompatActivity
             return true;
         });
 
+        MenuItem uploadChangesItem = menu.findItem(R.id.uploadChanges);
+        uploadChangesItem.setOnMenuItemClickListener((m) -> {
+            confirmUpload(null);
+            return true;
+        });
+
 //        MenuItem profileItem = menu.findItem(R.id.profile);
 //        profileItem.setActionView(R.layout.agro_button_profile);
 //        addNewFieldItem.setShowAsActionFlags(SHOW_AS_ACTION_IF_ROOM);

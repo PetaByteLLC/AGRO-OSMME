@@ -185,6 +185,9 @@
                 android:id="@+id/exportPolygon"
                 android:title="Экспорт"/>
             <item
+                android:id="@+id/uploadChanges"
+                android:title="Загрузка"/>
+            <item
                 android:id="@+id/logout"
                 android:title="@string/logout" />
         </menu>
