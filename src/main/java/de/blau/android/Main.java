@@ -2003,7 +2003,7 @@ public class Main extends FullScreenAppCompatActivity
 
         MenuItem uploadChangesItem = menu.findItem(R.id.uploadChanges);
         uploadChangesItem.setOnMenuItemClickListener((m) -> {
-            confirmUpload(null);
+            upload();
             return true;
         });
 
