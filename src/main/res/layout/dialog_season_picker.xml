@@ -8,62 +8,6 @@
     <ListView
         android:id="@+id/season_list"
         android:layout_width="match_parent"
-        android:layout_height="250dp" />
+        android:layout_height="match_parent" />
 
-    <EditText
-        android:id="@+id/season_name"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="Введите название сезона"
-        android:inputType="text" />
-
-    <EditText
-        android:id="@+id/season_start"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="Начало сезона"
-        android:inputType="date" />
-
-    <EditText
-        android:id="@+id/season_end"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="Конец сезона"
-        android:inputType="date" />
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="horizontal">
-
-        <Button
-            android:id="@+id/importBtn"
-            android:text="Импортировать сезоны"
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="wrap_content"
-            android:layout_gravity="end"
-            android:background="@drawable/radius"
-            android:paddingHorizontal="20dp"
-            android:layout_marginEnd="20dp"/>
-
-        <Button
-            android:id="@+id/add_button"
-            android:text="Добавить сезон"
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="wrap_content"
-            android:layout_gravity="end"
-            android:background="@drawable/radius"
-            android:paddingHorizontal="20dp"/>
-
-    </LinearLayout>
-
-    <TextView
-        android:layout_marginTop="20dp"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Долгое зажатие по сезону удалить запись"
-        android:textColor="@color/material_red"
-        android:textSize="17sp"/>
 </LinearLayout>

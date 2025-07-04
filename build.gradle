@@ -231,7 +231,7 @@ updateSynonyms.group = 'vespucci'
 updateSynonyms.description = 'Update synonym files from iD editor repo'
 
     
-apply from: 'https://raw.githubusercontent.com/simonpoole/gradle-tasks/master/eclipse-android-3.6-flavors'
+//apply from: 'https://raw.githubusercontent.com/simonpoole/gradle-tasks/master/eclipse-android-3.6-flavors'
 // apply from: '../gradle-tasks/eclipse-android-3.6-flavors'
 
 sonarqube {

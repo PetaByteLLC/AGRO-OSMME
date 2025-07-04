@@ -1,9 +1,11 @@
 package de.blau.android;
 
 import static de.blau.android.AgroConstants.CROP_TAG_CULTURE;
+import static de.blau.android.AgroConstants.CROP_TAG_NAME;
 import static de.blau.android.AgroConstants.OTHER_CULTURE;
 import static de.blau.android.AgroConstants.REMOVE_FIELD_MESSAGE;
 import static de.blau.android.AgroConstants.YIELD_TAG_REGION;
+import static de.blau.android.Main.SELECTED_SEASON;
 
 import android.app.AlertDialog;
 import android.os.Bundle;
@@ -25,13 +27,11 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 
 import de.blau.android.osm.BoundingBox;
-import de.blau.android.osm.Relation;
-import de.blau.android.osm.Tags;
 import de.blau.android.osm.ViewBox;
+import de.blau.android.osm.Way;
 
 public class BottomSheetFragmentAllField extends BottomSheetDialogFragment {
 
@@ -52,13 +52,13 @@ public class BottomSheetFragmentAllField extends BottomSheetDialogFragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        Season currentSeason = main.currentSeason;
-        if (currentSeason == null || currentSeason.getName() == null) {
+        String currentSeason = SELECTED_SEASON;
+        if (currentSeason == null) {
             Toast.makeText(getContext(), "Сезон не выбран!", Toast.LENGTH_SHORT).show();
             dismiss();
             return;
         }
-        regions = getGroup(main.getAllFields(), currentSeason.getName());
+        regions = getGroup(App.getLogic().getWays(), currentSeason);
         if (regions.isEmpty()) {
             Toast.makeText(getContext(), "По этому сезоны данных нет.", Toast.LENGTH_SHORT).show();
             dismiss();
@@ -66,13 +66,13 @@ public class BottomSheetFragmentAllField extends BottomSheetDialogFragment {
         }
         regionAdapter = new RegionAdapter(regions, new FieldAdapter.OnFieldClickListener() {
             @Override
-            public void remove(Relation relation) {
+            public void remove(Way way) {
                 new AlertDialog.Builder(getContext())
                         .setTitle("Вы уверены, что хотите удалить поле?")
                         .setMessage(REMOVE_FIELD_MESSAGE)
                         .setIcon(android.R.drawable.ic_dialog_alert)
                         .setPositiveButton("Удалить", (dialogInterface, which) -> {
-                            App.getDelegator().removeFieldRelation(relation);
+                            App.getDelegator().removeWay(way);
                             Toast.makeText(getContext(), "Поле удалёно", Toast.LENGTH_SHORT).show();
                             dismiss();
                         })
@@ -81,33 +81,29 @@ public class BottomSheetFragmentAllField extends BottomSheetDialogFragment {
             }
 
             @Override
-            public void editMetaData(Relation relation) {
-                main.editYield(relation, getChildFragmentManager(), false);
+            public void editMetaData(Way way) {
+                main.editYield(way, getChildFragmentManager(), false);
             }
 
             @Override
-            public void edit(Relation relation) {
-                BoundingBox bounds = relation.getBounds();
-                if (bounds != null) {
-                    final ViewBox box = new ViewBox(bounds);
-                    double[] center = box.getCenter();
-                    main.invalidateMap();
-                    main.getMap().getViewBox().moveTo(main.getMap(), (int) (center[0] * 1E7D), (int) (center[1] * 1E7D));
-                    main.editor(relation);
-                    dismiss();
-                }
+            public void edit(Way way) {
+                BoundingBox bounds = way.getBounds();
+                final ViewBox box = new ViewBox(bounds);
+                double[] center = box.getCenter();
+                main.invalidateMap();
+                main.getMap().getViewBox().moveTo(main.getMap(), (int) (center[0] * 1E7D), (int) (center[1] * 1E7D));
+                main.editor(way);
+                dismiss();
             }
 
             @Override
-            public void move(Relation relation) {
-                BoundingBox bounds = relation.getBounds();
-                if (bounds != null) {
-                    final ViewBox box = new ViewBox(bounds);
-                    double[] center = box.getCenter();
-                    main.invalidateMap();
-                    main.getMap().getViewBox().moveTo(main.getMap(), (int) (center[0] * 1E7D), (int) (center[1] * 1E7D));
-                    dismiss();
-                }
+            public void move(Way way) {
+                BoundingBox bounds = way.getBounds();
+                final ViewBox box = new ViewBox(bounds);
+                double[] center = box.getCenter();
+                main.invalidateMap();
+                main.getMap().getViewBox().moveTo(main.getMap(), (int) (center[0] * 1E7D), (int) (center[1] * 1E7D));
+                dismiss();
             }
         });
 
@@ -120,90 +116,111 @@ public class BottomSheetFragmentAllField extends BottomSheetDialogFragment {
         bottomSheetBehavior.setDraggable(false);
     }
 
-    public void updateList() {
-        regionAdapter.updateData();
-    }
-
-    private Set<String> getCulturesForYield(Relation yield, String currentSeasonName) {
+    private Set<String> getCulturesForWay(Way way, String currentSeasonName) {
         Set<String> culturesFound = new HashSet<>();
-        if (yield == null) return culturesFound;
-        List<Relation> seasons = yield.getParentRelations();
-        if (seasons == null) return culturesFound;
-        for (Relation season : seasons) {
-            if (season == null) continue;
-            if (currentSeasonName != null) {
-                String seasonNameFromTag = season.getTagWithKey(Tags.KEY_NAME);
-                if (!Objects.equals(currentSeasonName, seasonNameFromTag)) {
-                    continue;
-                }
-            }
-            List<Relation> crops = season.getParentRelations();
-            if (crops == null) continue;
-            for (Relation crop : crops) {
-                if (crop == null) continue;
-                String cultureValue = crop.getTagWithKey(CROP_TAG_CULTURE);
-                if (cultureValue != null && !cultureValue.isEmpty()) {
-                    culturesFound.add(cultureValue);
+        if (way == null || way.getTags() == null || currentSeasonName == null) {
+            return culturesFound;
+        }
+
+        // Итерируемся по всем тегам объекта Way
+        for (java.util.Map.Entry<String, String> tag : way.getTags().entrySet()) {
+            String tagKey = tag.getKey();
+            String tagValue = tag.getValue();
+
+            // 1. Проверяем, что ключ тега соответствует формату "crop_plan:..."
+            if (tagKey.startsWith(CROP_TAG_NAME)) {
+                // 2. Извлекаем сезон из ключа (например, "2024" из "crop_plan:2024:0")
+                String[] keyParts = tagKey.split(":");
+                if (keyParts.length >= 2) {
+                    String seasonFromTag = keyParts[1];
+
+                    // 3. Сравниваем с текущим сезоном
+                    if (currentSeasonName.equals(seasonFromTag)) {
+                        // 4. Парсим значение тега (например, "culture:Клубника;variety:белая пленка")
+                        String[] valueParts = tagValue.split(";");
+                        for (String part : valueParts) {
+                            String[] kv = part.split(":", 2); // Разделяем на ключ-значение
+                            if (kv.length == 2 && CROP_TAG_CULTURE.equals(kv[0].trim())) {
+                                String cultureName = kv[1].trim();
+                                if (!cultureName.isEmpty()) {
+                                    culturesFound.add(cultureName);
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
         return culturesFound;
     }
 
-    public List<Region> getGroup(List<Relation> allYieldRelations, String currentSeasonName) {
-        if (allYieldRelations == null || allYieldRelations.isEmpty()) {
+    /**
+     * Группирует список Way'ев по регионам и культурам.
+     *
+     * @param allWays           Список всех объектов Way (полей).
+     * @param currentSeasonName Сезон, для которого производится группировка.
+     * @return Список регионов, содержащих сгруппированные по культурам поля.
+     */
+    public List<Region> getGroup(List<Way> allWays, String currentSeasonName) {
+        if (allWays == null || allWays.isEmpty()) {
             return Collections.emptyList();
         }
-        java.util.Map<String, java.util.Map<String, List<Relation>>> groupedByRegionAndCulture = new HashMap<>();
-        for (Relation yield : allYieldRelations) {
-            if (yield == null) continue;
-            String regionValue = yield.getTagWithKey(YIELD_TAG_REGION);
+
+        java.util.Map<String, java.util.Map<String, List<Way>>> groupedByRegionAndCulture = new HashMap<>();
+
+        for (Way way : allWays) {
+            if (way == null) continue;
+
+            String regionValue = way.getTagWithKey(YIELD_TAG_REGION);
             if (regionValue == null || regionValue.isEmpty()) {
                 continue;
             }
-            Set<String> culturesForThisYield = getCulturesForYield(yield, currentSeasonName);
-            if (culturesForThisYield.isEmpty()) {
+
+            // Вызываем наш метод, работающий с Way
+            Set<String> culturesForThisWay = getCulturesForWay(way, currentSeasonName);
+            if (culturesForThisWay.isEmpty()) {
                 continue;
             }
+
             String effectiveCultureName;
-            if (culturesForThisYield.size() == 1) {
-                effectiveCultureName = culturesForThisYield.iterator().next();
+            if (culturesForThisWay.size() == 1) {
+                effectiveCultureName = culturesForThisWay.iterator().next();
             } else {
                 effectiveCultureName = OTHER_CULTURE;
             }
 
-            java.util.Map<String, List<Relation>> culturesMap = groupedByRegionAndCulture.get(regionValue);
+            // Логика группировки остается той же
+            java.util.Map<String, List<Way>> culturesMap = groupedByRegionAndCulture.get(regionValue);
             if (culturesMap == null) {
                 culturesMap = new HashMap<>();
                 groupedByRegionAndCulture.put(regionValue, culturesMap);
             }
-
-            List<Relation> yieldsList = culturesMap.get(effectiveCultureName);
-            if (yieldsList == null) {
-                yieldsList = new ArrayList<>();
-                culturesMap.put(effectiveCultureName, yieldsList);
-            }
-            yieldsList.add(yield);
+            List<Way> waysList = culturesMap.get(effectiveCultureName);
+            if (waysList == null) {
+                waysList = new ArrayList<>();
+                culturesMap.put(effectiveCultureName, waysList);
+            }waysList.add(way);
         }
 
         List<Region> resultRegionList = new ArrayList<>();
-        for (java.util.Map.Entry<String, java.util.Map<String, List<Relation>>> regionEntry : groupedByRegionAndCulture.entrySet()) {
+        for (java.util.Map.Entry<String, java.util.Map<String, List<Way>>> regionEntry : groupedByRegionAndCulture.entrySet()) {
             String regionName = regionEntry.getKey();
-            java.util.Map<String, List<Relation>> culturesInRegionMap = regionEntry.getValue();
+            java.util.Map<String, List<Way>> culturesInRegionMap = regionEntry.getValue();
             List<Culture> cultureListForCurrentRegion = new ArrayList<>();
-            for (java.util.Map.Entry<String, List<Relation>> cultureEntry : culturesInRegionMap.entrySet()) {
+
+            for (java.util.Map.Entry<String, List<Way>> cultureEntry : culturesInRegionMap.entrySet()) {
                 String cultureName = cultureEntry.getKey();
-                List<Relation> fieldsForCulture = cultureEntry.getValue();
+                List<Way> fieldsForCulture = cultureEntry.getValue(); // Теперь это список Way'ев
                 if (!fieldsForCulture.isEmpty()) {
                     cultureListForCurrentRegion.add(new Culture(cultureName, fieldsForCulture));
                 }
             }
+
             if (!cultureListForCurrentRegion.isEmpty()) {
                 resultRegionList.add(new Region(regionName, cultureListForCurrentRegion));
             }
         }
         return resultRegionList;
     }
-
 
 }

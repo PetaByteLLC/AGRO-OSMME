@@ -1,7 +1,8 @@
 package de.blau.android;
 
 import static de.blau.android.AgroConstants.CROP_TAG_CULTURE;
-import static de.blau.android.TagHelper.getTagValue;
+import static de.blau.android.BsEditCropFragment.getCrops;
+import static de.blau.android.BsEditCropFragment.getSubData;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -13,31 +14,30 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.List;
+import java.util.Map;
 
-import de.blau.android.osm.OsmElement;
-import de.blau.android.osm.Relation;
-import de.blau.android.osm.Tags;
+import de.blau.android.osm.Way;
 
 public class CropAdapter extends RecyclerView.Adapter<CropAdapter.ViewHolder> {
-    private List<Relation> crops;
+    private Way way;
     private Context context;
 
     public interface OnItemClickListener {
-        void onItemClick(Relation relation);
+        void onItemClick(String tagName);
     }
 
     public interface OnItemLongClickListener {
-        void onItemLongClick(Relation relation);
+        void onItemLongClick(String tagName);
     }
 
     private OnItemClickListener clickListener;
     private OnItemLongClickListener longClickListener;
 
-    public CropAdapter(Context context, List<Relation> crops,
+    public CropAdapter(Context context, Way way,
                        OnItemClickListener clickListener,
                        OnItemLongClickListener longClickListener) {
         this.context = context;
-        this.crops = crops;
+        this.way = way;
         this.clickListener = clickListener;
         this.longClickListener = longClickListener;
     }
@@ -62,28 +62,31 @@ public class CropAdapter extends RecyclerView.Adapter<CropAdapter.ViewHolder> {
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        Relation relation = crops.get(position);
+        List<Map.Entry<String, String>> crops = getCrops(way);
+        Map.Entry<String, String> data = crops.get(position);
 
-        holder.culture.setText(getTagValue(relation, CROP_TAG_CULTURE));
+        holder.culture.setText(getSubData(data.getValue(), CROP_TAG_CULTURE));
+        if (holder.culture.getText() == null) {
+            holder.culture.setText("Не указано");
+        }
 
-        List<OsmElement> parentRelations = relation.getMemberElements();
-        if (parentRelations != null && !parentRelations.isEmpty()) {
-            Relation parentRelation = (Relation) parentRelations.get(0);
-            holder.season.setText("Сезон " + getTagValue(parentRelation, Tags.KEY_NAME));
+        String[] keySplit = data.getKey().split(":");
+        if (keySplit.length > 1) {
+            holder.season.setText("Сезон " + keySplit[1]);
         } else {
-            holder.season.setText("Сезон неизвестен");
+            holder.season.setText("Сезон не указан");
         }
 
         // Click listeners
         holder.itemView.setOnClickListener(v -> {
             if (clickListener != null) {
-                clickListener.onItemClick(relation);
+                clickListener.onItemClick(data.getKey());
             }
         });
 
         holder.itemView.setOnLongClickListener(v -> {
             if (longClickListener != null) {
-                longClickListener.onItemLongClick(relation);
+                longClickListener.onItemLongClick(data.getKey());
                 return true;
             }
             return false;
@@ -92,7 +95,6 @@ public class CropAdapter extends RecyclerView.Adapter<CropAdapter.ViewHolder> {
 
     @Override
     public int getItemCount() {
-        return crops.size();
+        return getCrops(way).size();
     }
-
 }

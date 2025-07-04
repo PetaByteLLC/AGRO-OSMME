@@ -1,9 +1,8 @@
 package de.blau.android;
 
 import static de.blau.android.AgroConstants.*;
-import static de.blau.android.TagHelper.getTagValue;
+import static de.blau.android.Main.YEARS;
 
-import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -12,9 +11,7 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.Spinner;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -25,6 +22,7 @@ import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
@@ -33,40 +31,27 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 
-import de.blau.android.osm.OsmElement;
-import de.blau.android.osm.Relation;
-import de.blau.android.osm.Tags;
+import de.blau.android.osm.Way;
 
 public class BsEditCropFragment extends BottomSheetDialogFragment {
 
-    private final Relation crop;
-    private final Relation yield;
-    private final List<Relation> seasons;
-    private final List<Season> seasonSelector;
+    private final Way yield;
     private final Main main;
+    private final String key;
 
-    private Button saveButton;
-    private ImageView addSeason;
+    private Spinner season;
 
     private Spinner culture;
     private Spinner technology;
-    private EditText cultureVarieties;
-    private Spinner season;
-    private Spinner landCategory;
-    private Spinner irrigationType;
+    private EditText variety;
     private EditText sowingDate;
     private EditText cleaningDate;
     private EditText productivity;
 
-    private final boolean isNew;
-
-    public BsEditCropFragment(Relation crop, Relation yield, List<Relation> seasons, Main main, boolean isNew) {
-        this.crop = crop;
+    public BsEditCropFragment(String key, Way yield, Main main) {
+        this.key = key;
         this.yield = yield;
         this.main = main;
-        this.seasons = seasons;
-        this.seasonSelector = App.getPreferences(getContext()).getSeasons();
-        this.isNew = isNew;
     }
 
     @Override
@@ -79,18 +64,16 @@ public class BsEditCropFragment extends BottomSheetDialogFragment {
         super.onViewCreated(view, savedInstanceState);
         if (this.getActivity() == null) return;
 
-        saveButton = view.findViewById(R.id.btn_save);
-        culture = view.findViewById(R.id.culture);
-        cultureVarieties = view.findViewById(R.id.cultureVarieties);
+        Button saveButton = view.findViewById(R.id.btn_save);
 
-        season = view.findViewById(R.id.season);
+        culture = view.findViewById(R.id.culture);
+        variety = view.findViewById(R.id.cultureVarieties);
         technology = view.findViewById(R.id.technology);
-        landCategory = view.findViewById(R.id.landCategory);
-        irrigationType = view.findViewById(R.id.irrigationType);
         sowingDate = view.findViewById(R.id.sowingDate);
         cleaningDate = view.findViewById(R.id.cleaningDate);
         productivity = view.findViewById(R.id.productivity);
-        addSeason = view.findViewById(R.id.add_season);
+
+        season = view.findViewById(R.id.season);
 
         ArrayAdapter<String> cultureAdapter = new ArrayAdapter<String>(getActivity(), R.layout.agro_simple_spinner_item, CULTURE_DATA);
         cultureAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -100,125 +83,32 @@ public class BsEditCropFragment extends BottomSheetDialogFragment {
         technologyAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         technology.setAdapter(technologyAdapter);
 
-        ArrayAdapter<String> landCategoryAdapter = new ArrayAdapter<String>(getActivity(), R.layout.agro_simple_spinner_item, LAND_CATEGORY_DATA);
-        landCategoryAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        landCategory.setAdapter(landCategoryAdapter);
-
-        ArrayAdapter<String> irrigationTypeAdapter = new ArrayAdapter<String>(getActivity(), R.layout.agro_simple_spinner_item, IRRIGATION_TYPE_DATA);
-        irrigationTypeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        irrigationType.setAdapter(irrigationTypeAdapter);
-
-        ArrayAdapter<Season> seasonAdapter = getSeasonArrayAdapter();
+        ArrayAdapter<String> seasonAdapter = new ArrayAdapter<>(getActivity(), R.layout.agro_simple_spinner_item, YEARS);
+        seasonAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         season.setAdapter(seasonAdapter);
-
-        addSeason.setOnClickListener(v -> {
-            LayoutInflater inflater = getLayoutInflater();
-            View dialogView = inflater.inflate(R.layout.season_create_diaglog, null);
-            final EditText name = dialogView.findViewById(R.id.name);
-            final EditText start = dialogView.findViewById(R.id.start);
-            final EditText end = dialogView.findViewById(R.id.end);
-
-            DatePiker.setDataPicker(start, getContext());
-            DatePiker.setDataPicker(end, getContext());
-            AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-            builder.setTitle("Создание сезона")
-                    .setView(dialogView)
-                    .setPositiveButton("Создать", null)
-                    .setNegativeButton("Отмена", null);
-
-            AlertDialog dialog = builder.create();
-            dialog.show();
-
-            Button createButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
-            createButton.setOnClickListener(view1 -> {
-                String startStr = start.getText().toString();
-                String endStr = end.getText().toString();
-                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
-
-                try {
-                    if (!startStr.isEmpty() && !endStr.isEmpty()) {
-                        Date startDate = sdf.parse(startStr);
-                        Date endDate = sdf.parse(endStr);
-
-                        if (startDate.after(endDate)) {
-                            start.setError("Дата начала позже даты конца");
-                            end.setError("Дата конца раньше даты начала");
-                            return;
-                        }
-                    } else {
-                        if (startStr.isEmpty()) start.setError("Заполните поле");
-                        if (endStr.isEmpty()) end.setError("Заполните поле");
-                        return;
-                    }
-                    Season newSeason = new Season(name.getText().toString());
-                    newSeason.setStartDate(startStr);
-                    newSeason.setEndDate(endStr);
-//                    createSeason(newSeason);
-                    seasonSelector.add(newSeason);
-                    seasonAdapter.notifyDataSetChanged();
-                    season.setSelection(seasonSelector.size() - 1);
-                    dialog.dismiss();
-                } catch (ParseException e) {
-                    e.printStackTrace();
-                }
-            });
-
-        });
-
-        if (main.currentSeason != null) {
-            Season currentSeason = seasonSelector.get(seasonSelector.size() - 1);
-            for (Season s : seasonSelector) {
-                if (main.currentSeason.equals(s)) {
-                    currentSeason = s;
-                    break;
-                }
-            }
-            season.setSelection(seasonSelector.indexOf(currentSeason));
-        }
+        season.setSelection(YEARS.size() - 1);
 
         DatePiker.setDataPicker(sowingDate, getContext());
         DatePiker.setDataPicker(cleaningDate, getContext());
-        if (crop != null) {
-            cultureVarieties.setText(getTagValue(crop, CROP_TAG_CULTURE_VARIETIES));
-            sowingDate.setText(getTagValue(crop, CROP_TAG_SOWING_DATE));
-            cleaningDate.setText(getTagValue(crop, CROP_TAG_CLEANING_DATE));
-            productivity.setText(getTagValue(crop, CROP_TAG_PRODUCTIVITY));
-            try {
-                culture.setSelection(Arrays.asList(CULTURE_DATA).indexOf(crop.getTagWithKey(CROP_TAG_CULTURE)));
-                technology.setSelection(Arrays.asList(TECHNOLOGY_DATA).indexOf(crop.getTagWithKey(CROP_TAG_TECHNOLOGY)));
-                landCategory.setSelection(Arrays.asList(LAND_CATEGORY_DATA).indexOf(crop.getTagWithKey(CROP_TAG_LAND_CATEGORY)));
-                irrigationType.setSelection(Arrays.asList(IRRIGATION_TYPE_DATA).indexOf(crop.getTagWithKey(CROP_TAG_IRRIGATION_TYPE)));
-                OsmElement osmElement = crop.getMemberElements().get(0);
-                Season selectedSeason = null;
-                for (Season s : seasonSelector) {
-                    if (Objects.equals(s.getName(), osmElement.getTagWithKey(Tags.KEY_NAME))) {
-                        selectedSeason = s;
-                        break;
-                    }
-                }
-                season.setSelection(seasonSelector.indexOf(selectedSeason));
-            } catch (NullPointerException ignore) {
-            }
-        }
+
+        editValues();
 
         saveButton.setOnClickListener(v -> {
-            String cultureVarietiesValue = cultureVarieties.getText().toString();
+            String cultureVarietiesValue = variety.getText().toString();
             String sowingDateValue = sowingDate.getText().toString();
             String cleaningDateValue = cleaningDate.getText().toString();
             String productivityValue = productivity.getText().toString();
-            String landCategoryValue = landCategory.getSelectedItem().toString();
-            String irrigationTypeValue = irrigationType.getSelectedItem().toString();
             String technologyValue = technology.getSelectedItem().toString();
-            Season seasonValue = (Season) season.getSelectedItem();
+            String seasonValue = season.getSelectedItem().toString();
 
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+            SimpleDateFormat sdf = new SimpleDateFormat(DATE_FORMAT, Locale.getDefault());
             try {
                 sowingDate.setError(null);
                 cleaningDate.setError(null);
                 if (!sowingDateValue.isEmpty() && !cleaningDateValue.isEmpty()) {
                     Date startDate = sdf.parse(sowingDateValue);
                     Date endDate = sdf.parse(cleaningDateValue);
-
+                    assert startDate != null;
                     if (startDate.after(endDate)) {
                         sowingDate.setError("дата посева не должна быть позже даты сбора");
                         cleaningDate.setError("дата сбора не должна быть раньше даты посева");
@@ -238,27 +128,30 @@ public class BsEditCropFragment extends BottomSheetDialogFragment {
 
                 Map<String, String> map = new HashMap<>();
                 map.put(CROP_TAG_CULTURE, cultureValue);
+                map.put(CROP_TAG_TECHNOLOGY, technologyValue);
                 map.put(CROP_TAG_CULTURE_VARIETIES, cultureVarietiesValue);
                 map.put(CROP_TAG_SOWING_DATE, sowingDateValue);
                 map.put(CROP_TAG_CLEANING_DATE, cleaningDateValue);
                 map.put(CROP_TAG_PRODUCTIVITY, productivityValue);
-                map.put(CROP_TAG_TECHNOLOGY, technologyValue);
-                map.put(CROP_TAG_LAND_CATEGORY, landCategory.getSelectedItemPosition() != 0 ? landCategoryValue : "");
-                map.put(CROP_TAG_IRRIGATION_TYPE, irrigationType.getSelectedItemPosition() != 0 ? irrigationTypeValue : "");
-                map.put(Tags.KEY_TYPE, TYPE_CROP);
 
-                Relation seasonForFieldRelation = App.getDelegator().createSeasonForFieldRelation(yield, seasonValue, seasons);
-                if (isNew) {
-                    Relation newCrop = App.getDelegator().createCropForSeasonRelation(seasonForFieldRelation, map);
-                    if (getParentFragment() instanceof BsEditYieldFragment) {
-                        ((BsEditYieldFragment) getParentFragment()).updateCropList(newCrop);
+                StringBuilder cropData = new StringBuilder();
+                int count = 0;
+                for (Map.Entry<String, String> prop : map.entrySet()){
+                    cropData.append(prop.getKey())
+                            .append(":")
+                            .append(prop.getValue());
+                    if (count < map.size()) {
+                        cropData.append(";");
                     }
-                } else {
-                    if (crop == null) return;
-                    App.getDelegator().updateCropAndSeasonRelation(crop, map, seasonForFieldRelation);
-                    if (getParentFragment() instanceof BsEditYieldFragment) {
-                        ((BsEditYieldFragment) getParentFragment()).updateCropList();
-                    }
+                }
+
+                String tag = CROP_TAG_NAME + ":" + seasonValue + ":" + getNumber(seasonValue);
+                if (key != null) {
+                    App.getDelegator().deleteTag(key, yield);
+                }
+                App.getDelegator().updateTag(tag, cropData.toString(), yield);
+                if (getParentFragment() instanceof BsEditYieldFragment) {
+                    ((BsEditYieldFragment) getParentFragment()).updateCropList();
                 }
             } catch (NullPointerException exception) {
                 Toast.makeText(getContext(),
@@ -266,7 +159,6 @@ public class BsEditCropFragment extends BottomSheetDialogFragment {
                         Toast.LENGTH_SHORT).show();
                 return;
             }
-
             dismiss();
         });
 
@@ -274,46 +166,69 @@ public class BsEditCropFragment extends BottomSheetDialogFragment {
         bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
         bottomSheetBehavior.setDraggable(false);
 
-//        if (getDialog() != null) {
-//            getDialog().setCancelable(false);
-//            getDialog().setCanceledOnTouchOutside(false);
-//        }
+        if (getDialog() != null) {
+            getDialog().setCancelable(false);
+            getDialog().setCanceledOnTouchOutside(false);
+        }
     }
 
-    @NonNull
-    private ArrayAdapter<Season> getSeasonArrayAdapter() {
-        ArrayAdapter<Season> seasonAdapter = new ArrayAdapter<Season>(getActivity(), R.layout.season_dropdown_item, seasonSelector) {
-            @NonNull
-            @Override
-            public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
-                if (convertView == null) {
-                    convertView = LayoutInflater.from(getContext()).inflate(R.layout.season_dropdown_item, parent, false);
-                }
-                Season season = getItem(position);
-                TextView name = convertView.findViewById(R.id.text1);
-                name.setText("Сезон " + season.getName());
+    private int getNumber(String season) {
+        List<Map.Entry<String, String>> crops = getCrops(yield);
+        int max = 0;
+        for (Map.Entry<String, String> crop : crops) {
+            String cropKey = crop.getKey();
+            if (cropKey != null && cropKey.contains(season)) {
+                int val = Integer.parseInt(cropKey.substring(cropKey.length() - 1));
+                if (val > max) max = val;
+            };
+        }
+        return max + 1;
+    }
 
-                TextView date = convertView.findViewById(R.id.text2);
-                date.setText(season.getStartDate() + " - " + season.getEndDate());
-                return convertView;
-            }
-        };
-        seasonAdapter.setDropDownViewResource(R.layout.agro_simple_spinner_item);
-        return seasonAdapter;
+    private void editValues() {
+        if (key != null) {
+            String dataString = yield.getTagWithKey(key);
+            if (dataString == null) return;
+            sowingDate.setText(getSubData(dataString, CROP_TAG_SOWING_DATE));
+            cleaningDate.setText(getSubData(dataString, CROP_TAG_CLEANING_DATE));
+            productivity.setText(getSubData(dataString, CROP_TAG_PRODUCTIVITY));
+            try {
+                culture.setSelection(Arrays.asList(CULTURE_DATA).indexOf(getSubData(dataString, CROP_TAG_CULTURE)));
+                technology.setSelection(Arrays.asList(TECHNOLOGY_DATA).indexOf(getSubData(dataString, CROP_TAG_TECHNOLOGY)));
+                season.setSelection(YEARS.indexOf(key.split(":")[1]));
+            } catch (Exception ignore) {}
+        }
     }
 
     @Override
     public void onDismiss(@NonNull DialogInterface dialog) {
         super.onDismiss(dialog);
         main.invalidateMap();
+        assert App.getLogic() != null;
         App.getLogic().deselectAll();
         App.getLogic().setLocked(true);
         main.invisibleUnlockButton();
         if (getActivity() != null) {
             getActivity().invalidateOptionsMenu();
         }
-
-        App.getPreferences(getContext()).saveSeasons(seasonSelector);
     }
 
+    public static List<java.util.Map.Entry<String, String>> getCrops(Way way) {
+        ArrayList<java.util.Map.Entry<String, String>> list = new ArrayList<>();
+        for (Map.Entry<String, String> tag : way.getTags().entrySet()) {
+            if (tag.getKey().startsWith(CROP_TAG_NAME)) list.add(tag);
+        }
+        return list;
+    }
+
+    public static String getSubData(String data, String fieldName) {
+        String[] split = data.split(";");
+        for (String prop : split) {
+            String[] kv = prop.split(":");
+            if (Objects.equals(kv[0], fieldName)) {
+                return kv.length > 1 ? kv[1] : "";
+            }
+        }
+        return "";
+    }
 }

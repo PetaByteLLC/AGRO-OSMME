@@ -15,22 +15,22 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.List;
 
-import de.blau.android.osm.Relation;
 import de.blau.android.osm.Tags;
+import de.blau.android.osm.Way;
 
 public class FieldAdapter extends RecyclerView.Adapter<FieldAdapter.FieldViewHolder> {
 
-    private final List<Relation> fieldList;
+    private final List<Way> fieldList;
     private final OnFieldClickListener listener;
 
     public interface OnFieldClickListener {
-        void remove(Relation relation);
-        void editMetaData(Relation relation);
-        void edit(Relation relation);
-        void move(Relation relation);
+        void remove(Way way);
+        void editMetaData(Way way);
+        void edit(Way way);
+        void move(Way way);
     }
 
-    public FieldAdapter(List<Relation> fieldList, OnFieldClickListener listener) {
+    public FieldAdapter(List<Way> fieldList, OnFieldClickListener listener) {
         this.fieldList = fieldList;
         this.listener = listener;
     }
@@ -45,25 +45,25 @@ public class FieldAdapter extends RecyclerView.Adapter<FieldAdapter.FieldViewHol
 
     @Override
     public void onBindViewHolder(@NonNull FieldViewHolder holder, int position) {
-        Relation relation = fieldList.get(position);
-        String name = getTagValue(relation, Tags.KEY_NAME) + " - " + getTagValue(relation, Tags.KEY_AREA) + " га";
+        Way way = fieldList.get(position);
+        String name = getTagValue(way, Tags.KEY_NAME) + " - " + getTagValue(way, Tags.KEY_AREA) + " га";
         holder.name.setText(name);
 
         if (listener != null) {
             holder.fieldBox.setOnClickListener(v -> {
-                listener.editMetaData(relation);
+                listener.editMetaData(way);
             });
 
             holder.remove.setOnClickListener(v -> {
-                listener.remove(relation);
+                listener.remove(way);
             });
 
             holder.edit.setOnClickListener(v -> {
-                listener.edit(relation);
+                listener.edit(way);
             });
 
             holder.viewOnMap.setOnClickListener(v -> {
-                listener.move(relation);
+                listener.move(way);
             });
         }
     }

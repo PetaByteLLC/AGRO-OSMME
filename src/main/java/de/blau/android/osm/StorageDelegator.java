@@ -4338,69 +4338,13 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
         }
     }
 
-    // Роль Relation Сезона в Relation Посева
-
-    /**
-     * СОЗДАЕТ: Геометрию(Way) + Поле(Relation) + Сезон(Relation) + Посев(Relation)
-     * СВЯЗЫВАЕТ: Поле содержит Way, Сезон содержит Поле, Посев содержит Сезон.
-     *
-     * @param fieldWay          Way.
-     * @param fieldRelationTags Теги для Relation Поля (включая type=agromap_field).
-     * @param seasonTags        Теги для Relation Сезона (включая type=agricultural_season).
-     * @param cropTags          Теги для Relation Посева (включая type=crop_planting).
-     */
     @NonNull
-    public void createFieldRelationWithSeasonAndCrop(@NonNull Way fieldWay,
-                                                     @NonNull Map<String, String> fieldRelationTags,
-                                                     @NonNull Map<String, String> seasonTags,
-                                                     @NonNull Map<String, String> cropTags) {
+    public void createField(@NonNull Way fieldWay) {
         try {
             lock();
 
             setElementCreated(fieldWay); // Добавлен Way
-
-            // 2. Создаем Поле (Relation)
-            Relation fieldRelation = factory.createRelationWithNewId();
-            fieldRelationTags.put(Tags.KEY_TYPE, TYPE_FIELD); // Убедимся, что тип есть
-            fieldRelation.setTags(fieldRelationTags);
-            // Добавляем Way геометрии как члена Поля
-            RelationMember fieldWayMember = new RelationMember(ROLE_FIELD_GEOMETRY, fieldWay);
-            fieldRelation.addMember(fieldWayMember);
-            // Добавляем Поле в хранилища ПОСЛЕ добавления члена
-            setElementCreated(fieldRelation);
-            // Обратная ссылка для Way
-            fieldWay.addParentRelation(fieldRelation);
-            setElementModified(fieldWay); // Way изменен (добавлен родитель)
             onParentRelationChanged(fieldWay);
-
-            // 3. Создаем Сезон (Relation)
-            Relation seasonRelation = factory.createRelationWithNewId();
-            seasonTags.put(Tags.KEY_TYPE, TYPE_SEASON);
-            seasonRelation.setTags(seasonTags);
-            // Добавляем Relation Поля как члена Сезона
-            RelationMember fieldRelationMember = new RelationMember(ROLE_FIELD, fieldRelation);
-            seasonRelation.addMember(fieldRelationMember);
-            // Добавляем Сезон в хранилища ПОСЛЕ добавления члена
-            setElementCreated(seasonRelation);
-            // Обратная ссылка для Поля
-            fieldRelation.addParentRelation(seasonRelation);
-            setElementModified(fieldRelation); // Поле изменено (добавлен родитель)
-            onParentRelationChanged(fieldRelation);
-
-            // 4. Создаем Посев (Relation)
-            Relation cropRelation = factory.createRelationWithNewId();
-            cropTags.put(Tags.KEY_TYPE, TYPE_CROP);
-            cropRelation.setTags(cropTags);
-            // Добавляем Relation Сезона как члена Посева
-            RelationMember seasonRelationMember = new RelationMember(ROLE_SEASON, seasonRelation);
-            cropRelation.addMember(seasonRelationMember);
-            // Добавляем Посев в хранилища ПОСЛЕ добавления члена
-            setElementCreated(cropRelation);
-            // Обратная ссылка для Сезона
-            seasonRelation.addParentRelation(cropRelation);
-            setElementModified(seasonRelation); // Сезон изменен (добавлен родитель)
-            onParentRelationChanged(seasonRelation);
-
         } finally {
             unlock();
         }
@@ -4412,7 +4356,7 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
      * @param fieldRelation Relation Поля для обновления.
      * @param newTags       Полный набор новых тегов (включая type=agromap_field).
      */
-    public void updateFieldRelationTags(@NonNull Relation fieldRelation, @NonNull Map<String, String> newTags) {
+    public void updateOsmElementTags(@NonNull OsmElement fieldRelation, @NonNull Map<String, String> newTags) {
         boolean update = false;
         for (String key : newTags.keySet()) {
             if (!Objects.equals(fieldRelation.getTagWithKey(key), newTags.get(key))) {
@@ -4430,47 +4374,47 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
      * @param parentFieldRelation Существующий Relation Поля.
      * @param seasonValue         Теги для нового Сезона (включая type=agricultural_season).
      */
-    @NonNull
-    public Relation createSeasonForFieldRelation(@NonNull Relation parentFieldRelation, @NonNull Season seasonValue, List<Relation> exitsSeasons) {
-        if (currentStorage.getRelation(parentFieldRelation.getOsmId()) == null) {
-            throw new IllegalArgumentException("Parent Field Relation " + parentFieldRelation.getDescription(true) + " not found.");
-        }
-        try {
-            lock();
-            // 1. Создаем Сезон\Ищем сущ
-            if (!exitsSeasons.isEmpty()) {
-                for (Relation relation : exitsSeasons) {
-                    if (Objects.equals(seasonValue.getName(), relation.getTagWithKey(Tags.KEY_NAME))) {
-                        return relation;
-                    }
-                }
-            }
-
-            Relation season = factory.createRelationWithNewId();
-            Map<String, String> seasonTags = new HashMap<>();
-            seasonTags.put(Tags.KEY_NAME, seasonValue.getName());
-            seasonTags.put(AgroConstants.SEASON_TAG_START, seasonValue.getStartDate());
-            seasonTags.put(AgroConstants.SEASON_TAG_END, seasonValue.getEndDate());
-            seasonTags.put(Tags.KEY_TYPE, TYPE_SEASON);
-            season.setTags(seasonTags);
-
-            // 2. Связываем с Полем (Сезон содержит Relation Поля)
-            undo.save(parentFieldRelation); // Сохраняем Поле перед добавлением родителя
-            RelationMember fieldMember = new RelationMember(ROLE_FIELD, parentFieldRelation);
-            season.addMember(fieldMember);
-
-            // Добавляем Сезон ПОСЛЕ добавления члена
-            setElementCreated(season);
-
-            // Обратная ссылка для Поля
-            parentFieldRelation.addParentRelation(season);
-            setElementModified(parentFieldRelation); // Поле изменено (добавлен родитель)
-            onParentRelationChanged(parentFieldRelation);
-            return season;
-        } finally {
-            unlock();
-        }
-    }
+//    @NonNull
+//    public Relation createSeasonForFieldRelation(@NonNull Relation parentFieldRelation, @NonNull Season seasonValue, List<Relation> exitsSeasons) {
+//        if (currentStorage.getRelation(parentFieldRelation.getOsmId()) == null) {
+//            throw new IllegalArgumentException("Parent Field Relation " + parentFieldRelation.getDescription(true) + " not found.");
+//        }
+//        try {
+//            lock();
+//            // 1. Создаем Сезон\Ищем сущ
+//            if (!exitsSeasons.isEmpty()) {
+//                for (Relation relation : exitsSeasons) {
+//                    if (Objects.equals(seasonValue.getName(), relation.getTagWithKey(Tags.KEY_NAME))) {
+//                        return relation;
+//                    }
+//                }
+//            }
+//
+//            Relation season = factory.createRelationWithNewId();
+//            Map<String, String> seasonTags = new HashMap<>();
+//            seasonTags.put(Tags.KEY_NAME, seasonValue.getName());
+////            seasonTags.put(AgroConstants.SEASON_TAG_START, seasonValue.getStartDate());
+////            seasonTags.put(AgroConstants.SEASON_TAG_END, seasonValue.getEndDate());
+////            seasonTags.put(Tags.KEY_TYPE, TYPE_SEASON);
+//            season.setTags(seasonTags);
+//
+//            // 2. Связываем с Полем (Сезон содержит Relation Поля)
+//            undo.save(parentFieldRelation); // Сохраняем Поле перед добавлением родителя
+//            RelationMember fieldMember = new RelationMember(ROLE_FIELD, parentFieldRelation);
+//            season.addMember(fieldMember);
+//
+//            // Добавляем Сезон ПОСЛЕ добавления члена
+//            setElementCreated(season);
+//
+//            // Обратная ссылка для Поля
+//            parentFieldRelation.addParentRelation(season);
+//            setElementModified(parentFieldRelation); // Поле изменено (добавлен родитель)
+//            onParentRelationChanged(parentFieldRelation);
+//            return season;
+//        } finally {
+//            unlock();
+//        }
+//    }
 
     /**
      * Создает новый Посев (Relation) и связывает его с существующим Сезоном (Relation).
@@ -4479,37 +4423,37 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
      * @param cropTags     Теги для нового Посева (включая type=crop_planting).
      * @return Созданное отношение Посева.
      */
-    @NonNull
-    public Relation createCropForSeasonRelation(@NonNull Relation parentSeason, @NonNull Map<String, String> cropTags) {
-        if (currentStorage.getRelation(parentSeason.getOsmId()) == null) {
-            throw new IllegalArgumentException("Parent Season Relation " + parentSeason.getDescription(true) + " not found.");
-        }
-        try {
-            lock();
-            // 1. Создаем Посев
-            Relation crop = factory.createRelationWithNewId();
-            cropTags.put(Tags.KEY_TYPE, TYPE_CROP);
-            crop.setTags(cropTags);
-
-            // 2. Связываем с Сезоном (Посев содержит Relation Сезона)
-            undo.save(parentSeason); // Сохраняем Сезон перед добавлением родителя
-            RelationMember seasonMember = new RelationMember(ROLE_SEASON, parentSeason);
-            crop.addMember(seasonMember);
-
-            // Добавляем Посев ПОСЛЕ добавления члена
-            setElementCreated(crop);
-
-            // Обратная ссылка для Сезона
-            parentSeason.addParentRelation(crop);
-            setElementModified(parentSeason); // Сезон изменен (добавлен родитель)
-            onParentRelationChanged(parentSeason);
-
-            return crop;
-
-        } finally {
-            unlock();
-        }
-    }
+//    @NonNull
+//    public Relation createCropForSeasonRelation(@NonNull Relation parentSeason, @NonNull Map<String, String> cropTags) {
+//        if (currentStorage.getRelation(parentSeason.getOsmId()) == null) {
+//            throw new IllegalArgumentException("Parent Season Relation " + parentSeason.getDescription(true) + " not found.");
+//        }
+//        try {
+//            lock();
+//            // 1. Создаем Посев
+//            Relation crop = factory.createRelationWithNewId();
+//            cropTags.put(Tags.KEY_TYPE, TYPE_CROP);
+//            crop.setTags(cropTags);
+//
+//            // 2. Связываем с Сезоном (Посев содержит Relation Сезона)
+//            undo.save(parentSeason); // Сохраняем Сезон перед добавлением родителя
+//            RelationMember seasonMember = new RelationMember(ROLE_SEASON, parentSeason);
+//            crop.addMember(seasonMember);
+//
+//            // Добавляем Посев ПОСЛЕ добавления члена
+//            setElementCreated(crop);
+//
+//            // Обратная ссылка для Сезона
+//            parentSeason.addParentRelation(crop);
+//            setElementModified(parentSeason); // Сезон изменен (добавлен родитель)
+//            onParentRelationChanged(parentSeason);
+//
+//            return crop;
+//
+//        } finally {
+//            unlock();
+//        }
+//    }
 
 
     /**
@@ -4519,75 +4463,75 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
      * @param newCropTags  Новый набор тегов для Посева (включая type=crop_planting).
      * @param targetSeason Сезон (Relation), к которому Посев должен быть привязан ПОСЛЕ сохранения.
      */
-    public void updateCropAndSeasonRelation(@NonNull Relation cropToUpdate, @NonNull Map<String, String> newCropTags, @NonNull Relation targetSeason) {
-        // ... (проверки cropToUpdate, targetSeason) ...
-
-        Relation oldSeason = null;
-        RelationMember oldSeasonMember = null; // Член ВНУТРИ Посева, указывающий на старый сезон
-        boolean seasonChanged = false;
-
-        // Ищем текущий член-сезон ВНУТРИ Посева
-        List<RelationMember> members = cropToUpdate.getMembers();
-        if (members != null) {
-            for (RelationMember member : members) {
-                if (ROLE_SEASON.equals(member.getRole()) && member.getElement() instanceof Relation) {
-                    OsmElement potentialSeason = member.getElement();
-                    if (potentialSeason != null && TYPE_SEASON.equals(potentialSeason.getTagWithKey(Tags.KEY_TYPE))) {
-                        oldSeason = (Relation) potentialSeason;
-                        oldSeasonMember = member;
-                        break;
-                    }
-                }
-            }
-        }
-
-        // Определяем, изменился ли сезон
-        if (oldSeason == null || oldSeason.getOsmId() != targetSeason.getOsmId()) {
-            seasonChanged = true;
-        }
-
-        try {
-            lock();
-
-            // 1. Обновляем теги Посева
-            newCropTags.put(Tags.KEY_TYPE, TYPE_CROP);
-            boolean tagsChanged = cropToUpdate.setTags(newCropTags); // Вызывает undo и potentially modified status
-
-            // 2. Перемещаем Посев, если Сезон изменился
-            if (seasonChanged) {
-                undo.save(targetSeason);
-                if (oldSeason != null) {
-                    undo.save(oldSeason);
-                }
-
-                // --- ИЗМЕНЕНИЯ ЗДЕСЬ ---
-                // Удаляем старый член-сезон из Посева
-                if (oldSeasonMember != null) {
-                    cropToUpdate.removeMember(oldSeasonMember);
-                }
-                // Добавляем новый член-сезон в Посев
-                RelationMember newSeasonMember = new RelationMember(ROLE_SEASON, targetSeason);
-                cropToUpdate.addMember(newSeasonMember);
-                // ----------------------
-
-                // Обновляем обратные ссылки у Сезонов
-                if (oldSeason != null) {
-                    oldSeason.removeParentRelation(cropToUpdate);
-                    setElementModified(oldSeason);
-                    onParentRelationChanged(oldSeason);
-                }
-                targetSeason.addParentRelation(cropToUpdate);
-
-                setElementModified(targetSeason);
-                setElementModified(cropToUpdate); // Посев изменен (член и, возможно, родитель)
-                onParentRelationChanged(targetSeason);
-            } else if (!tagsChanged) {
-                // No changes
-            }
-        } finally {
-            unlock();
-        }
-    }
+//    public void updateCropAndSeasonRelation(@NonNull Relation cropToUpdate, @NonNull Map<String, String> newCropTags, @NonNull Relation targetSeason) {
+//        // ... (проверки cropToUpdate, targetSeason) ...
+//
+//        Relation oldSeason = null;
+//        RelationMember oldSeasonMember = null; // Член ВНУТРИ Посева, указывающий на старый сезон
+//        boolean seasonChanged = false;
+//
+//        // Ищем текущий член-сезон ВНУТРИ Посева
+//        List<RelationMember> members = cropToUpdate.getMembers();
+//        if (members != null) {
+//            for (RelationMember member : members) {
+//                if (ROLE_SEASON.equals(member.getRole()) && member.getElement() instanceof Relation) {
+//                    OsmElement potentialSeason = member.getElement();
+//                    if (potentialSeason != null && TYPE_SEASON.equals(potentialSeason.getTagWithKey(Tags.KEY_TYPE))) {
+//                        oldSeason = (Relation) potentialSeason;
+//                        oldSeasonMember = member;
+//                        break;
+//                    }
+//                }
+//            }
+//        }
+//
+//        // Определяем, изменился ли сезон
+//        if (oldSeason == null || oldSeason.getOsmId() != targetSeason.getOsmId()) {
+//            seasonChanged = true;
+//        }
+//
+//        try {
+//            lock();
+//
+//            // 1. Обновляем теги Посева
+//            newCropTags.put(Tags.KEY_TYPE, TYPE_CROP);
+//            boolean tagsChanged = cropToUpdate.setTags(newCropTags); // Вызывает undo и potentially modified status
+//
+//            // 2. Перемещаем Посев, если Сезон изменился
+//            if (seasonChanged) {
+//                undo.save(targetSeason);
+//                if (oldSeason != null) {
+//                    undo.save(oldSeason);
+//                }
+//
+//                // --- ИЗМЕНЕНИЯ ЗДЕСЬ ---
+//                // Удаляем старый член-сезон из Посева
+//                if (oldSeasonMember != null) {
+//                    cropToUpdate.removeMember(oldSeasonMember);
+//                }
+//                // Добавляем новый член-сезон в Посев
+//                RelationMember newSeasonMember = new RelationMember(ROLE_SEASON, targetSeason);
+//                cropToUpdate.addMember(newSeasonMember);
+//                // ----------------------
+//
+//                // Обновляем обратные ссылки у Сезонов
+//                if (oldSeason != null) {
+//                    oldSeason.removeParentRelation(cropToUpdate);
+//                    setElementModified(oldSeason);
+//                    onParentRelationChanged(oldSeason);
+//                }
+//                targetSeason.addParentRelation(cropToUpdate);
+//
+//                setElementModified(targetSeason);
+//                setElementModified(cropToUpdate); // Посев изменен (член и, возможно, родитель)
+//                onParentRelationChanged(targetSeason);
+//            } else if (!tagsChanged) {
+//                // No changes
+//            }
+//        } finally {
+//            unlock();
+//        }
+//    }
 
     private void setElementCreated(@NonNull OsmElement osmElement) {
         // 1. Устанавливаем флаг, что данные изменились и требуют сохранения
@@ -4701,100 +4645,144 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
         onElementChanged(null, osmElement);
     }
 
-    public void removeSeasonsByName(@NonNull String seasonName) {
-        boolean deletedSomething = false;
-        Log.d(DEBUG_TAG, "Attempting to remove seasons with name: " + seasonName + " and their related crops.");
-
+    public void updateTag(String tag, String value, Way yield) {
         try {
-            lock(); // Блокируем хранилище
-
-            // --- Шаг 1: Найти все сезоны, подлежащие удалению ---
-            // Собираем их в отдельный список, чтобы не менять основную коллекцию во время итерации
-            List<Relation> seasonsToDelete = new ArrayList<>();
-            // Итерируем по копии, т.к. будем удалять элементы
-            for (Relation r : new ArrayList<>(currentStorage.getRelations())) {
-                if (TYPE_SEASON.equals(r.getTagWithKey(Tags.KEY_TYPE)) &&
-                        seasonName.equals(r.getTagWithKey(Tags.KEY_NAME))) {
-                    seasonsToDelete.add(r);
-                }
+            lock();
+            dirty = true;
+            undo.save(yield);
+            yield.addTag(tag, value);
+            if (yield.isUnchanged()) {
+                yield.updateState(OsmElement.STATE_MODIFIED);
             }
-
-            // Если нет сезонов с таким именем, выходим
-            if (seasonsToDelete.isEmpty()) {
-                Log.d(DEBUG_TAG, "No seasons found with name '" + seasonName + "' to remove.");
-                return;
+            yield.stamp(); // Обновляем временную метку
+            yield.resetHasProblem(); // Сбрасываем флаги проблем
+            try {
+                apiStorage.insertElementSafe(yield);
+                onElementChanged(null, yield);
+            } catch (StorageException e) {
+                Log.e(DEBUG_TAG, "setTag got " + e.getMessage());
             }
-
-            Set<Long> deletedCropIds = new HashSet<>(); // Храним ID уже удаленных посевов, чтобы не пытаться удалить дважды
-
-            // --- Шаг 2: Для каждого найденного сезона найти и удалить связанные посевы ---
-            for (Relation season : seasonsToDelete) {
-                Log.d(DEBUG_TAG, "Processing season " + season.getDescription(true) + " for related crops.");
-
-                // Получаем список отношений, которые содержат этот сезон как член (обратные ссылки)
-                List<Relation> parentRelations = season.getParentRelations();
-                // Создаем копию для безопасной итерации, т.к. удаление посева может изменить parentRelations сезона
-                List<Relation> parentsToCheck = new ArrayList<>(parentRelations != null ? parentRelations : Collections.emptyList());
-
-                for (Relation parent : parentsToCheck) {
-                    long parentId = parent.getOsmId();
-                    // Пропускаем, если этот посев уже был удален (на случай сложных связей)
-                    if (deletedCropIds.contains(parentId)) {
-                        continue;
-                    }
-
-                    // Проверяем, является ли родительское отношение Посевом
-                    if (TYPE_CROP.equals(parent.getTagWithKey(Tags.KEY_TYPE))) {
-                        // Теперь ВАЖНО проверить, что этот Посев содержит ИМЕННО ЭТОТ сезон
-                        // с ролью ROLE_SEASON. Элемент может быть членом многих отношений.
-                        boolean isMemberWithCorrectRole = false;
-                        List<RelationMember> membersInCrop = parent.getAllMembers(season); // Получаем члены в Посеве, указывающие на наш Сезон
-                        if (membersInCrop != null) {
-                            for (RelationMember member : membersInCrop) {
-                                // Проверяем, что ссылка идет от Посева на Сезон с нужной ролью
-                                if (ROLE_SEASON.equals(member.getRole())) {
-                                    isMemberWithCorrectRole = true;
-                                    break;
-                                }
-                            }
-                        }
-
-                        if (isMemberWithCorrectRole) {
-                            Log.i(DEBUG_TAG, "Found related crop " + parent.getDescription(true) + " referencing season " + season.getDescription(true) + ". Removing crop.");
-                            // --- Удаляем найденный Посев ---
-                            // removeRelation сам позаботится об undo, apiStorage и удалении обратных ссылок
-                            // (включая удаление ссылки из 'parentRelations' нашего 'season')
-                            removeRelation(parent);
-                            deletedCropIds.add(parentId); // Запоминаем, что удалили этот посев
-                            deletedSomething = true;
-                        }
-                    }
-                }
-            }
-
-            // --- Шаг 3: Теперь удаляем сами сезоны ---
-            for (Relation season : seasonsToDelete) {
-                // Проверяем, существует ли сезон еще (он мог быть удален на шаге 2,
-                // если какая-то сущность была одновременно и сезоном, и посевом - маловероятно, но безопасно проверить)
-                if (currentStorage.getRelation(season.getOsmId()) != null || apiStorage.getRelation(season.getOsmId()) != null) {
-                    Log.i(DEBUG_TAG, "Removing season itself: " + season.getDescription(true));
-                    // Используем существующий метод удаления
-                    removeRelation(season);
-                    deletedSomething = true;
-                } else {
-                    Log.w(DEBUG_TAG, "Season " + season.getDescription(true) + " was already removed (possibly during crop removal?). Skipping redundant removal.");
-                }
-            }
-
         } finally {
-            unlock(); // Обязательно освобождаем блокировку
+            unlock();
         }
-
-        if (deletedSomething) {
-            Log.i(DEBUG_TAG, "Finished removing seasons named '" + seasonName + "' and their related crops. At least one element was removed.");
-        }
-
     }
+
+    public void deleteTag(String key, Way yield) {
+        try {
+            lock();
+            dirty = true;
+            undo.save(yield);
+            yield.removeTag(key);
+            if (yield.isUnchanged()) {
+                yield.updateState(OsmElement.STATE_MODIFIED);
+            }
+            yield.stamp(); // Обновляем временную метку
+            yield.resetHasProblem(); // Сбрасываем флаги проблем
+            try {
+                apiStorage.insertElementSafe(yield);
+                onElementChanged(null, yield);
+            } catch (StorageException e) {
+                Log.e(DEBUG_TAG, "setTag got " + e.getMessage());
+            }
+        } finally {
+            unlock();
+        }
+    }
+
+//    public void removeSeasonsByName(@NonNull String seasonName) {
+//        boolean deletedSomething = false;
+//        Log.d(DEBUG_TAG, "Attempting to remove seasons with name: " + seasonName + " and their related crops.");
+//
+//        try {
+//            lock(); // Блокируем хранилище
+//
+//            // --- Шаг 1: Найти все сезоны, подлежащие удалению ---
+//            // Собираем их в отдельный список, чтобы не менять основную коллекцию во время итерации
+//            List<Relation> seasonsToDelete = new ArrayList<>();
+//            // Итерируем по копии, т.к. будем удалять элементы
+//            for (Relation r : new ArrayList<>(currentStorage.getRelations())) {
+//                if (TYPE_SEASON.equals(r.getTagWithKey(Tags.KEY_TYPE)) &&
+//                        seasonName.equals(r.getTagWithKey(Tags.KEY_NAME))) {
+//                    seasonsToDelete.add(r);
+//                }
+//            }
+//
+//            // Если нет сезонов с таким именем, выходим
+//            if (seasonsToDelete.isEmpty()) {
+//                Log.d(DEBUG_TAG, "No seasons found with name '" + seasonName + "' to remove.");
+//                return;
+//            }
+//
+//            Set<Long> deletedCropIds = new HashSet<>(); // Храним ID уже удаленных посевов, чтобы не пытаться удалить дважды
+//
+//            // --- Шаг 2: Для каждого найденного сезона найти и удалить связанные посевы ---
+//            for (Relation season : seasonsToDelete) {
+//                Log.d(DEBUG_TAG, "Processing season " + season.getDescription(true) + " for related crops.");
+//
+//                // Получаем список отношений, которые содержат этот сезон как член (обратные ссылки)
+//                List<Relation> parentRelations = season.getParentRelations();
+//                // Создаем копию для безопасной итерации, т.к. удаление посева может изменить parentRelations сезона
+//                List<Relation> parentsToCheck = new ArrayList<>(parentRelations != null ? parentRelations : Collections.emptyList());
+//
+//                for (Relation parent : parentsToCheck) {
+//                    long parentId = parent.getOsmId();
+//                    // Пропускаем, если этот посев уже был удален (на случай сложных связей)
+//                    if (deletedCropIds.contains(parentId)) {
+//                        continue;
+//                    }
+//
+//                    // Проверяем, является ли родительское отношение Посевом
+//                    if (TYPE_CROP.equals(parent.getTagWithKey(Tags.KEY_TYPE))) {
+//                        // Теперь ВАЖНО проверить, что этот Посев содержит ИМЕННО ЭТОТ сезон
+//                        // с ролью ROLE_SEASON. Элемент может быть членом многих отношений.
+//                        boolean isMemberWithCorrectRole = false;
+//                        List<RelationMember> membersInCrop = parent.getAllMembers(season); // Получаем члены в Посеве, указывающие на наш Сезон
+//                        if (membersInCrop != null) {
+//                            for (RelationMember member : membersInCrop) {
+//                                // Проверяем, что ссылка идет от Посева на Сезон с нужной ролью
+//                                if (ROLE_SEASON.equals(member.getRole())) {
+//                                    isMemberWithCorrectRole = true;
+//                                    break;
+//                                }
+//                            }
+//                        }
+//
+//                        if (isMemberWithCorrectRole) {
+//                            Log.i(DEBUG_TAG, "Found related crop " + parent.getDescription(true) + " referencing season " + season.getDescription(true) + ". Removing crop.");
+//                            // --- Удаляем найденный Посев ---
+//                            // removeRelation сам позаботится об undo, apiStorage и удалении обратных ссылок
+//                            // (включая удаление ссылки из 'parentRelations' нашего 'season')
+//                            removeRelation(parent);
+//                            deletedCropIds.add(parentId); // Запоминаем, что удалили этот посев
+//                            deletedSomething = true;
+//                        }
+//                    }
+//                }
+//            }
+//
+//            // --- Шаг 3: Теперь удаляем сами сезоны ---
+//            for (Relation season : seasonsToDelete) {
+//                // Проверяем, существует ли сезон еще (он мог быть удален на шаге 2,
+//                // если какая-то сущность была одновременно и сезоном, и посевом - маловероятно, но безопасно проверить)
+//                if (currentStorage.getRelation(season.getOsmId()) != null || apiStorage.getRelation(season.getOsmId()) != null) {
+//                    Log.i(DEBUG_TAG, "Removing season itself: " + season.getDescription(true));
+//                    // Используем существующий метод удаления
+//                    removeRelation(season);
+//                    deletedSomething = true;
+//                } else {
+//                    Log.w(DEBUG_TAG, "Season " + season.getDescription(true) + " was already removed (possibly during crop removal?). Skipping redundant removal.");
+//                }
+//            }
+//
+//        } finally {
+//            unlock(); // Обязательно освобождаем блокировку
+//        }
+//
+//        if (deletedSomething) {
+//            Log.i(DEBUG_TAG, "Finished removing seasons named '" + seasonName + "' and their related crops. At least one element was removed.");
+//        }
+//
+//    }
 
     /**
      * Removes a specific Field Relation, its reference from any parent Season Relations,
@@ -4805,233 +4793,233 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
      *
      * @param fieldRelation The Relation object (must have type=agromap_field) to remove.
      */
-    public void removeFieldRelation(@NonNull Relation fieldRelation) {
-        if (fieldRelation == null) {
-            return;
-        }
-        long fieldOsmId = fieldRelation.getOsmId();
-
-        Set<Long> seasonsPotentiallyToDelete = new HashSet<>();
-        Set<Long> cropsToDelete = new HashSet<>();
-        Set<Long> waysPotentiallyToDelete = new HashSet<>();
-
-        try {
-            lock(); // Lock the storage for thread safety
-
-            // --- 1. Validate the input Relation ---
-            OsmElement checkExists = getOsmElement(Relation.NAME, fieldOsmId);
-            if (checkExists == null || !(checkExists instanceof Relation) || checkExists.getState() == OsmElement.STATE_DELETED) {
-                return; // Not found, not a relation, or already deleted
-            }
-            Relation storedFieldRelation = (Relation) checkExists;
-            if (!TYPE_FIELD.equals(storedFieldRelation.getTagWithKey(Tags.KEY_TYPE))) {
-                return; // Wrong type
-            }
-
-            // --- 2. Identify Geometry Ways ---
-            if (storedFieldRelation.getMembers() != null) {
-                for (RelationMember member : storedFieldRelation.getMembers()) {
-                    if (ROLE_FIELD_GEOMETRY.equals(member.getRole()) && Way.NAME.equals(member.getType())) {
-                        waysPotentiallyToDelete.add(member.getRef());
-                    }
-                }
-            }
-
-            // --- 3. Identify Parent Seasons ---
-            List<Relation> initialParentSeasons = new ArrayList<>();
-            List<Relation> allPotentialParents = storedFieldRelation.getParentRelations();
-            if (allPotentialParents != null) {
-                for (Relation parentRef : new ArrayList<>(allPotentialParents)) {
-                    Relation currentParent = (Relation) getOsmElement(Relation.NAME, parentRef.getOsmId());
-                    if (currentParent != null && currentParent.getState() != OsmElement.STATE_DELETED &&
-                            TYPE_SEASON.equals(currentParent.getTagWithKey(Tags.KEY_TYPE))) {
-                        boolean isMember = false;
-                        if (currentParent.getMembers() != null) {
-                            for(RelationMember rm : currentParent.getMembers()){
-                                if(rm.getRef() == fieldOsmId && Relation.NAME.equals(rm.getType()) && ROLE_FIELD.equals(rm.getRole())){
-                                    isMember = true;
-                                    break;
-                                }
-                            }
-                        }
-                        if(isMember) {
-                            initialParentSeasons.add(currentParent);
-                        }
-                    }
-                }
-            }
-
-            // --- 4. Remove the Field Relation itself ---
-            // removeRelation handles dirty flag, undo, api storage
-            removeRelation(storedFieldRelation);
-
-            // --- 5. Process Parent Seasons: Remove Field ref & Check if Season should be deleted ---
-            for (Relation season : initialParentSeasons) {
-                Relation currentSeason = (Relation) getOsmElement(Relation.NAME, season.getOsmId());
-                if (currentSeason == null || currentSeason.getState() == OsmElement.STATE_DELETED) {
-                    continue;
-                }
-
-                List<RelationMember> membersToRemove = new ArrayList<>();
-                if(currentSeason.getMembers() != null){
-                    for (RelationMember member : new ArrayList<>(currentSeason.getMembers())) {
-                        if (member.getRef() == fieldOsmId && Relation.NAME.equals(member.getType()) && ROLE_FIELD.equals(member.getRole())) {
-                            membersToRemove.add(member);
-                        }
-                    }
-                }
-
-                if (!membersToRemove.isEmpty()) {
-                    undo.save(currentSeason); // Save before modifying members
-                    for (RelationMember memberToRemove : membersToRemove) {
-                        currentSeason.removeMember(memberToRemove);
-                        setElementModified(currentSeason); // Handles dirty flag, undo, api storage
-                    }
-                }
-
-                // Check if any other 'field' members remain
-                boolean hasOtherFields = false;
-                if(currentSeason.getMembers() != null) {
-                    for (RelationMember member : currentSeason.getMembers()) {
-                        if (ROLE_FIELD.equals(member.getRole())) {
-                            hasOtherFields = true;
-                            break;
-                        }
-                    }
-                }
-
-                if (!hasOtherFields) {
-                    seasonsPotentiallyToDelete.add(currentSeason.getOsmId());
-                }
-            }
-
-            // --- 6. Identify Crops linked to Seasons marked for deletion ---
-            for (Long seasonIdToDelete : seasonsPotentiallyToDelete) {
-                Relation seasonRelation = (Relation) getOsmElement(Relation.NAME, seasonIdToDelete);
-                if (seasonRelation == null || seasonRelation.getState() == OsmElement.STATE_DELETED) continue;
-
-                List<Relation> seasonParents = seasonRelation.getParentRelations();
-                if (seasonParents != null) {
-                    for (Relation cropRef : new ArrayList<>(seasonParents)) {
-                        Relation currentCrop = (Relation) getOsmElement(Relation.NAME, cropRef.getOsmId());
-                        if (currentCrop != null && currentCrop.getState() != OsmElement.STATE_DELETED &&
-                                TYPE_CROP.equals(currentCrop.getTagWithKey(Tags.KEY_TYPE))) {
-                            boolean isMember = false;
-                            if(currentCrop.getMembers() != null){
-                                for(RelationMember rm : currentCrop.getMembers()){
-                                    if(rm.getRef() == seasonIdToDelete && Relation.NAME.equals(rm.getType()) && ROLE_SEASON.equals(rm.getRole())){
-                                        isMember = true;
-                                        break;
-                                    }
-                                }
-                            }
-                            if(isMember){
-                                cropsToDelete.add(currentCrop.getOsmId());
-                            }
-                        }
-                    }
-                }
-            }
-
-            // --- 7. Delete Identified Crops ---
-            for (Long cropId : cropsToDelete) {
-                Relation cropRelation = (Relation) getOsmElement(Relation.NAME, cropId);
-                if (cropRelation != null && cropRelation.getState() != OsmElement.STATE_DELETED) {
-                    removeRelation(cropRelation); // Handles dirty flag, undo, api storage
-                }
-            }
-
-            // --- 8. Delete Identified Seasons ---
-            for (Long seasonId : seasonsPotentiallyToDelete) {
-                Relation seasonRelation = (Relation) getOsmElement(Relation.NAME, seasonId);
-                if (seasonRelation != null && seasonRelation.getState() != OsmElement.STATE_DELETED) {
-                    removeRelation(seasonRelation); // Handles dirty flag, undo, api storage
-                }
-            }
-
-            // --- 9. Handle Geometry Ways (optional deletion) ---
-            for(Long wayId : waysPotentiallyToDelete) {
-                Way currentWay = (Way) getOsmElement(Way.NAME, wayId);
-                if (currentWay != null && currentWay.getState() != OsmElement.STATE_DELETED) {
-                    boolean hasTags = currentWay.hasTags();
-                    List<Relation> wayParents = currentWay.getParentRelations();
-                    boolean hasOtherParents = wayParents != null && !wayParents.isEmpty();
-
-                    if (!hasTags && !hasOtherParents) {
-                        List<Node> nodesToRemove = new ArrayList<>();
-                        nodesToRemove.addAll(currentWay.getNodes());
-
-                        removeWay(currentWay); // Handles dirty flag, undo, api storage
-
-                        // Check and remove orphaned nodes
-                        for (Node node : nodesToRemove) {
-                            Node currentNode = (Node) getOsmElement(Node.NAME, node.getOsmId());
-                            if (currentNode != null && currentNode.getState() != OsmElement.STATE_DELETED) {
-                                boolean nodeHasTags = currentNode.hasTags();
-                                List<Way> nodeParentWays = currentStorage.getWays(currentNode);
-                                boolean nodeHasOtherWays = !nodeParentWays.isEmpty();
-
-                                if (!nodeHasTags && !nodeHasOtherWays) {
-                                    removeNode(currentNode); // Handles dirty flag, undo, api storage
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
-        } finally {
-            unlock(); // Always ensure the lock is released
-        }
-    }
-
-    public Relation createFieldRelation(Way fieldWay) {
-        try {
-            lock();
-
-            setElementCreated(fieldWay);
-            Relation fieldRelation = factory.createRelationWithNewId();
-            Map<String, String> fieldRelationTags = new HashMap<>();
-            fieldRelationTags.put(Tags.KEY_TYPE, TYPE_FIELD);
-            fieldRelationTags.put(Tags.KEY_NAME, "Поле " + UUID.randomUUID());
-            fieldRelation.setTags(fieldRelationTags);
-            RelationMember fieldWayMember = new RelationMember(ROLE_FIELD_GEOMETRY, fieldWay);
-            fieldRelation.addMember(fieldWayMember);
-            setElementCreated(fieldRelation);
-            fieldWay.addParentRelation(fieldRelation);
-            setElementModified(fieldWay);
-            onParentRelationChanged(fieldWay);
+//    public void removeFieldRelation(@NonNull Relation fieldRelation) {
+//        if (fieldRelation == null) {
+//            return;
+//        }
+//        long fieldOsmId = fieldRelation.getOsmId();
 //
-//            // 3. Создаем Сезон (Relation)
-//            Relation seasonRelation = factory.createRelationWithNewId();
-//            seasonTags.put(Tags.KEY_TYPE, TYPE_SEASON);
-//            seasonRelation.setTags(seasonTags);
-//            // Добавляем Relation Поля как члена Сезона
-//            RelationMember fieldRelationMember = new RelationMember(ROLE_FIELD, fieldRelation);
-//            seasonRelation.addMember(fieldRelationMember);
-//            // Добавляем Сезон в хранилища ПОСЛЕ добавления члена
-//            setElementCreated(seasonRelation);
-//            // Обратная ссылка для Поля
-//            fieldRelation.addParentRelation(seasonRelation);
-//            setElementModified(fieldRelation); // Поле изменено (добавлен родитель)
-//            onParentRelationChanged(fieldRelation);
+//        Set<Long> seasonsPotentiallyToDelete = new HashSet<>();
+//        Set<Long> cropsToDelete = new HashSet<>();
+//        Set<Long> waysPotentiallyToDelete = new HashSet<>();
 //
-//            // 4. Создаем Посев (Relation)
-//            Relation cropRelation = factory.createRelationWithNewId();
-//            cropTags.put(Tags.KEY_TYPE, TYPE_CROP);
-//            cropRelation.setTags(cropTags);
-//            // Добавляем Relation Сезона как члена Посева
-//            RelationMember seasonRelationMember = new RelationMember(ROLE_SEASON, seasonRelation);
-//            cropRelation.addMember(seasonRelationMember);
-//            // Добавляем Посев в хранилища ПОСЛЕ добавления члена
-//            setElementCreated(cropRelation);
-//            // Обратная ссылка для Сезона
-//            seasonRelation.addParentRelation(cropRelation);
-//            setElementModified(seasonRelation); // Сезон изменен (добавлен родитель)
-//            onParentRelationChanged(seasonRelation);
-            return fieldRelation;
-        } finally {
-            unlock();
-        }
-    }
+//        try {
+//            lock(); // Lock the storage for thread safety
+//
+//            // --- 1. Validate the input Relation ---
+//            OsmElement checkExists = getOsmElement(Relation.NAME, fieldOsmId);
+//            if (checkExists == null || !(checkExists instanceof Relation) || checkExists.getState() == OsmElement.STATE_DELETED) {
+//                return; // Not found, not a relation, or already deleted
+//            }
+//            Relation storedFieldRelation = (Relation) checkExists;
+////            if (!TYPE_FIELD.equals(storedFieldRelation.getTagWithKey(Tags.KEY_TYPE))) {
+////                return; // Wrong type
+////            }
+//
+//            // --- 2. Identify Geometry Ways ---
+//            if (storedFieldRelation.getMembers() != null) {
+//                for (RelationMember member : storedFieldRelation.getMembers()) {
+////                    if (ROLE_FIELD_GEOMETRY.equals(member.getRole()) && Way.NAME.equals(member.getType())) {
+////                        waysPotentiallyToDelete.add(member.getRef());
+////                    }
+//                }
+//            }
+//
+//            // --- 3. Identify Parent Seasons ---
+//            List<Relation> initialParentSeasons = new ArrayList<>();
+//            List<Relation> allPotentialParents = storedFieldRelation.getParentRelations();
+//            if (allPotentialParents != null) {
+//                for (Relation parentRef : new ArrayList<>(allPotentialParents)) {
+//                    Relation currentParent = (Relation) getOsmElement(Relation.NAME, parentRef.getOsmId());
+////                    if (currentParent != null && currentParent.getState() != OsmElement.STATE_DELETED &&
+////                            TYPE_SEASON.equals(currentParent.getTagWithKey(Tags.KEY_TYPE))) {
+//                        boolean isMember = false;
+//                        if (currentParent.getMembers() != null) {
+//                            for(RelationMember rm : currentParent.getMembers()){
+////                                if(rm.getRef() == fieldOsmId && Relation.NAME.equals(rm.getType()) && ROLE_FIELD.equals(rm.getRole())){
+////                                    isMember = true;
+////                                    break;
+////                                }
+//                            }
+//                        }
+//                        if(isMember) {
+//                            initialParentSeasons.add(currentParent);
+//                        }
+//                    }
+//                }
+//            }
+//
+//            // --- 4. Remove the Field Relation itself ---
+//            // removeRelation handles dirty flag, undo, api storage
+//            removeRelation(storedFieldRelation);
+//
+//            // --- 5. Process Parent Seasons: Remove Field ref & Check if Season should be deleted ---
+//            for (Relation season : initialParentSeasons) {
+//                Relation currentSeason = (Relation) getOsmElement(Relation.NAME, season.getOsmId());
+//                if (currentSeason == null || currentSeason.getState() == OsmElement.STATE_DELETED) {
+//                    continue;
+//                }
+//
+//                List<RelationMember> membersToRemove = new ArrayList<>();
+//                if(currentSeason.getMembers() != null){
+//                    for (RelationMember member : new ArrayList<>(currentSeason.getMembers())) {
+//                        if (member.getRef() == fieldOsmId && Relation.NAME.equals(member.getType()) && ROLE_FIELD.equals(member.getRole())) {
+//                            membersToRemove.add(member);
+//                        }
+//                    }
+//                }
+//
+//                if (!membersToRemove.isEmpty()) {
+//                    undo.save(currentSeason); // Save before modifying members
+//                    for (RelationMember memberToRemove : membersToRemove) {
+//                        currentSeason.removeMember(memberToRemove);
+//                        setElementModified(currentSeason); // Handles dirty flag, undo, api storage
+//                    }
+//                }
+//
+//                // Check if any other 'field' members remain
+//                boolean hasOtherFields = false;
+//                if(currentSeason.getMembers() != null) {
+//                    for (RelationMember member : currentSeason.getMembers()) {
+//                        if (ROLE_FIELD.equals(member.getRole())) {
+//                            hasOtherFields = true;
+//                            break;
+//                        }
+//                    }
+//                }
+//
+//                if (!hasOtherFields) {
+//                    seasonsPotentiallyToDelete.add(currentSeason.getOsmId());
+//                }
+//            }
+//
+//            // --- 6. Identify Crops linked to Seasons marked for deletion ---
+//            for (Long seasonIdToDelete : seasonsPotentiallyToDelete) {
+//                Relation seasonRelation = (Relation) getOsmElement(Relation.NAME, seasonIdToDelete);
+//                if (seasonRelation == null || seasonRelation.getState() == OsmElement.STATE_DELETED) continue;
+//
+//                List<Relation> seasonParents = seasonRelation.getParentRelations();
+//                if (seasonParents != null) {
+//                    for (Relation cropRef : new ArrayList<>(seasonParents)) {
+//                        Relation currentCrop = (Relation) getOsmElement(Relation.NAME, cropRef.getOsmId());
+//                        if (currentCrop != null && currentCrop.getState() != OsmElement.STATE_DELETED &&
+//                                TYPE_CROP.equals(currentCrop.getTagWithKey(Tags.KEY_TYPE))) {
+//                            boolean isMember = false;
+//                            if(currentCrop.getMembers() != null){
+//                                for(RelationMember rm : currentCrop.getMembers()){
+//                                    if(rm.getRef() == seasonIdToDelete && Relation.NAME.equals(rm.getType()) && ROLE_SEASON.equals(rm.getRole())){
+//                                        isMember = true;
+//                                        break;
+//                                    }
+//                                }
+//                            }
+//                            if(isMember){
+//                                cropsToDelete.add(currentCrop.getOsmId());
+//                            }
+//                        }
+//                    }
+//                }
+//            }
+//
+//            // --- 7. Delete Identified Crops ---
+//            for (Long cropId : cropsToDelete) {
+//                Relation cropRelation = (Relation) getOsmElement(Relation.NAME, cropId);
+//                if (cropRelation != null && cropRelation.getState() != OsmElement.STATE_DELETED) {
+//                    removeRelation(cropRelation); // Handles dirty flag, undo, api storage
+//                }
+//            }
+//
+//            // --- 8. Delete Identified Seasons ---
+//            for (Long seasonId : seasonsPotentiallyToDelete) {
+//                Relation seasonRelation = (Relation) getOsmElement(Relation.NAME, seasonId);
+//                if (seasonRelation != null && seasonRelation.getState() != OsmElement.STATE_DELETED) {
+//                    removeRelation(seasonRelation); // Handles dirty flag, undo, api storage
+//                }
+//            }
+//
+//            // --- 9. Handle Geometry Ways (optional deletion) ---
+//            for(Long wayId : waysPotentiallyToDelete) {
+//                Way currentWay = (Way) getOsmElement(Way.NAME, wayId);
+//                if (currentWay != null && currentWay.getState() != OsmElement.STATE_DELETED) {
+//                    boolean hasTags = currentWay.hasTags();
+//                    List<Relation> wayParents = currentWay.getParentRelations();
+//                    boolean hasOtherParents = wayParents != null && !wayParents.isEmpty();
+//
+//                    if (!hasTags && !hasOtherParents) {
+//                        List<Node> nodesToRemove = new ArrayList<>();
+//                        nodesToRemove.addAll(currentWay.getNodes());
+//
+//                        removeWay(currentWay); // Handles dirty flag, undo, api storage
+//
+//                        // Check and remove orphaned nodes
+//                        for (Node node : nodesToRemove) {
+//                            Node currentNode = (Node) getOsmElement(Node.NAME, node.getOsmId());
+//                            if (currentNode != null && currentNode.getState() != OsmElement.STATE_DELETED) {
+//                                boolean nodeHasTags = currentNode.hasTags();
+//                                List<Way> nodeParentWays = currentStorage.getWays(currentNode);
+//                                boolean nodeHasOtherWays = !nodeParentWays.isEmpty();
+//
+//                                if (!nodeHasTags && !nodeHasOtherWays) {
+//                                    removeNode(currentNode); // Handles dirty flag, undo, api storage
+//                                }
+//                            }
+//                        }
+//                    }
+//                }
+//            }
+//
+//        } finally {
+//            unlock(); // Always ensure the lock is released
+//        }
+//    }
+//
+//    public Relation createFieldRelation(Way fieldWay) {
+//        try {
+//            lock();
+//
+//            setElementCreated(fieldWay);
+//            Relation fieldRelation = factory.createRelationWithNewId();
+//            Map<String, String> fieldRelationTags = new HashMap<>();
+//            fieldRelationTags.put(Tags.KEY_TYPE, TYPE_FIELD);
+//            fieldRelationTags.put(Tags.KEY_NAME, "Поле " + UUID.randomUUID());
+//            fieldRelation.setTags(fieldRelationTags);
+//            RelationMember fieldWayMember = new RelationMember(ROLE_FIELD_GEOMETRY, fieldWay);
+//            fieldRelation.addMember(fieldWayMember);
+//            setElementCreated(fieldRelation);
+//            fieldWay.addParentRelation(fieldRelation);
+//            setElementModified(fieldWay);
+//            onParentRelationChanged(fieldWay);
+////
+////            // 3. Создаем Сезон (Relation)
+////            Relation seasonRelation = factory.createRelationWithNewId();
+////            seasonTags.put(Tags.KEY_TYPE, TYPE_SEASON);
+////            seasonRelation.setTags(seasonTags);
+////            // Добавляем Relation Поля как члена Сезона
+////            RelationMember fieldRelationMember = new RelationMember(ROLE_FIELD, fieldRelation);
+////            seasonRelation.addMember(fieldRelationMember);
+////            // Добавляем Сезон в хранилища ПОСЛЕ добавления члена
+////            setElementCreated(seasonRelation);
+////            // Обратная ссылка для Поля
+////            fieldRelation.addParentRelation(seasonRelation);
+////            setElementModified(fieldRelation); // Поле изменено (добавлен родитель)
+////            onParentRelationChanged(fieldRelation);
+////
+////            // 4. Создаем Посев (Relation)
+////            Relation cropRelation = factory.createRelationWithNewId();
+////            cropTags.put(Tags.KEY_TYPE, TYPE_CROP);
+////            cropRelation.setTags(cropTags);
+////            // Добавляем Relation Сезона как члена Посева
+////            RelationMember seasonRelationMember = new RelationMember(ROLE_SEASON, seasonRelation);
+////            cropRelation.addMember(seasonRelationMember);
+////            // Добавляем Посев в хранилища ПОСЛЕ добавления члена
+////            setElementCreated(cropRelation);
+////            // Обратная ссылка для Сезона
+////            seasonRelation.addParentRelation(cropRelation);
+////            setElementModified(seasonRelation); // Сезон изменен (добавлен родитель)
+////            onParentRelationChanged(seasonRelation);
+//            return fieldRelation;
+//        } finally {
+//            unlock();
+//        }
+//    }
 }

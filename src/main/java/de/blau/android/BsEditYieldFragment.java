@@ -3,7 +3,7 @@ package de.blau.android;
 import static android.app.Activity.RESULT_CANCELED;
 import static android.app.Activity.RESULT_OK;
 import static de.blau.android.AgroConstants.*;
-import static de.blau.android.BottomSheetFragment.getArea;
+import static de.blau.android.BsEditCropFragment.getCrops;
 import static de.blau.android.Main.REQUEST_IMAGE_CAPTURE;
 import static de.blau.android.TagHelper.getTagValue;
 
@@ -20,11 +20,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
-import android.widget.ListView;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -41,6 +42,7 @@ import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -49,8 +51,6 @@ import java.util.SortedMap;
 
 import de.blau.android.osm.BoundingBox;
 import de.blau.android.osm.OsmElement;
-import de.blau.android.osm.Relation;
-import de.blau.android.osm.RelationMember;
 import de.blau.android.osm.Tags;
 import de.blau.android.osm.ViewBox;
 import de.blau.android.osm.Way;
@@ -58,9 +58,7 @@ import de.blau.android.util.LatLon;
 
 public class BsEditYieldFragment extends BottomSheetDialogFragment {
 
-    private final Relation yield;
-    private List<Relation> seasons;
-    private final List<Relation> crops;
+    private final Way yield;
     private final Main main;
 
     private TextView label;
@@ -72,6 +70,9 @@ public class BsEditYieldFragment extends BottomSheetDialogFragment {
     private EditText name;
     private EditText area;
     private EditText region;
+    private Spinner landType;
+    private Spinner underLandType;
+    private Spinner irrigationType;
     private EditText district;
     private EditText farmerSurName;
     private EditText farmerName;
@@ -91,10 +92,8 @@ public class BsEditYieldFragment extends BottomSheetDialogFragment {
     private ImageStringAdapter imageStringAdapter;
     private List<String> urls;
 
-    public BsEditYieldFragment(Relation yield, List<Relation> seasons, List<Relation> crops, Main main, boolean areEditTextsVisible) {
+    public BsEditYieldFragment(Way yield, Main main, boolean areEditTextsVisible) {
         this.yield = yield;
-        this.seasons = seasons;
-        this.crops = crops;
         this.main = main;
         this.areEditTextsVisible = !areEditTextsVisible;
     }
@@ -117,6 +116,9 @@ public class BsEditYieldFragment extends BottomSheetDialogFragment {
         name = view.findViewById(R.id.name);
         region = view.findViewById(R.id.region);
         district = view.findViewById(R.id.district);
+        landType = view.findViewById(R.id.landType);
+        underLandType = view.findViewById(R.id.underLandType);
+        irrigationType = view.findViewById(R.id.irrigationType);
         farmerSurName = view.findViewById(R.id.farmerSurName);
         farmerName = view.findViewById(R.id.farmerName);
         farmerMobile = view.findViewById(R.id.farmerMobile);
@@ -129,17 +131,13 @@ public class BsEditYieldFragment extends BottomSheetDialogFragment {
         images = view.findViewById(R.id.images);
         btnUploadImage = view.findViewById(R.id.btn_upload_image);
 
-        List<RelationMember> membersWithRole = yield.getMembersWithRole(ROLE_FIELD_GEOMETRY);
-        if (membersWithRole.isEmpty()) return;
-        Way way = (Way) membersWithRole.get(0).getElement();
-
         imagePanel();
 
         yieldPanel();
 
         cropPanel();
 
-        setArea(way);
+        setArea();
 
         editLogic();
 
@@ -149,9 +147,11 @@ public class BsEditYieldFragment extends BottomSheetDialogFragment {
 
         roleCheck();
 
-        coordinate(view, way);
+        coordinate(view);
 
-        setRegionAndDistrict(way);
+        setRegionAndDistrict();
+
+        setSpinnerData();
 
         BottomSheetBehavior<View> bottomSheetBehavior = BottomSheetBehavior.from((View) view.getParent());
         bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
@@ -163,12 +163,44 @@ public class BsEditYieldFragment extends BottomSheetDialogFragment {
 //        }
     }
 
-    private void coordinate(@NonNull View view, Way way) {
-        if (way == null) return;
+    private void setSpinnerData() {
+        ArrayAdapter<String> landTypeAdapter = new ArrayAdapter<>(getActivity(), R.layout.agro_simple_spinner_item, TYPE_LAND_DATA);
+        landTypeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        landType.setAdapter(landTypeAdapter);
+
+        landType.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                String typeLand = TYPE_LAND_DATA[position];
+                String[] strings = UNDER_TYPE_LAND_DATA.get(typeLand);
+                if (strings != null) {
+                    ArrayAdapter<String> underLandTypeAdapter = new ArrayAdapter<>(getActivity(), R.layout.agro_simple_spinner_item, strings);
+                    underLandTypeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                    underLandType.setAdapter(underLandTypeAdapter);
+                    underLandType.setVisibility(View.VISIBLE);
+                } else {
+                    underLandType.setAdapter(null);
+                    underLandType.setVisibility(View.GONE);
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+
+        ArrayAdapter<String> irrigationTypeAdapter = new ArrayAdapter<>(getActivity(), R.layout.agro_simple_spinner_item, IRRIGATION_TYPE_DATA);
+        irrigationTypeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        irrigationType.setAdapter(irrigationTypeAdapter);
+    }
+
+    private void coordinate(@NonNull View view) {
+        if (yield == null) return;
         RecyclerView recyclerView = view.findViewById(R.id.coordinate_list);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         recyclerView.setHasFixedSize(true);
-        CoordinateAdapter adapter = new CoordinateAdapter(way.getNodes());
+        CoordinateAdapter adapter = new CoordinateAdapter(yield.getNodes());
         recyclerView.setAdapter(adapter);
     }
 
@@ -200,15 +232,18 @@ public class BsEditYieldFragment extends BottomSheetDialogFragment {
         farmerMobile.setText(getTagValue(yield, YIELD_TAG_FARMER_MOBILE));
         cadastrNumber.setText(getTagValue(yield, YIELD_TAG_CADASTRAL_NUMBER));
         additionalInformation.setText(getTagValue(yield, YIELD_TAG_ADDITIONAL_INFORMATION));
+        landType.setSelection(Arrays.asList(TYPE_LAND_DATA).indexOf(getTagValue(yield, YIELD_TAG_TYPE_LAND)));
+        underLandType.setSelection(Arrays.asList(UNDER_TYPE_LAND_DATA).indexOf(getTagValue(yield, YIELD_TAG_UNDER_TYPE_LAND)));
+        irrigationType.setSelection(Arrays.asList(IRRIGATION_TYPE_DATA).indexOf(getTagValue(yield, YIELD_TAG_IRRIGATION_TYPE)));
     }
 
-    private void setArea(Way way) {
+    private void setArea() {
         String areaValue = getTagValue(yield, Tags.KEY_AREA);
-        if (way == null) return;
+        if (yield == null) return;
         if (areaValue.isEmpty()) {
-            area.setText(getArea(way));
+            area.setText(getArea(yield));
         } else {
-            String newArea = getArea(way);
+            String newArea = getArea(yield);
             double oldVal = Double.parseDouble(areaValue);
             double newVal = Double.parseDouble(newArea);
             area.setText(oldVal == newVal ? getTagValue(yield, Tags.KEY_AREA) : newArea);
@@ -243,9 +278,7 @@ public class BsEditYieldFragment extends BottomSheetDialogFragment {
                     startActivityForResult(startCamera, REQUEST_IMAGE_CAPTURE);
                 }
                 urls.add(imageFile.getAbsolutePath());
-            } catch (Exception ignored) {
-
-            }
+            } catch (Exception ignored) {}
         });
     }
 
@@ -253,7 +286,7 @@ public class BsEditYieldFragment extends BottomSheetDialogFragment {
         saveBtn.setOnClickListener(v -> {
 
             if (Objects.equals(yield.getState(), OsmElement.STATE_CREATED)) {
-                if (crops == null || crops.isEmpty()) {
+                if (getCrops(yield).isEmpty()) {
                     Toast.makeText(getContext(), "Добавьте хотя бы один элемент севооборота.",
                             Toast.LENGTH_SHORT).show();
                     return;
@@ -266,6 +299,9 @@ public class BsEditYieldFragment extends BottomSheetDialogFragment {
             map.put(Tags.KEY_AREA, area.getText().toString());
             map.put(YIELD_TAG_REGION, region.getText().toString());
             map.put(YIELD_TAG_DISTRICT, district.getText().toString());
+            map.put(YIELD_TAG_TYPE_LAND, landType.getSelectedItem() != null ? landType.getSelectedItem().toString() : "");
+            map.put(YIELD_TAG_UNDER_TYPE_LAND, underLandType.getSelectedItem() != null ? underLandType.getSelectedItem().toString() : "");
+            map.put(YIELD_TAG_IRRIGATION_TYPE, irrigationType.getSelectedItem() != null ? irrigationType.getSelectedItem().toString() : "");
             map.put(YIELD_TAG_AGGREGATOR, aggregator.getText().toString());
             map.put(YIELD_TAG_FARMER_NAME, farmerName.getText().toString());
             map.put(YIELD_TAG_FARMER_SURNAME, farmerSurName.getText().toString());
@@ -273,13 +309,20 @@ public class BsEditYieldFragment extends BottomSheetDialogFragment {
             map.put(YIELD_TAG_CADASTRAL_NUMBER, cadastrNumber.getText().toString());
             map.put(YIELD_TAG_ADDITIONAL_INFORMATION, additionalInformation.getText().toString());
 
+            int selectedItemPosition = landType.getSelectedItemPosition();
+            if (Objects.equals(selectedItemPosition, 2) || Objects.equals(selectedItemPosition, 3)) {
+                map.put("landuse", "meadow");
+            } else {
+                map.put("landuse", "farmland");
+            }
+
             if (urls != null && !urls.isEmpty()) {
                 for (int i = 0; i < urls.size(); i++) {
                     map.put(TAG_IMAGE + "_" + (i + 1), urls.get(i));
                 }
             }
 
-            App.getDelegator().updateFieldRelationTags(yield, map);
+            App.getDelegator().updateOsmElementTags(yield, map);
             dismiss();
         });
     }
@@ -290,22 +333,21 @@ public class BsEditYieldFragment extends BottomSheetDialogFragment {
 
         cropAdapter = new CropAdapter(
                 getContext(),
-                crops,
-                relation -> {
+                yield,
+                key -> {
                     // onItemClick
-                    BsEditCropFragment cropFragment = new BsEditCropFragment(relation, yield, seasons, main, false);
+                    BsEditCropFragment cropFragment = new BsEditCropFragment(key, yield, main);
                     cropFragment.show(getChildFragmentManager(), cropFragment.getTag());
                 },
-                relation -> {
+                key -> {
                     // onItemLongClick
                     new AlertDialog.Builder(getContext())
                             .setTitle("Вы уверены, что хотите удалить посев?")
                             .setMessage(REMOVE_CROP_MESSAGE)
                             .setIcon(android.R.drawable.ic_dialog_alert)
                             .setPositiveButton("Удалить", (dialogInterface, which) -> {
-                                App.getDelegator().removeRelation(relation);
+                                App.getDelegator().deleteTag(key, yield);
                                 Toast.makeText(getContext(), "Посев удалён", Toast.LENGTH_SHORT).show();
-                                crops.remove(relation);
                                 updateCropList();
                             })
                             .setNegativeButton("Отмена", null)
@@ -315,7 +357,7 @@ public class BsEditYieldFragment extends BottomSheetDialogFragment {
         cropList.setAdapter(cropAdapter);
 
         cropAdd.setOnClickListener(v -> {
-            BsEditCropFragment cropFragment = new BsEditCropFragment(null, yield, seasons, main, true);
+            BsEditCropFragment cropFragment = new BsEditCropFragment(null, yield, main);
             cropFragment.show(getChildFragmentManager(), cropFragment.getTag());
         });
     }
@@ -339,12 +381,6 @@ public class BsEditYieldFragment extends BottomSheetDialogFragment {
     }
 
     public void updateCropList() {
-        cropAdapter.notifyDataSetChanged();
-    }
-
-    public void updateCropList(Relation newCrop) {
-        crops.add(newCrop);
-        seasons = yield.getParentRelations();
         cropAdapter.notifyDataSetChanged();
     }
 
@@ -383,16 +419,16 @@ public class BsEditYieldFragment extends BottomSheetDialogFragment {
         }
 
         if (Objects.equals(yield.getState(), OsmElement.STATE_CREATED)) {
-            if (crops == null || crops.isEmpty()) {
-                App.getDelegator().removeFieldRelation(yield);
+            if (getCrops(yield).isEmpty()) {
+                App.getDelegator().removeWay(yield);
                 Toast.makeText(getContext(), "Поле удалёно", Toast.LENGTH_SHORT).show();
             }
         }
     }
 
-    private void setRegionAndDistrict(Way way) {
-        if (way == null) return;
-        BoundingBox bounds = way.getBounds();
+    private void setRegionAndDistrict() {
+        if (yield == null) return;
+        BoundingBox bounds = yield.getBounds();
         if (bounds.isValid()) {
             final ViewBox box = new ViewBox(bounds);
             double[] centerCoords = box.getCenter();

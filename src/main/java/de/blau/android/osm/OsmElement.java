@@ -878,6 +878,12 @@ public abstract class OsmElement implements OsmElementInterface, Serializable, X
      */
     public abstract ElementType getType(Map<String, String> tags);
 
+    public void removeTag(String key) {
+        if (this.tags != null) {
+            this.tags.remove(key);
+        }
+    }
+
     /** Enum for element types (Node, Way, Closed Ways, Relations, Areas (MPs) */
     public enum ElementType {
         NODE, WAY, CLOSEDWAY, RELATION, AREA

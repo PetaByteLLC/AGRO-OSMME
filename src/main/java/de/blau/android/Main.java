@@ -294,7 +294,6 @@ public class Main extends FullScreenAppCompatActivity
      */
     private static final int REQUEST_CODE_ASK_MULTIPLE_PERMISSIONS = 54321;
 
-    public Season currentSeason;
     /**
      * Not clear if this is even useful
      */
@@ -305,33 +304,6 @@ public class Main extends FullScreenAppCompatActivity
      * Minimum change in azimuth before we redraw
      */
     private static final int MIN_AZIMUT_CHANGE = 5;
-
-    public List<Relation> getUnicalSeason() {
-        List<Relation> seasons = new ArrayList<>();
-        addAllRelation(App.getLogic().getRelations(), seasons);
-        addAllRelation(App.getLogic().getModifiedRelations(), seasons);
-        return seasons;
-    }
-
-    private void addAllRelation(List<Relation> relations, List<Relation> seasons) {
-        if (relations == null) return;
-        for (Relation relation : relations) {
-            if (Objects.equals(relation.getTagWithKey(Tags.KEY_TYPE), ROLE_SEASON) && relation.getState() != OsmElement.STATE_DELETED) {
-                if (seasons.isEmpty()) {
-                    seasons.add(relation);
-                } else {
-                    boolean notExists = false;
-                    for (Relation s : seasons) {
-                        if (notExists) continue;
-
-                        if (Objects.equals(s.getTagWithKey("name"), relation.getTagWithKey("name")))
-                            notExists = true;
-                    }
-                    if (!notExists) seasons.add(relation);
-                }
-            }
-        }
-    }
 
     private class ConnectivityChangedReceiver extends BroadcastReceiver {
         @Override
@@ -686,23 +658,27 @@ public class Main extends FullScreenAppCompatActivity
             startActivity(intent);
             finish();
         }
+
+        for (int i = 2000; i <= Calendar.getInstance().get(Calendar.YEAR); i++) {
+            YEARS.add(String.valueOf(i));
+        }
+
+        TextView seasonTextView = findViewById(R.id.seasons);
+        seasonTextView.setOnClickListener(v -> {
+            SeasonDialog.show(this, currentSeason -> {
+                if (currentSeason != null) {
+                    prefs.selectSeason(SELECTED_SEASON);
+                    SELECTED_SEASON = currentSeason;
+                    invalidateOptionsMenu();
+                }
+            });
+        });
     }
+
+    public static final List<String> YEARS = new ArrayList<>();
 
     public String getUserRole() {
         return prefs.getAgroUserRole();
-    }
-
-    public void importSeasons() {
-        List<Relation> relations = App.getLogic().getRelations();
-        if (relations != null && !relations.isEmpty()) {
-            Set<Season> seasons = new HashSet<>();
-            for (Relation relation : relations) {
-                if (Objects.equals(relation.getTagWithKey(Tags.KEY_TYPE), TYPE_SEASON)) {
-                    seasons.add(new Season(relation.getTagWithKey("start"), relation.getTagWithKey(Tags.KEY_NAME), relation.getTagWithKey("end")));
-                }
-            }
-            prefs.saveSeasons(new ArrayList<>(seasons));
-        }
     }
 
     /**
@@ -2134,66 +2110,19 @@ public class Main extends FullScreenAppCompatActivity
 //            }
 //        }
 
+        String selectedSeason = prefs.getSelectedSeason();
         TextView seasonTextView = findViewById(R.id.seasons);
-        List<Season> seasons = prefs.getSeasons();
-        if (currentSeason == null) {
-            if (!seasons.isEmpty()) {
-                Calendar calToday = Calendar.getInstance();
-                calToday.set(Calendar.HOUR_OF_DAY, 0);
-                calToday.set(Calendar.MINUTE, 0);
-                calToday.set(Calendar.SECOND, 0);
-                calToday.set(Calendar.MILLISECOND, 0);
-                Date todayDateOnly = calToday.getTime();
-
-                for (Season season : seasons) {
-                    try {
-                        Calendar calStart = Calendar.getInstance();
-                        calStart.setTime(DatePiker.parseStringToDate(season.getStartDate(), DATE_FORMAT));
-                        calStart.set(Calendar.HOUR_OF_DAY, 0);
-                        calStart.set(Calendar.MINUTE, 0);
-                        calStart.set(Calendar.SECOND, 0);
-                        calStart.set(Calendar.MILLISECOND, 0);
-                        Date seasonStartDateOnly = calStart.getTime();
-
-                        Calendar calEnd = Calendar.getInstance();
-                        calEnd.setTime(DatePiker.parseStringToDate(season.getEndDate(), DATE_FORMAT));
-                        calEnd.set(Calendar.HOUR_OF_DAY, 0);
-                        calEnd.set(Calendar.MINUTE, 0);
-                        calEnd.set(Calendar.SECOND, 0);
-                        calEnd.set(Calendar.MILLISECOND, 0);
-                        Date seasonEndDateOnly = calEnd.getTime();
-
-                        if (!todayDateOnly.before(seasonStartDateOnly) && !todayDateOnly.after(seasonEndDateOnly)) {
-                            seasonTextView.setText(season.getName());
-                            currentSeason = season;
-                            break;
-                        }
-                    } catch (ParseException ignore) {}
-                }
-                if (currentSeason == null) {
-                    seasonTextView.setText("Сезон не выбран");
-                }
-            } else {
-                seasonTextView.setText("Сезон не выбран");
-            }
+        if (SELECTED_SEASON == null) {
+            SELECTED_SEASON = selectedSeason;
+            invalidateOptionsMenu();
         } else {
-            seasonTextView.setText(currentSeason.getName());
+            seasonTextView.setText(SELECTED_SEASON);
         }
-        seasonTextView.setOnClickListener(v -> {
-            SeasonDialog.show(this, selectedSeason -> {
-                if (selectedSeason != null) {
-//                    ScreenMessage.toastTopWarning(Main.this, "Вы выбрали: " + selectedSeason.getName());
-                    currentSeason = selectedSeason;
-                    invalidateOptionsMenu();
-                } else {
-                    seasonTextView.setText("Сезон не выбран");
-                    currentSeason = null;
-                }
-            });
-        });
 
         return true;
     }
+
+    public static String SELECTED_SEASON;
 
     /**
      * Check if we have a specific location provider
@@ -2818,7 +2747,6 @@ public class Main extends FullScreenAppCompatActivity
             case R.id.logout:
                 Runnable reset2 = () -> {
                     prefs.setCgiToken(null);
-                    prefs.saveSeasons(new ArrayList<>());
                     delegator.reset(true);
                     invalidateOptionsMenu();
                     map.invalidate();
@@ -4381,64 +4309,50 @@ public class Main extends FullScreenAppCompatActivity
 
         if (logic.getState() == 2) {
             Way way = logic.getSelectedWay();
-            List<Relation> parentRelations = way.getParentRelations();
-            editData(parentRelations.get(0));
+            editData(way);
         }
     }
 
 
-    public void editYield(Relation clickedRelation, FragmentManager fragmentManager, boolean visibleGeneralPanel) {
-        List<Relation> seasons = clickedRelation.getParentRelations();
-        if (seasons == null || seasons.isEmpty()) seasons = new ArrayList<>();
-
-        List<Relation> crops = new ArrayList<>();
-        for (Relation season : seasons) {
-            if (season == null) continue;
-            if (season.getParentRelations() == null) continue;
-            crops.addAll(season.getParentRelations());
-        }
-
-        BsEditYieldFragment bsEditYieldFragment = new BsEditYieldFragment(clickedRelation, seasons, crops, this, visibleGeneralPanel);
+    public void editYield(Way clickedRelation, FragmentManager fragmentManager, boolean visibleGeneralPanel) {
+        BsEditYieldFragment bsEditYieldFragment = new BsEditYieldFragment(clickedRelation, this, visibleGeneralPanel);
         bsEditYieldFragment.show(fragmentManager, bsEditYieldFragment.getTag());
     }
 
-    private void editData(Relation relation) {
-        if (relation == null) return;
-        editYield(relation, getSupportFragmentManager(), false);
+    private void editData(Way way) {
+        if (way == null) return;
+        editYield(way, getSupportFragmentManager(), false);
     }
 
     protected void finishPath(@Nullable final Way lastSelectedWay) {
         getEasyEditManager().finish();
         App.getLogic().removeCheckpoint(this, createdWay != null ? R.string.undo_action_moveobjects : R.string.undo_action_movenode);
         if (!addedNodes.isEmpty() && !dontTag) {
-            editor(lastSelectedWay);
+            editYield(lastSelectedWay);
             delayedResetHasProblem(lastSelectedWay);
         }
     }
 
-    private void editor(@Nullable final Way lastSelectedWay) {
+    private void editYield(@Nullable final Way lastSelectedWay) {
         if (lastSelectedWay == null) {
             ScreenMessage.toastTopWarning(this, "Не хватает точек");
             return;
         }
 
-        Relation fieldRelation = App.getDelegator().createFieldRelation(lastSelectedWay);
-        editYield(fieldRelation, getSupportFragmentManager(), true);
+//        Relation fieldRelation = App.getDelegator().createFieldRelation(lastSelectedWay);
+        editYield(lastSelectedWay, getSupportFragmentManager(), true);
 //        BottomSheetFragment bottomSheetFragment = new BottomSheetFragment(lastSelectedWay, this);
 //        bottomSheetFragment.show(getSupportFragmentManager(), bottomSheetFragment.getTag());
     }
 
-    public void editor(Relation relation) {
+    public void editor(Way way) {
         final Logic logic = App.getLogic();
         if (logic.isInEditZoomRange()) {
             addedNodes = new ArrayList<>();
             logic.deselectAll();
             logic.setLocked(false);
 
-            if (relation == null) return;
-            List<RelationMember> membersWithRole = relation.getMembersWithRole(ROLE_FIELD_GEOMETRY);
-            if (membersWithRole.isEmpty()) return;
-            Way way = (Way) membersWithRole.get(0).getElement();
+            if (way == null) return;
             logic.setSelectedWay(way);
             updateActionbarEditMode();
             map.invalidate();
@@ -5437,18 +5351,6 @@ public class Main extends FullScreenAppCompatActivity
             BottomSheetFragmentAllField bottomSheetFragment = new BottomSheetFragmentAllField(Main.this);
             bottomSheetFragment.show(getSupportFragmentManager(), bottomSheetFragment.getTag());
         }
-    }
-
-    public List<Relation> getAllFields() {
-        List<Relation> relations = App.getLogic().getRelations();
-        List<Relation> relationList = new ArrayList<>();
-
-        for (Relation relation : relations) {
-            if (Objects.equals(relation.getTagWithKey(Tags.KEY_TYPE), TYPE_FIELD)) {
-                relationList.add(relation);
-            }
-        }
-        return relationList;
     }
 
     private void deleteNeedlessNode() {

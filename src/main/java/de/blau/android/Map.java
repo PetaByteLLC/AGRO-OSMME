@@ -1,6 +1,6 @@
 package de.blau.android;
 
-import static de.blau.android.BottomSheetFragment.getArea;
+import static de.blau.android.AgroConstants.getArea;
 import static de.blau.android.contract.Constants.LOG_TAG_LEN;
 
 import java.io.IOException;

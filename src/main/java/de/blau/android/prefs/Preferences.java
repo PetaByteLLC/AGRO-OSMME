@@ -1,6 +1,7 @@
 package de.blau.android.prefs;
 
 import static de.blau.android.DatePiker.forCurrentYear;
+import static de.blau.android.Main.YEARS;
 import static de.blau.android.contract.Constants.LOG_TAG_LEN;
 
 import java.util.ArrayList;
@@ -2211,29 +2212,6 @@ public class Preferences {
         return prefs.getString("accessToken", null);
     }
 
-    private static final String KEY_SEASONS = "seasons";
-
-    public void saveSeasons(List<Season> seasons) {
-        Gson gson = new Gson();
-        String json = gson.toJson(seasons);
-        prefs.edit().putString(KEY_SEASONS, json).apply();
-    }
-
-    public List<Season> getSeasons() {
-        String json = prefs.getString(KEY_SEASONS, null);
-        ArrayList<Season> seasons = new ArrayList<>();
-        try {
-            Gson gson = new Gson();
-            Collections.addAll(seasons, gson.fromJson(json, Season[].class));
-            if (seasons.isEmpty()) throw new NullPointerException();
-            return seasons;
-        } catch (NullPointerException ignore) {}
-
-        // Список по умолчанию
-        seasons.add(forCurrentYear());
-        return seasons;
-    }
-
     public String getAgroUsername() {
         return prefs.getString("agroUsername", null);
     }
@@ -2257,4 +2235,14 @@ public class Preferences {
     public void setAgroUserRole(String role) {
         prefs.edit().putString("agroUserRole", role).commit();
     }
+
+    public String getSelectedSeason() {
+        return prefs.getString(KEY_SEASON, YEARS.get(YEARS.size() - 1));
+    }
+
+    public void selectSeason(String selectedSeason) {
+        prefs.edit().putString(KEY_SEASON, selectedSeason).apply();
+    }
+
+    private static final String KEY_SEASON = "season";
 }
