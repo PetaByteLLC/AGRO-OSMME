@@ -59,7 +59,9 @@ import android.nfc.Tag;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.provider.MediaStore;
 import android.provider.Settings;
 import android.text.SpannableString;
@@ -673,6 +675,15 @@ public class Main extends FullScreenAppCompatActivity
                 }
             });
         });
+
+        new Handler(Looper.getMainLooper()).postDelayed(() -> {
+            BoundingBox bounds = new BoundingBox(69.2, 39.2, 80.3, 43.3);
+            final ViewBox box = new ViewBox(bounds);
+            double[] center = box.getCenter();
+            invalidateMap();
+            App.getLogic().setZoom(getMap(), 7);
+            getMap().getViewBox().moveTo(getMap(), (int) (center[0] * 1E7D), (int) (center[1] * 1E7D));
+        }, 2000);
     }
 
     public static final List<String> YEARS = new ArrayList<>();

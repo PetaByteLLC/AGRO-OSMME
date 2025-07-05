@@ -29,6 +29,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import de.blau.android.contract.Ui;
 import de.blau.android.osm.BoundingBox;
 import de.blau.android.osm.ViewBox;
 import de.blau.android.osm.Way;
@@ -72,7 +73,8 @@ public class BottomSheetFragmentAllField extends BottomSheetDialogFragment {
                         .setMessage(REMOVE_FIELD_MESSAGE)
                         .setIcon(android.R.drawable.ic_dialog_alert)
                         .setPositiveButton("Удалить", (dialogInterface, which) -> {
-                            App.getDelegator().removeWay(way);
+                            App.getDelegator().removeFieldRelation(way);
+                            main.invalidateMap();
                             Toast.makeText(getContext(), "Поле удалёно", Toast.LENGTH_SHORT).show();
                             dismiss();
                         })
@@ -102,6 +104,7 @@ public class BottomSheetFragmentAllField extends BottomSheetDialogFragment {
                 final ViewBox box = new ViewBox(bounds);
                 double[] center = box.getCenter();
                 main.invalidateMap();
+                App.getLogic().setZoom(main.getMap(), Ui.ZOOM_FOR_ZOOMTO - 2);
                 main.getMap().getViewBox().moveTo(main.getMap(), (int) (center[0] * 1E7D), (int) (center[1] * 1E7D));
                 dismiss();
             }

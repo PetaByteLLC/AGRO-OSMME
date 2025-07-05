@@ -8,7 +8,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.SortedMap;
 
 import org.xmlpull.v1.XmlPullParserException;
@@ -16,17 +15,16 @@ import org.xmlpull.v1.XmlPullParserFactory;
 import org.xmlpull.v1.XmlSerializer;
 
 import android.util.Log;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import de.blau.android.AgroConstants;
 import de.blau.android.util.collections.LongHashSet;
 
 /**
  * Provide reading and writing data files in OSM and JOSM format
- * 
- * @author simon
  *
+ * @author simon
  */
 public final class OsmXml {
     private static final String DEBUG_TAG = OsmXml.class.getSimpleName().substring(0, Math.min(23, OsmXml.class.getSimpleName().length()));
@@ -207,57 +205,31 @@ public final class OsmXml {
             });
         }
 
-        List<Relation> independentCreatedRelations = new ArrayList<>();
-        List<Relation> dependentCreatedRelations = new ArrayList<>();
-//        if (!createdRelations.isEmpty()) {
-//            LongHashSet createdRelationIds = new LongHashSet();
-//            for(Relation r : createdRelations) {
-//                createdRelationIds.put(r.getOsmId());
-//
-//                if (Objects.equals(r.getTagWithKey("landuse"), AgroConstants.)) {
-//                    SortedMap<String, String> tags = r.getTags();
-//                    for (Map.Entry<String, String> record : tags.entrySet()) {
-//                        if (record.getValue() == null) continue;
-//                        if (record.getValue().startsWith("/storage")) {
-//                            r.addTag(record.getKey(), FileUploader.uploadFile(record.getValue()));
-//                        }
-//                    }
-//                }
-//            }
-//
-//            for(Relation r : createdRelations) {
-//                boolean dependsOnOtherNewRelation = false;
-//                if (r.getMembers() != null) {
-//                    for (RelationMember rm : r.getMembers()) {
-//                        if (rm.getElement() instanceof Relation && createdRelationIds.contains(rm.getRef())) {
-//                            dependsOnOtherNewRelation = true;
-//                            break;
-//                        }
-//                    }
-//                }
-//                if (dependsOnOtherNewRelation) {
-//                    dependentCreatedRelations.add(r);
-//                } else {
-//                    independentCreatedRelations.add(r);
-//                }
-//            }
-//            // Сортируем зависимые между собой (надеясь, что улучшенный relationOrder сработает)
-//            Collections.sort(dependentCreatedRelations, relationOrder); // Используйте ИСПРАВЛЕННЫЙ relationOrder!
-//        }
-//
-//        if (!modifiedRelations.isEmpty()) {
-//            for (Relation r : modifiedRelations) {
-//                if (Objects.equals(r.getTagWithKey(Tags.KEY_TYPE), AgroConstants.TYPE_FIELD)) {
-//                    SortedMap<String, String> tags = r.getTags();
-//                    for (Map.Entry<String, String> record : tags.entrySet()) {
-//                        if (record.getValue() == null) continue;
-//                        if (record.getValue().startsWith("/storage")) {
-//                            r.addTag(record.getKey(), FileUploader.uploadFile(record.getValue()));
-//                        }
-//                    }
-//                }
-//            }
-//        }
+        if (!createdWays.isEmpty()) {
+            LongHashSet createdRelationIds = new LongHashSet();
+            for (Way way : createdWays) {
+                createdRelationIds.put(way.getOsmId());
+                SortedMap<String, String> tags = way.getTags();
+                for (Map.Entry<String, String> record : tags.entrySet()) {
+                    if (record.getValue() == null) continue;
+                    if (record.getValue().startsWith("/storage")) {
+                        way.addTag(record.getKey(), FileUploader.uploadFile(record.getValue()));
+                    }
+                }
+            }
+        }
+
+        if (!modifiedWays.isEmpty()) {
+            for (Way way : modifiedWays) {
+                SortedMap<String, String> tags = way.getTags();
+                for (Map.Entry<String, String> record : tags.entrySet()) {
+                    if (record.getValue() == null) continue;
+                    if (record.getValue().startsWith("/storage")) {
+                        way.addTag(record.getKey(), FileUploader.uploadFile(record.getValue()));
+                    }
+                }
+            }
+        }
 
         // NOTE as deleted elements cannot be referenced we need to undelete them in MODIFY elements before we reference
         // them, this will not always work for relations, see below
@@ -266,14 +238,7 @@ public final class OsmXml {
 
         serializeCreatedElements(serializer, changeSetId, createdWays);
         serializeModifiedElements(serializer, changeSetId, modifiedWays);
-
-
-// Сначала независимые отношения (например, Сезоны, зависящие только от Way)
-        serializeCreatedElements(serializer, changeSetId, independentCreatedRelations);
-// Потом зависимые отношения (например, Посевы, зависящие от Сезонов)
-        serializeCreatedElements(serializer, changeSetId, dependentCreatedRelations);
-
-        serializeModifiedElements(serializer, changeSetId, modifiedRelations); // Порядок для modify не так важен
+        serializeModifiedElements(serializer, changeSetId, modifiedRelations);
         // delete in opposite order
         if (!deletedNodes.isEmpty() || !deletedWays.isEmpty() || !deletedRelations.isEmpty()) {
             serializer.startTag(null, DELETE);
@@ -407,9 +372,11 @@ public final class OsmXml {
         List<Relation> dependentCreatedRelations = new ArrayList<>();
         if (!createdRelations.isEmpty()) {
             LongHashSet createdRelationIds = new LongHashSet();
-            for(Relation r : createdRelations) { createdRelationIds.put(r.getOsmId()); }
+            for (Relation r : createdRelations) {
+                createdRelationIds.put(r.getOsmId());
+            }
 
-            for(Relation r : createdRelations) {
+            for (Relation r : createdRelations) {
                 boolean dependsOnOtherNewRelation = false;
                 if (r.getMembers() != null) {
                     for (RelationMember rm : r.getMembers()) {
@@ -465,15 +432,15 @@ public final class OsmXml {
 
     /**
      * Serialize a MODIFY section
-     * 
-     * @param <T> type of element to serialize
-     * @param serializer the serializer
-     * @param changeSetId the changeset id
+     *
+     * @param <T>              type of element to serialize
+     * @param serializer       the serializer
+     * @param changeSetId      the changeset id
      * @param modifiedElements the list of elements
      * @throws IOException if serializing fails
      */
     private static <T extends OsmElement> void serializeModifiedElements(@NonNull XmlSerializer serializer, @NonNull Long changeSetId,
-            @NonNull List<T> modifiedElements) throws IOException {
+                                                                         @NonNull List<T> modifiedElements) throws IOException {
         if (!modifiedElements.isEmpty()) {
             serializer.startTag(null, MODIFY);
             for (OsmElement elem : modifiedElements) {
@@ -485,15 +452,15 @@ public final class OsmXml {
 
     /**
      * Serialize a CREATE section
-     * 
-     * @param <T> type of element to serialize
-     * @param serializer the serializer
-     * @param changeSetId the changeset id
+     *
+     * @param <T>             type of element to serialize
+     * @param serializer      the serializer
+     * @param changeSetId     the changeset id
      * @param createdElements the list of elements
      * @throws IOException if serializing fails
      */
     private static <T extends OsmElement> void serializeCreatedElements(@NonNull XmlSerializer serializer, @NonNull Long changeSetId,
-            @NonNull List<T> createdElements) throws IOException {
+                                                                        @NonNull List<T> createdElements) throws IOException {
         if (!createdElements.isEmpty()) {
             serializer.startTag(null, CREATE);
             for (OsmElement elem : createdElements) {
@@ -505,7 +472,7 @@ public final class OsmXml {
 
     /**
      * Log that the element hasn't been modified
-     * 
+     *
      * @param elem the OsmElement
      */
     private static void logNotModified(@NonNull OsmElement elem) {
@@ -514,17 +481,17 @@ public final class OsmXml {
 
     /**
      * Writes currentStorage + deleted objects to an OutputStream in JOSM format.
-     * 
+     * <p>
      * Output is sorted as suggested by Jochen Topf
-     * 
-     * @param current a Storage object with the undeleted elements
-     * @param api a Storage object with the changed and deleted elements, if null deleted objects will not be written
+     *
+     * @param current      a Storage object with the undeleted elements
+     * @param api          a Storage object with the changed and deleted elements, if null deleted objects will not be written
      * @param outputStream the stream we are writing to
-     * @param generator a String for the generator attribute
-     * @throws XmlPullParserException on a parser error
+     * @param generator    a String for the generator attribute
+     * @throws XmlPullParserException   on a parser error
      * @throws IllegalArgumentException on a parser error
-     * @throws IllegalStateException on a parser error
-     * @throws IOException if writing to the OutputStream fails
+     * @throws IllegalStateException    on a parser error
+     * @throws IOException              if writing to the OutputStream fails
      */
     public static void write(@NonNull Storage current, @Nullable Storage api, @NonNull OutputStream outputStream, @NonNull String generator)
             throws XmlPullParserException, IllegalArgumentException, IllegalStateException, IOException {
