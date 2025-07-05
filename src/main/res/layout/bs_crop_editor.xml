@@ -20,7 +20,7 @@
             android:choiceMode="singleChoice" />
 
         <EditText
-            android:id="@+id/cultureVarieties"
+            android:id="@+id/variety"
             android:layout_width="match_parent"
             android:layout_height="40dp"
             android:layout_marginTop="10dp"

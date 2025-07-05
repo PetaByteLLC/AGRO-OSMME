@@ -130,6 +130,7 @@ public class BsEditYieldFragment extends BottomSheetDialogFragment {
         area = view.findViewById(R.id.area);
         images = view.findViewById(R.id.images);
         btnUploadImage = view.findViewById(R.id.btn_upload_image);
+        setSpinnerData();
 
         imagePanel();
 
@@ -151,8 +152,6 @@ public class BsEditYieldFragment extends BottomSheetDialogFragment {
 
         setRegionAndDistrict();
 
-        setSpinnerData();
-
         BottomSheetBehavior<View> bottomSheetBehavior = BottomSheetBehavior.from((View) view.getParent());
         bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
         bottomSheetBehavior.setDraggable(false);
@@ -167,21 +166,11 @@ public class BsEditYieldFragment extends BottomSheetDialogFragment {
         ArrayAdapter<String> landTypeAdapter = new ArrayAdapter<>(getActivity(), R.layout.agro_simple_spinner_item, TYPE_LAND_DATA);
         landTypeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         landType.setAdapter(landTypeAdapter);
-
         landType.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 String typeLand = TYPE_LAND_DATA[position];
-                String[] strings = UNDER_TYPE_LAND_DATA.get(typeLand);
-                if (strings != null) {
-                    ArrayAdapter<String> underLandTypeAdapter = new ArrayAdapter<>(getActivity(), R.layout.agro_simple_spinner_item, strings);
-                    underLandTypeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-                    underLandType.setAdapter(underLandTypeAdapter);
-                    underLandType.setVisibility(View.VISIBLE);
-                } else {
-                    underLandType.setAdapter(null);
-                    underLandType.setVisibility(View.GONE);
-                }
+                changeUnderTypeLand(typeLand);
             }
 
             @Override
@@ -189,10 +178,25 @@ public class BsEditYieldFragment extends BottomSheetDialogFragment {
 
             }
         });
-
         ArrayAdapter<String> irrigationTypeAdapter = new ArrayAdapter<>(getActivity(), R.layout.agro_simple_spinner_item, IRRIGATION_TYPE_DATA);
         irrigationTypeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         irrigationType.setAdapter(irrigationTypeAdapter);
+    }
+
+    private void changeUnderTypeLand(String typeLand) {
+        String[] strings = UNDER_TYPE_LAND_DATA.get(typeLand);
+        if (strings != null) {
+            ArrayAdapter<String> underLandTypeAdapter = new ArrayAdapter<>(getActivity(), R.layout.agro_simple_spinner_item, strings);
+            underLandTypeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+            underLandType.setAdapter(underLandTypeAdapter);
+            underLandType.setVisibility(View.VISIBLE);
+        } else {
+            underLandType.setAdapter(null);
+            underLandType.setVisibility(View.GONE);
+        }
+        try {
+            underLandType.setSelection(Arrays.asList(UNDER_TYPE_LAND_DATA.get(typeLand)).indexOf(getTagValue(yield, YIELD_TAG_UNDER_TYPE_LAND)));
+        } catch (NullPointerException ignore) {}
     }
 
     private void coordinate(@NonNull View view) {
@@ -233,8 +237,12 @@ public class BsEditYieldFragment extends BottomSheetDialogFragment {
         cadastrNumber.setText(getTagValue(yield, YIELD_TAG_CADASTRAL_NUMBER));
         additionalInformation.setText(getTagValue(yield, YIELD_TAG_ADDITIONAL_INFORMATION));
         landType.setSelection(Arrays.asList(TYPE_LAND_DATA).indexOf(getTagValue(yield, YIELD_TAG_TYPE_LAND)));
-        underLandType.setSelection(Arrays.asList(UNDER_TYPE_LAND_DATA).indexOf(getTagValue(yield, YIELD_TAG_UNDER_TYPE_LAND)));
         irrigationType.setSelection(Arrays.asList(IRRIGATION_TYPE_DATA).indexOf(getTagValue(yield, YIELD_TAG_IRRIGATION_TYPE)));
+        try {
+            String tagValue = getTagValue(yield, YIELD_TAG_TYPE_LAND);
+            changeUnderTypeLand(tagValue);
+            underLandType.setSelection(Arrays.asList(UNDER_TYPE_LAND_DATA.get(tagValue)).indexOf(getTagValue(yield, YIELD_TAG_UNDER_TYPE_LAND)));
+        } catch (NullPointerException ignore) {}
     }
 
     private void setArea() {
@@ -299,9 +307,9 @@ public class BsEditYieldFragment extends BottomSheetDialogFragment {
             map.put(Tags.KEY_AREA, area.getText().toString());
             map.put(YIELD_TAG_REGION, region.getText().toString());
             map.put(YIELD_TAG_DISTRICT, district.getText().toString());
-            map.put(YIELD_TAG_TYPE_LAND, landType.getSelectedItem() != null ? landType.getSelectedItem().toString() : "");
-            map.put(YIELD_TAG_UNDER_TYPE_LAND, underLandType.getSelectedItem() != null ? underLandType.getSelectedItem().toString() : "");
-            map.put(YIELD_TAG_IRRIGATION_TYPE, irrigationType.getSelectedItem() != null ? irrigationType.getSelectedItem().toString() : "");
+            map.put(YIELD_TAG_TYPE_LAND, landType.getSelectedItemPosition() < 1 ? "" : landType.getSelectedItem().toString());
+            map.put(YIELD_TAG_UNDER_TYPE_LAND, underLandType.getSelectedItemPosition() < 1 ? "" : underLandType.getSelectedItem().toString());
+            map.put(YIELD_TAG_IRRIGATION_TYPE, irrigationType.getSelectedItemPosition() < 1 ? "" : irrigationType.getSelectedItem().toString());
             map.put(YIELD_TAG_AGGREGATOR, aggregator.getText().toString());
             map.put(YIELD_TAG_FARMER_NAME, farmerName.getText().toString());
             map.put(YIELD_TAG_FARMER_SURNAME, farmerSurName.getText().toString());

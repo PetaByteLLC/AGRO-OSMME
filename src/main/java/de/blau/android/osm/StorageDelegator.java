@@ -4645,7 +4645,7 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
         onElementChanged(null, osmElement);
     }
 
-    public void updateTag(String tag, String value, Way yield) {
+    public void addTag(String tag, String value, Way yield) {
         try {
             lock();
             dirty = true;

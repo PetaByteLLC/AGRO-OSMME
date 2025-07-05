@@ -67,7 +67,7 @@ public class BsEditCropFragment extends BottomSheetDialogFragment {
         Button saveButton = view.findViewById(R.id.btn_save);
 
         culture = view.findViewById(R.id.culture);
-        variety = view.findViewById(R.id.cultureVarieties);
+        variety = view.findViewById(R.id.variety);
         technology = view.findViewById(R.id.technology);
         sowingDate = view.findViewById(R.id.sowingDate);
         cleaningDate = view.findViewById(R.id.cleaningDate);
@@ -98,7 +98,7 @@ public class BsEditCropFragment extends BottomSheetDialogFragment {
             String sowingDateValue = sowingDate.getText().toString();
             String cleaningDateValue = cleaningDate.getText().toString();
             String productivityValue = productivity.getText().toString();
-            String technologyValue = technology.getSelectedItem().toString();
+            String technologyValue = technology.getSelectedItemPosition() < 1 ? "" : technology.getSelectedItem().toString();
             String seasonValue = season.getSelectedItem().toString();
 
             SimpleDateFormat sdf = new SimpleDateFormat(DATE_FORMAT, Locale.getDefault());
@@ -116,15 +116,16 @@ public class BsEditCropFragment extends BottomSheetDialogFragment {
                     }
                 }
             } catch (ParseException e) {
+                Toast.makeText(getContext(),
+                        "Даты не правильно заполнены",
+                        Toast.LENGTH_SHORT).show();
                 return;
             }
 
             try {
-                if (culture.getSelectedItem() == null)
+                if (culture.getSelectedItemPosition() < 1)
                     throw new NullPointerException("Выращиваемая культура");
                 String cultureValue = culture.getSelectedItem().toString();
-                if (cultureValue.equals("Выращиваемая культура"))
-                    throw new NullPointerException("Выращиваемая культура");
 
                 Map<String, String> map = new HashMap<>();
                 map.put(CROP_TAG_CULTURE, cultureValue);
@@ -146,10 +147,16 @@ public class BsEditCropFragment extends BottomSheetDialogFragment {
                 }
 
                 String tag = CROP_TAG_NAME + ":" + seasonValue + ":" + getNumber(seasonValue);
-                if (key != null) {
-                    App.getDelegator().deleteTag(key, yield);
+                if (key == null) {
+                    App.getDelegator().addTag(tag, cropData.toString(), yield);
+                } else {
+                    if (Objects.equals(seasonValue, key.split(":")[1])) {
+                        App.getDelegator().updateTags(yield, Map.of(key, cropData.toString()));
+                    } else {
+                        App.getDelegator().deleteTag(key, yield);
+                        App.getDelegator().addTag(tag, cropData.toString(), yield);
+                    }
                 }
-                App.getDelegator().updateTag(tag, cropData.toString(), yield);
                 if (getParentFragment() instanceof BsEditYieldFragment) {
                     ((BsEditYieldFragment) getParentFragment()).updateCropList();
                 }
@@ -192,6 +199,7 @@ public class BsEditCropFragment extends BottomSheetDialogFragment {
             sowingDate.setText(getSubData(dataString, CROP_TAG_SOWING_DATE));
             cleaningDate.setText(getSubData(dataString, CROP_TAG_CLEANING_DATE));
             productivity.setText(getSubData(dataString, CROP_TAG_PRODUCTIVITY));
+            variety.setText(getSubData(dataString, CROP_TAG_CULTURE_VARIETIES));
             try {
                 culture.setSelection(Arrays.asList(CULTURE_DATA).indexOf(getSubData(dataString, CROP_TAG_CULTURE)));
                 technology.setSelection(Arrays.asList(TECHNOLOGY_DATA).indexOf(getSubData(dataString, CROP_TAG_TECHNOLOGY)));
