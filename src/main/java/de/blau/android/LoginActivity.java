@@ -105,9 +105,13 @@ public class LoginActivity extends AppCompatActivity {
                         prefs.setAgroUserRole(responseRoleObject.getString("role"));
                         prefs.setAgroPassword(password);
                         prefs.setAgroUsername(username);
-                        prefs.setAgroPersonName(responseRoleObject.getString("name"));
-                        prefs.setAgroPersonSurName(responseRoleObject.getString("surname"));
-                        prefs.setAgroPersonMobile(responseRoleObject.getString("mobile"));
+
+                        try {
+                            JSONObject partner = responseRoleObject.getJSONObject("partner");
+                            prefs.setAgroPersonName(partner.getString("firstName"));
+                            prefs.setAgroPersonSurName(partner.getString("lastName"));
+                            prefs.setAgroPersonMobile(partner.getString("mobilePhone"));
+                        } catch (Exception ignored) {}
                         navigateToMain();
                     } else {
                         runOnUiThread(errorToast::show);
@@ -115,7 +119,6 @@ public class LoginActivity extends AppCompatActivity {
                 } else {
                     runOnUiThread(errorToast::show);
                 }
-
             } catch (NullPointerException e) {
                 runOnUiThread(errorToast::show);
             } catch (IOException | JSONException e) {

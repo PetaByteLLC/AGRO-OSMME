@@ -54,7 +54,8 @@ public class AuthCallbackActivity extends AppCompatActivity {
                 String errorMessage = data.getQueryParameter("error_message"); // или "error"
                 String userName = data.getQueryParameter("name");
                 String role = data.getQueryParameter("role");
-                String surname = data.getQueryParameter("surname");
+                String firstname = data.getQueryParameter("firstname");
+                String lastname = data.getQueryParameter("lastname");
                 String mobile = data.getQueryParameter("mobile");
 
                 Log.i(TAG, "Backend Token: " + backendToken);
@@ -62,7 +63,8 @@ public class AuthCallbackActivity extends AppCompatActivity {
                 Log.i(TAG, "Error Message: " + errorMessage);
                 Log.i(TAG, "User Name: " + userName);
                 Log.i(TAG, "User Email: " + role);
-                Log.i(TAG, "User surname: " + surname);
+                Log.i(TAG, "User firstname: " + firstname);
+                Log.i(TAG, "User lastname: " + lastname);
                 Log.i(TAG, "User mobile: " + mobile);
 
                 tvStatus.append("Статус: " + status + "\n");
@@ -71,7 +73,7 @@ public class AuthCallbackActivity extends AppCompatActivity {
                     tvStatus.append("Токен бэкенда: " + backendToken + "\n");
                     tvStatus.append("Пользователь: " + userName + " (" + role + ")\n");
 
-                    saveAuthData(backendToken, userName, role, surname, mobile);
+                    saveAuthData(backendToken, userName, role, firstname, lastname, mobile);
 
                     Toast.makeText(this, "Аутентификация успешна!", Toast.LENGTH_LONG).show();
 
@@ -94,12 +96,13 @@ public class AuthCallbackActivity extends AppCompatActivity {
         }
     }
 
-    private void saveAuthData(String backendToken, String userName, String role, String surname, String mobile) {
+    private void saveAuthData(String backendToken, String userName, String role, String firstname, String lastname, String mobile) {
         Preferences prefs = App.getPreferences(this);
         prefs.setCgiToken(backendToken);
         prefs.setAgroUsername(userName);
         prefs.setAgroUserRole(role);
-        prefs.setAgroPersonSurName(surname);
+        prefs.setAgroPersonName(firstname);
+        prefs.setAgroPersonSurName(lastname);
         prefs.setAgroPersonMobile(mobile);
     }
 }
