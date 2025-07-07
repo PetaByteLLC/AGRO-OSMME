@@ -30,6 +30,7 @@ import de.blau.android.App;
 import de.blau.android.Map;
 import de.blau.android.R;
 import de.blau.android.Season;
+import de.blau.android.SecureStorage;
 import de.blau.android.contract.Urls;
 import de.blau.android.layer.streetlevel.AbstractImageOverlay;
 import de.blau.android.osm.Server;
@@ -171,6 +172,7 @@ public class Preferences {
     public static final String DEFAULT_PEN_MAP_STYLE = "Pen Round Nodes";
 
     private final SharedPreferences prefs;
+//    private final SecureStorage secureStorage;
 
     private final Resources r;
 
@@ -184,7 +186,8 @@ public class Preferences {
         prefs = PreferenceManager.getDefaultSharedPreferences(ctx);
         r = ctx.getResources();
         advancedPrefs = new AdvancedPrefDatabase(ctx);
-
+//        secureStorage = new SecureStorage(ctx);
+//        secureStorage.init();
         // we're not using acra.disable - ensure it isn't present
         if (prefs.contains(ACRA_DISABLE)) {
             SharedPreferences.Editor editor = prefs.edit();
@@ -2213,51 +2216,51 @@ public class Preferences {
     }
 
     public String getAgroUsername() {
-        return prefs.getString("agroUsername", null);
+        return (prefs.getString("agroUsername", null));
     }
 
     public String getAgroPassword() {
-        return prefs.getString("agroPassword", null);
+        return (prefs.getString("agroPassword", null));
     }
 
     public String getAgroPersonName() {
-        return prefs.getString("agroPersonName", null);
+        return (prefs.getString("agroPersonName", null));
     }
 
     public String getAgroPersonSurName() {
-        return prefs.getString("agroPersonSurName", null);
+        return (prefs.getString("agroPersonSurName", null));
     }
 
     public String getAgroPersonMobile() {
-        return prefs.getString("agroPersonMobile", null);
+        return (prefs.getString("agroPersonMobile", null));
     }
 
     public String getAgroUserRole() {
-        return prefs.getString("agroUserRole", null);
+        return (prefs.getString("agroUserRole", null));
     }
 
     public void setAgroPersonName(String name) {
-        prefs.edit().putString("agroPersonName", name).commit();
+        prefs.edit().putString("agroPersonName", (name)).commit();
     }
 
     public void setAgroPersonSurName(String surname) {
-        prefs.edit().putString("agroPersonSurName", surname).commit();
+        prefs.edit().putString("agroPersonSurName", (surname)).commit();
     }
 
     public void setAgroPersonMobile(String mobile) {
-        prefs.edit().putString("agroPersonMobile", mobile).commit();
+        prefs.edit().putString("agroPersonMobile", (mobile)).commit();
     }
 
     public void setAgroUsername(String username) {
-        prefs.edit().putString("agroUsername", username).commit();
+        prefs.edit().putString("agroUsername", (username)).commit();
     }
 
     public void setAgroPassword(String password) {
-        prefs.edit().putString("agroPassword", password).commit();
+        prefs.edit().putString("agroPassword", (password)).commit();
     }
 
     public void setAgroUserRole(String role) {
-        prefs.edit().putString("agroUserRole", role).commit();
+        prefs.edit().putString("agroUserRole", (role)).commit();
     }
 
     public String getSelectedSeason() {
