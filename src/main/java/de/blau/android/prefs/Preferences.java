@@ -2220,8 +2220,32 @@ public class Preferences {
         return prefs.getString("agroPassword", null);
     }
 
+    public String getAgroPersonName() {
+        return prefs.getString("agroPersonName", null);
+    }
+
+    public String getAgroPersonSurName() {
+        return prefs.getString("agroPersonSurName", null);
+    }
+
+    public String getAgroPersonMobile() {
+        return prefs.getString("agroPersonMobile", null);
+    }
+
     public String getAgroUserRole() {
         return prefs.getString("agroUserRole", null);
+    }
+
+    public void setAgroPersonName(String name) {
+        prefs.edit().putString("agroPersonName", name).commit();
+    }
+
+    public void setAgroPersonSurName(String surname) {
+        prefs.edit().putString("agroPersonSurName", surname).commit();
+    }
+
+    public void setAgroPersonMobile(String mobile) {
+        prefs.edit().putString("agroPersonMobile", mobile).commit();
     }
 
     public void setAgroUsername(String username) {

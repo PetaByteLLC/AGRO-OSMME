@@ -27,17 +27,16 @@ import okhttp3.Response;
 public class LoginActivity extends AppCompatActivity {
 
     private EditText usernameInput, passwordInput;
-    private Button loginButton, googleButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
-        getSupportActionBar().hide();
+        Objects.requireNonNull(getSupportActionBar()).hide();
         usernameInput = findViewById(R.id.etUsername);
         passwordInput = findViewById(R.id.etPassword);
-        loginButton = findViewById(R.id.btnLogin);
-        googleButton = findViewById(R.id.google_sign_in_button);
+        Button loginButton = findViewById(R.id.btnLogin);
+        Button googleButton = findViewById(R.id.google_sign_in_button);
 
         loginButton.setOnClickListener(v -> {
             String username = usernameInput.getText().toString();
@@ -45,7 +44,7 @@ public class LoginActivity extends AppCompatActivity {
             login(username, password);
         });
 
-        googleButton.setOnClickListener( v -> oauth2());
+        googleButton.setOnClickListener(v -> oauth2());
     }
 
     private void oauth2() {
@@ -99,10 +98,16 @@ public class LoginActivity extends AppCompatActivity {
 
                     if (contentType != null && contentType.contains("application/json")) {
                         JSONObject responseObject = new JSONObject(responseBody);
-                        String token = responseObject.getString("data");
                         JSONObject responseRoleObject = new JSONObject(responseRoleBody);
-                        String role = responseRoleObject.getString("role");
-                        saveData(token, username, password, role);
+
+                        Preferences prefs = App.getPreferences(this);
+                        prefs.setCgiToken(responseObject.getString("data"));
+                        prefs.setAgroUserRole(responseRoleObject.getString("role"));
+                        prefs.setAgroPassword(password);
+                        prefs.setAgroUsername(username);
+                        prefs.setAgroPersonName(responseRoleObject.getString("name"));
+                        prefs.setAgroPersonSurName(responseRoleObject.getString("surname"));
+                        prefs.setAgroPersonMobile(responseRoleObject.getString("mobile"));
                         navigateToMain();
                     } else {
                         runOnUiThread(errorToast::show);
@@ -119,13 +124,6 @@ public class LoginActivity extends AppCompatActivity {
         }).start();
     }
 
-    private void saveData(String token, String username, String password, String role) {
-        Preferences prefs = App.getPreferences(this);
-        prefs.setCgiToken(token);
-        prefs.setAgroUserRole(role);
-        prefs.setAgroPassword(password);
-        prefs.setAgroUsername(username);
-    }
 
     private void navigateToMain() {
         runOnUiThread(() -> {

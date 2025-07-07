@@ -692,6 +692,18 @@ public class Main extends FullScreenAppCompatActivity
         return prefs.getAgroUserRole();
     }
 
+    public String getPersonName() {
+        return prefs.getAgroPersonName();
+    }
+
+    public String getPersonSurName() {
+        return prefs.getAgroPersonSurName();
+    }
+
+    public String getPersonMobile() {
+        return prefs.getAgroPersonMobile();
+    }
+
     /**
      * Set how we should handle screen orientation changes based of our preferences
      */

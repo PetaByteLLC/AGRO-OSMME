@@ -15,12 +15,21 @@
         <TextView
             android:id="@+id/title"
             android:layout_width="wrap_content"
-            android:maxWidth="300dp"
+            android:maxWidth="200dp"
             android:layout_height="match_parent"
             android:maxLength="50"
-            android:text="Название поле - 5.6 га"
+            android:text="Название поле"
             android:textColor="@color/black"
             android:textSize="16sp" />
+
+        <TextView
+            android:id="@+id/area"
+            android:layout_width="wrap_content"
+            android:maxWidth="100dp"
+            android:layout_height="match_parent"
+            android:text=" - 5.6 га"
+            android:textColor="@color/black"
+            android:textSize="16sp"/>
 
         <LinearLayout
             android:layout_width="match_parent"

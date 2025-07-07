@@ -46,8 +46,8 @@ public class FieldAdapter extends RecyclerView.Adapter<FieldAdapter.FieldViewHol
     @Override
     public void onBindViewHolder(@NonNull FieldViewHolder holder, int position) {
         Way way = fieldList.get(position);
-        String name = getTagValue(way, Tags.KEY_NAME) + " - " + getTagValue(way, Tags.KEY_AREA) + " га";
-        holder.name.setText(name);
+        holder.name.setText(getTagValue(way, Tags.KEY_NAME));
+        holder.area.setText(" - " + getTagValue(way, Tags.KEY_AREA) + " га");
 
         if (listener != null) {
             holder.fieldBox.setOnClickListener(v -> {
@@ -80,6 +80,7 @@ public class FieldAdapter extends RecyclerView.Adapter<FieldAdapter.FieldViewHol
 
     static class FieldViewHolder extends RecyclerView.ViewHolder {
         TextView name;
+        TextView area;
         LinearLayout fieldBox;
         ImageView remove;
         ImageView edit;
@@ -88,6 +89,7 @@ public class FieldAdapter extends RecyclerView.Adapter<FieldAdapter.FieldViewHol
         public FieldViewHolder(@NonNull View itemView) {
             super(itemView);
             name = itemView.findViewById(R.id.title);
+            area = itemView.findViewById(R.id.area);
             fieldBox = itemView.findViewById(R.id.fieldBox);
             edit = itemView.findViewById(R.id.edit);
             remove = itemView.findViewById(R.id.remove);

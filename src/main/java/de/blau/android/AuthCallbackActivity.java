@@ -54,12 +54,16 @@ public class AuthCallbackActivity extends AppCompatActivity {
                 String errorMessage = data.getQueryParameter("error_message"); // или "error"
                 String userName = data.getQueryParameter("name");
                 String role = data.getQueryParameter("role");
+                String surname = data.getQueryParameter("surname");
+                String mobile = data.getQueryParameter("mobile");
 
                 Log.i(TAG, "Backend Token: " + backendToken);
                 Log.i(TAG, "Status: " + status);
                 Log.i(TAG, "Error Message: " + errorMessage);
                 Log.i(TAG, "User Name: " + userName);
                 Log.i(TAG, "User Email: " + role);
+                Log.i(TAG, "User surname: " + surname);
+                Log.i(TAG, "User mobile: " + mobile);
 
                 tvStatus.append("Статус: " + status + "\n");
 
@@ -67,7 +71,7 @@ public class AuthCallbackActivity extends AppCompatActivity {
                     tvStatus.append("Токен бэкенда: " + backendToken + "\n");
                     tvStatus.append("Пользователь: " + userName + " (" + role + ")\n");
 
-                    saveAuthData(backendToken, userName, role);
+                    saveAuthData(backendToken, userName, role, surname, mobile);
 
                     Toast.makeText(this, "Аутентификация успешна!", Toast.LENGTH_LONG).show();
 
@@ -90,10 +94,12 @@ public class AuthCallbackActivity extends AppCompatActivity {
         }
     }
 
-    private void saveAuthData(String backendToken, String userName, String role) {
+    private void saveAuthData(String backendToken, String userName, String role, String surname, String mobile) {
         Preferences prefs = App.getPreferences(this);
         prefs.setCgiToken(backendToken);
         prefs.setAgroUsername(userName);
         prefs.setAgroUserRole(role);
+        prefs.setAgroPersonSurName(surname);
+        prefs.setAgroPersonMobile(mobile);
     }
 }

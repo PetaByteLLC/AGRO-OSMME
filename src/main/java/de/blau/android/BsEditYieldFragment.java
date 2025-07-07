@@ -311,9 +311,15 @@ public class BsEditYieldFragment extends BottomSheetDialogFragment {
             map.put(YIELD_TAG_UNDER_TYPE_LAND, underLandType.getSelectedItemPosition() < 1 ? "" : underLandType.getSelectedItem().toString());
             map.put(YIELD_TAG_IRRIGATION_TYPE, irrigationType.getSelectedItemPosition() < 1 ? "" : irrigationType.getSelectedItem().toString());
             map.put(YIELD_TAG_AGGREGATOR, aggregator.getText().toString());
-            map.put(YIELD_TAG_FARMER_NAME, farmerName.getText().toString());
-            map.put(YIELD_TAG_FARMER_SURNAME, farmerSurName.getText().toString());
-            map.put(YIELD_TAG_FARMER_MOBILE, farmerMobile.getText().toString());
+            if (Objects.equals(main.getUserRole(), ROLE_FARMER)){
+                map.put(YIELD_TAG_FARMER_NAME, main.getPersonName());
+                map.put(YIELD_TAG_FARMER_SURNAME, main.getPersonSurName());
+                map.put(YIELD_TAG_FARMER_MOBILE, main.getPersonMobile());
+            } else {
+                map.put(YIELD_TAG_FARMER_NAME, farmerName.getText().toString());
+                map.put(YIELD_TAG_FARMER_SURNAME, farmerSurName.getText().toString());
+                map.put(YIELD_TAG_FARMER_MOBILE, farmerMobile.getText().toString());
+            }
             map.put(YIELD_TAG_CADASTRAL_NUMBER, cadastrNumber.getText().toString());
             map.put(YIELD_TAG_ADDITIONAL_INFORMATION, additionalInformation.getText().toString());
 
@@ -428,7 +434,7 @@ public class BsEditYieldFragment extends BottomSheetDialogFragment {
 
         if (Objects.equals(yield.getState(), OsmElement.STATE_CREATED)) {
             if (getCrops(yield).isEmpty()) {
-                App.getDelegator().removeWay(yield);
+                App.getDelegator().removeFieldRelation(yield);
                 Toast.makeText(getContext(), "Поле удалёно", Toast.LENGTH_SHORT).show();
             }
         }
