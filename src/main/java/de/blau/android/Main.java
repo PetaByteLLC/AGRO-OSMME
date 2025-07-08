@@ -1984,13 +1984,27 @@ public class Main extends FullScreenAppCompatActivity
         allFieldItem.setActionView(R.layout.agro_button_fields);
         allFieldItem.getActionView().setOnClickListener(new AllFieldListener());
 
-        MenuItem exportPolygonItem = menu.findItem(R.id.exportPolygon);
-        exportPolygonItem.setOnMenuItemClickListener((m) -> {
+        MenuItem exportGjPolygonItem = menu.findItem(R.id.exportGjPolygon);
+        exportGjPolygonItem.setOnMenuItemClickListener((m) -> {
             if (isConnected()) {
-                DownloadManager.Request request = new DownloadManager.Request(Uri.parse(EXPORT_URL));
-                request.addRequestHeader("Authorization", getBasicAuthHeader());
+                DownloadManager.Request request = new DownloadManager.Request(Uri.parse(EXPORT_GEOJSON_URL));
                 request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
                 request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, "exported.geojson");
+
+                DownloadManager downloadManager = (DownloadManager) getSystemService(Context.DOWNLOAD_SERVICE);
+                downloadManager.enqueue(request);
+            } else {
+                ScreenMessage.toastTopInfo(Main.this, "Нету подключения к интернету");
+            }
+            return true;
+        });
+
+        MenuItem exportShPolygonItem = menu.findItem(R.id.exportShPolygon);
+        exportShPolygonItem.setOnMenuItemClickListener((m) -> {
+            if (isConnected()) {
+                DownloadManager.Request request = new DownloadManager.Request(Uri.parse(EXPORT_ZIP_URL));
+                request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
+                request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, "exported.zip");
 
                 DownloadManager downloadManager = (DownloadManager) getSystemService(Context.DOWNLOAD_SERVICE);
                 downloadManager.enqueue(request);

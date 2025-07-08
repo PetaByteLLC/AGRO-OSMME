@@ -182,8 +182,11 @@
                 </menu>
             </item>
             <item
-                android:id="@+id/exportPolygon"
-                android:title="Экспорт"/>
+                android:id="@+id/exportGjPolygon"
+                android:title="Экспорт Geojson"/>
+            <item
+                android:id="@+id/exportShPolygon"
+                android:title="Экспорт Shape"/>
             <item
                 android:id="@+id/uploadChanges"
                 android:title="Загрузка"/>

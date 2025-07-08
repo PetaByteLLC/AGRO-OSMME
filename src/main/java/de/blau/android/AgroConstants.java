@@ -11,7 +11,10 @@ public class AgroConstants {
 
     public static final String BASE_URL = "https://agrotest.brisklyminds.com";
     public static final String URL = BASE_URL + "/agroadmin";
-    public static final String EXPORT_URL = URL + "/ws/fields/export/geojson";
+    public static final String UPLOAD_URL = URL + "/ws/public/file/upload";
+    public static final String DOWNLOAD_URL_TEMPLATE = URL + "/ws/public/file/download/%s";
+    public static final String EXPORT_GEOJSON_URL = URL + "/ws/public/fields/export/geojson";
+    public static final String EXPORT_ZIP_URL = URL + "/ws/public/fields/export/shape";
     // --- КОНСТАНТЫ ---
 
     public static final String YIELD_TAG_REGION = "region";
