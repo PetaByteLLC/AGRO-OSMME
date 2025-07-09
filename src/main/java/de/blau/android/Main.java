@@ -2017,7 +2017,7 @@ public class Main extends FullScreenAppCompatActivity
         MenuItem exportExcelPolygon = menu.findItem(R.id.exportExcelPolygon);
         exportExcelPolygon.setOnMenuItemClickListener((m) -> {
             if (isConnected()) {
-                DownloadManager.Request request = new DownloadManager.Request(Uri.parse(EXPORT_ZIP_URL));
+                DownloadManager.Request request = new DownloadManager.Request(Uri.parse(EXPORT_EXCEL_URL));
                 request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
                 request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, "exported.xlsx");
 
