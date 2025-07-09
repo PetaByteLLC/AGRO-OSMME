@@ -246,7 +246,7 @@ public class BsEditYieldFragment extends BottomSheetDialogFragment {
     }
 
     private void setArea() {
-        String areaValue = getTagValue(yield, Tags.KEY_AREA);
+        String areaValue = getTagValue(yield, YIELD_TAG_AREA);
         if (yield == null) return;
         if (areaValue.isEmpty()) {
             area.setText(getArea(yield));
@@ -254,7 +254,7 @@ public class BsEditYieldFragment extends BottomSheetDialogFragment {
             String newArea = getArea(yield);
             double oldVal = Double.parseDouble(areaValue);
             double newVal = Double.parseDouble(newArea);
-            area.setText(oldVal == newVal ? getTagValue(yield, Tags.KEY_AREA) : newArea);
+            area.setText(oldVal == newVal ? getTagValue(yield, YIELD_TAG_AREA) : newArea);
         }
     }
 
@@ -304,7 +304,7 @@ public class BsEditYieldFragment extends BottomSheetDialogFragment {
             Map<String, String> map = new HashMap<>();
             map.put(YIELD_TAG_POSITION, getPosition());
             map.put(Tags.KEY_NAME, name.getText().toString());
-            map.put(Tags.KEY_AREA, area.getText().toString());
+            map.put(YIELD_TAG_AREA, area.getText().toString());
             map.put(YIELD_TAG_REGION, region.getText().toString());
             map.put(YIELD_TAG_DISTRICT, district.getText().toString());
             map.put(YIELD_TAG_TYPE_LAND, landType.getSelectedItemPosition() < 1 ? "" : landType.getSelectedItem().toString());

@@ -29,6 +29,7 @@ public class AgroConstants {
     public static final String YIELD_TAG_UNDER_TYPE_LAND = "underTypeLand";
     public static final String YIELD_TAG_TYPE_LAND = "typeLand";
     public static final String YIELD_TAG_ADDITIONAL_INFORMATION = "additionalInformation";
+    public static final String YIELD_TAG_AREA = "polygonArea";
 
     public static final String TAG_IMAGE = "image";
 
