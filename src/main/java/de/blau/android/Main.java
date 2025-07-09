@@ -2004,7 +2004,22 @@ public class Main extends FullScreenAppCompatActivity
             if (isConnected()) {
                 DownloadManager.Request request = new DownloadManager.Request(Uri.parse(EXPORT_ZIP_URL));
                 request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
-                request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, "exported.zip");
+                request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, "exported.gpkg");
+
+                DownloadManager downloadManager = (DownloadManager) getSystemService(Context.DOWNLOAD_SERVICE);
+                downloadManager.enqueue(request);
+            } else {
+                ScreenMessage.toastTopInfo(Main.this, "Нету подключения к интернету");
+            }
+            return true;
+        });
+
+        MenuItem exportExcelPolygon = menu.findItem(R.id.exportExcelPolygon);
+        exportExcelPolygon.setOnMenuItemClickListener((m) -> {
+            if (isConnected()) {
+                DownloadManager.Request request = new DownloadManager.Request(Uri.parse(EXPORT_ZIP_URL));
+                request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
+                request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, "exported.xlsx");
 
                 DownloadManager downloadManager = (DownloadManager) getSystemService(Context.DOWNLOAD_SERVICE);
                 downloadManager.enqueue(request);
