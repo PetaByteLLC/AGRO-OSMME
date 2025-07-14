@@ -13,12 +13,15 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class DatePiker {
 
-    @SuppressLint("DefaultLocale")
+    @SuppressLint({"DefaultLocale", "ClickableViewAccessibility"})
     public static void setDataPicker(EditText editText, Context context) {
-        editText.setOnClickListener(v -> {
+        AtomicBoolean opened = new AtomicBoolean(false);
+        editText.setOnTouchListener((v, me) -> {
+            if (opened.get()) return false;
             Calendar calendar = Calendar.getInstance();
             int year = calendar.get(Calendar.YEAR);
             int month = calendar.get(Calendar.MONTH);
@@ -31,7 +34,23 @@ public class DatePiker {
                     },
                     year, month, day);
             datePickerDialog.show();
+            opened.set(true);
+            return false;
         });
+//        editText.setOnClickListener(v -> {
+//            Calendar calendar = Calendar.getInstance();
+//            int year = calendar.get(Calendar.YEAR);
+//            int month = calendar.get(Calendar.MONTH);
+//            int day = calendar.get(Calendar.DAY_OF_MONTH);
+//
+//            DatePickerDialog datePickerDialog = new DatePickerDialog(
+//                    context,
+//                    (view1, year1, monthOfYear, dayOfMonth) -> {
+//                        editText.setText(String.format(DATE_STRING_FORMAT, year1, monthOfYear + 1, dayOfMonth));
+//                    },
+//                    year, month, day);
+//            datePickerDialog.show();
+//        });
     }
 
     public static String formatCalendarToString(Calendar calendar) {

@@ -93,26 +93,6 @@
                 android:textColor="@color/ag_text_color"
                 android:textColorHint="@color/ag_text_color" />
 
-            <Spinner
-                android:id="@+id/landType"
-                android:layout_width="match_parent"
-                android:layout_height="40dp"
-                android:layout_marginTop="10dp"
-                android:background="@drawable/edittext_background"
-                android:textColor="@color/ag_text_color"
-                android:textColorHint="@color/ag_text_color"
-                android:choiceMode="singleChoice"/>
-
-            <Spinner
-                android:id="@+id/underLandType"
-                android:layout_width="match_parent"
-                android:layout_height="40dp"
-                android:layout_marginTop="10dp"
-                android:background="@drawable/edittext_background"
-                android:textColor="@color/ag_text_color"
-                android:textColorHint="@color/ag_text_color"
-                android:choiceMode="singleChoice"/>
-
             <EditText
                 android:id="@+id/farmerSurName"
                 android:layout_width="match_parent"
@@ -145,6 +125,26 @@
                 android:inputType="text"
                 android:textColor="@color/ag_text_color"
                 android:textColorHint="@color/ag_text_color" />
+
+            <Spinner
+                android:id="@+id/landType"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:layout_marginTop="10dp"
+                android:background="@drawable/edittext_background"
+                android:textColor="@color/ag_text_color"
+                android:textColorHint="@color/ag_text_color"
+                android:choiceMode="singleChoice"/>
+
+            <Spinner
+                android:id="@+id/underLandType"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:layout_marginTop="10dp"
+                android:background="@drawable/edittext_background"
+                android:textColor="@color/ag_text_color"
+                android:textColorHint="@color/ag_text_color"
+                android:choiceMode="singleChoice"/>
 
             <EditText
                 android:id="@+id/cadastrId"

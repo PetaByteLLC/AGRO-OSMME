@@ -1,11 +1,15 @@
 package de.blau.android;
 
+import static com.google.android.material.internal.ViewUtils.hideKeyboard;
 import static de.blau.android.AgroConstants.*;
 import static de.blau.android.Main.YEARS;
 
+import android.annotation.SuppressLint;
 import android.content.DialogInterface;
+import android.graphics.Rect;
 import android.os.Bundle;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
@@ -63,6 +67,25 @@ public class BsEditCropFragment extends BottomSheetDialogFragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         if (this.getActivity() == null) return;
+
+        view.setOnTouchListener(new View.OnTouchListener() {
+            @SuppressLint({"RestrictedApi", "ClickableViewAccessibility"})
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                    View currentFocus = getDialog().getCurrentFocus();
+                    if (currentFocus instanceof EditText) {
+                        Rect outRect = new Rect();
+                        currentFocus.getGlobalVisibleRect(outRect);
+                        if (!outRect.contains((int) event.getRawX(), (int) event.getRawY())) {
+                            currentFocus.clearFocus();
+                            hideKeyboard(view);
+                        }
+                    }
+                }
+                return false; // чтобы остальные события тоже обрабатывались
+            }
+        });
 
         Button saveButton = view.findViewById(R.id.btn_save);
 
