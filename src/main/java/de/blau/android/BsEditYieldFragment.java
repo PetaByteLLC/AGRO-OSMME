@@ -69,6 +69,8 @@ public class BsEditYieldFragment extends BottomSheetDialogFragment {
     private Button toggleButton;
     private Button saveBtn;
     private LinearLayout editTextContainer;
+    private LinearLayout cropPanel;
+    private LinearLayout pasturePanel;
 
     private EditText name;
     private EditText area;
@@ -76,19 +78,28 @@ public class BsEditYieldFragment extends BottomSheetDialogFragment {
     private Spinner landType;
     private Spinner underLandType;
     private Spinner irrigationType;
+    private Spinner livestockName;
+    private EditText livestockCount;
     private EditText district;
     private EditText farmerSurName;
     private EditText farmerName;
     private EditText farmerMobile;
     private EditText cadastrNumber;
     private EditText aggregator;
+    private EditText hayfielddate;
+    private EditText hayfieldproductivity;
+    private EditText pasturesproductivity;
+    private Spinner pasturesvegetationtype;
     private EditText additionalInformation;
 
     private boolean areEditTextsVisible;
 
     private RecyclerView cropList;
+    private RecyclerView livestockList;
     private Button cropAdd;
+    private Button livestockAdd;
     private CropAdapter cropAdapter;
+    private PastureAdapter livestockAdapter;
 
     private RecyclerView images;
     private Button btnUploadImage;
@@ -134,6 +145,8 @@ public class BsEditYieldFragment extends BottomSheetDialogFragment {
         toggleButton = view.findViewById(R.id.toggleButton);
         saveBtn = view.findViewById(R.id.btn_save);
         editTextContainer = view.findViewById(R.id.editTextContainer);
+        cropPanel = view.findViewById(R.id.cropPanel);
+        pasturePanel = view.findViewById(R.id.pasturePanel);
 
         name = view.findViewById(R.id.name);
         region = view.findViewById(R.id.region);
@@ -147,22 +160,34 @@ public class BsEditYieldFragment extends BottomSheetDialogFragment {
         cadastrNumber = view.findViewById(R.id.cadastrId);
         aggregator = view.findViewById(R.id.aggregator);
         additionalInformation = view.findViewById(R.id.additionalInformation);
+        hayfielddate = view.findViewById(R.id.hayfielddate);
+        hayfieldproductivity = view.findViewById(R.id.hayfieldproductivity);
+        pasturesproductivity = view.findViewById(R.id.pasturesproductivity);
+        pasturesvegetationtype = view.findViewById(R.id.pasturesvegetationtype);
+        livestockCount = view.findViewById(R.id.livestockCount);
+        livestockName = view.findViewById(R.id.livestockName);
         cropList = view.findViewById(R.id.crop_list);
+        livestockList = view.findViewById(R.id.livestock_list);
         cropAdd = view.findViewById(R.id.crop_add);
+        livestockAdd = view.findViewById(R.id.livestock_add);
         area = view.findViewById(R.id.area);
         images = view.findViewById(R.id.images);
         btnUploadImage = view.findViewById(R.id.btn_upload_image);
+
+        DatePiker.setDataPicker(hayfielddate, getContext());
+
         setSpinnerData();
 
         imagePanel();
 
-        yieldPanel();
-
         cropPanel();
+        pasturePanel();
 
         setArea();
 
         editLogic();
+
+        yieldPanel();
 
         saveBtnLogic();
 
@@ -184,6 +209,40 @@ public class BsEditYieldFragment extends BottomSheetDialogFragment {
 //        }
     }
 
+    private void pasturePanel() {
+        livestockList.setLayoutManager(new LinearLayoutManager(getContext()));
+        livestockList.setNestedScrollingEnabled(false);
+
+        livestockAdapter = new PastureAdapter(
+                getContext(),
+                yield,
+                key -> {
+                    // onItemLongClick
+                    new AlertDialog.Builder(getContext())
+                            .setTitle("Вы уверены, что хотите удалить скот?")
+                            .setIcon(android.R.drawable.ic_dialog_alert)
+                            .setPositiveButton("Удалить", (dialogInterface, which) -> {
+                                App.getDelegator().deleteTag(key, yield);
+                                Toast.makeText(getContext(), "Скот удалён", Toast.LENGTH_SHORT).show();
+                                livestockAdapter.notifyDataSetChanged();
+                            })
+                            .setNegativeButton("Отмена", null)
+                            .show();
+                }
+        );
+        livestockList.setAdapter(livestockAdapter);
+
+        livestockAdd.setOnClickListener(v -> {
+            String name = livestockName.getSelectedItem().toString();
+            String count = livestockCount.getText().toString();
+            if (count.isEmpty()) return;
+            App.getDelegator().addTag("pasture:" + name, count, yield);
+            livestockAdapter.notifyDataSetChanged();
+            livestockName.setSelection(0);
+            livestockCount.setText(null);
+        });
+    }
+
     private void setSpinnerData() {
         ArrayAdapter<String> landTypeAdapter = new ArrayAdapter<>(getActivity(), R.layout.agro_simple_spinner_item, TYPE_LAND_DATA);
         landTypeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -193,6 +252,30 @@ public class BsEditYieldFragment extends BottomSheetDialogFragment {
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 String typeLand = TYPE_LAND_DATA[position];
                 changeUnderTypeLand(typeLand);
+
+                if (Objects.equals(typeLand, "Пашня")) {
+                    cropPanel.setVisibility(View.VISIBLE);
+                } else {
+                    cropPanel.setVisibility(View.GONE);
+                }
+
+                if (Objects.equals(typeLand, "Сенокосы")) {
+                    hayfielddate.setVisibility(View.VISIBLE);
+                    hayfieldproductivity.setVisibility(View.VISIBLE);
+                } else {
+                    hayfielddate.setVisibility(View.GONE);
+                    hayfieldproductivity.setVisibility(View.GONE);
+                }
+
+                if (Objects.equals(typeLand, "Пастбища")) {
+                    pasturesproductivity.setVisibility(View.VISIBLE);
+                    pasturesvegetationtype.setVisibility(View.VISIBLE);
+                    pasturePanel.setVisibility(View.VISIBLE);
+                } else {
+                    pasturesproductivity.setVisibility(View.GONE);
+                    pasturesvegetationtype.setVisibility(View.GONE);
+                    pasturePanel.setVisibility(View.GONE);
+                }
             }
 
             @Override
@@ -203,6 +286,32 @@ public class BsEditYieldFragment extends BottomSheetDialogFragment {
         ArrayAdapter<String> irrigationTypeAdapter = new ArrayAdapter<>(getActivity(), R.layout.agro_simple_spinner_item, IRRIGATION_TYPE_DATA);
         irrigationTypeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         irrigationType.setAdapter(irrigationTypeAdapter);
+
+        underLandType.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                String[] strings = UNDER_TYPE_LAND_DATA.get(landType.getSelectedItem().toString());
+                if (strings != null) {
+                    String string = strings[position];
+                    if (Objects.equals(string, "Богара") || Objects.equals(string, "Условно богара")) {
+                        irrigationType.setVisibility(View.GONE);
+                    } else {
+                        irrigationType.setVisibility(View.VISIBLE);
+                    }
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {}
+        });
+
+        ArrayAdapter<String> livestockAdapter = new ArrayAdapter<>(getActivity(), R.layout.agro_simple_spinner_item, LIVESTOCK_DATA);
+        livestockAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        livestockName.setAdapter(livestockAdapter);
+
+        ArrayAdapter<String> pastureTypeAdapter = new ArrayAdapter<>(getActivity(), R.layout.agro_simple_spinner_item, PASTURE_TYPE);
+        pastureTypeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        pasturesvegetationtype.setAdapter(pastureTypeAdapter);
     }
 
     private void changeUnderTypeLand(String typeLand) {
@@ -258,7 +367,11 @@ public class BsEditYieldFragment extends BottomSheetDialogFragment {
         farmerMobile.setText(getTagValue(yield, YIELD_TAG_FARMER_MOBILE));
         cadastrNumber.setText(getTagValue(yield, YIELD_TAG_CADASTRAL_NUMBER));
         additionalInformation.setText(getTagValue(yield, YIELD_TAG_ADDITIONAL_INFORMATION));
+        hayfielddate.setText(getTagValue(yield, "hayfielddate"));
+        hayfieldproductivity.setText(getTagValue(yield, "hayfieldproductivity"));
+        pasturesproductivity.setText(getTagValue(yield, "pasturesproductivity"));
         landType.setSelection(Arrays.asList(TYPE_LAND_DATA).indexOf(getTagValue(yield, YIELD_TAG_TYPE_LAND)));
+        pasturesvegetationtype.setSelection(Arrays.asList(PASTURE_TYPE).indexOf(getTagValue(yield, "pasturesvegetationtype")));
         irrigationType.setSelection(Arrays.asList(IRRIGATION_TYPE_DATA).indexOf(getTagValue(yield, YIELD_TAG_IRRIGATION_TYPE)));
         try {
             String tagValue = getTagValue(yield, YIELD_TAG_TYPE_LAND);
@@ -315,14 +428,6 @@ public class BsEditYieldFragment extends BottomSheetDialogFragment {
     private void saveBtnLogic() {
         saveBtn.setOnClickListener(v -> {
 
-            if (Objects.equals(yield.getState(), OsmElement.STATE_CREATED)) {
-                if (getCrops(yield).isEmpty()) {
-                    Toast.makeText(getContext(), "Добавьте хотя бы один элемент севооборота.",
-                            Toast.LENGTH_SHORT).show();
-                    return;
-                }
-            }
-
             Map<String, String> map = new HashMap<>();
             map.put(YIELD_TAG_POSITION, getPosition());
             map.put(Tags.KEY_NAME, name.getText().toString());
@@ -344,6 +449,10 @@ public class BsEditYieldFragment extends BottomSheetDialogFragment {
             }
             map.put(YIELD_TAG_CADASTRAL_NUMBER, cadastrNumber.getText().toString());
             map.put(YIELD_TAG_ADDITIONAL_INFORMATION, additionalInformation.getText().toString());
+            map.put("hayfielddate", hayfielddate.getText().toString());
+            map.put("hayfieldproductivity", hayfieldproductivity.getText().toString());
+            map.put("pasturesproductivity", pasturesproductivity.getText().toString());
+            map.put("pasturesvegetationtype", pasturesvegetationtype.getSelectedItemPosition() < 1 ? "" : pasturesvegetationtype.getSelectedItem().toString());
 
             int selectedItemPosition = landType.getSelectedItemPosition();
             if (Objects.equals(selectedItemPosition, 2) || Objects.equals(selectedItemPosition, 3)) {
@@ -355,6 +464,14 @@ public class BsEditYieldFragment extends BottomSheetDialogFragment {
             if (urls != null && !urls.isEmpty()) {
                 for (int i = 0; i < urls.size(); i++) {
                     map.put(TAG_IMAGE + "_" + (i + 1), urls.get(i));
+                }
+            }
+
+            if (Objects.equals(yield.getState(), OsmElement.STATE_CREATED) && Objects.equals("Пашня", map.get(YIELD_TAG_TYPE_LAND))) {
+                if (getCrops(yield).isEmpty()) {
+                    Toast.makeText(getContext(), "Добавьте хотя бы один элемент севооборота.",
+                            Toast.LENGTH_SHORT).show();
+                    return;
                 }
             }
 
@@ -406,6 +523,9 @@ public class BsEditYieldFragment extends BottomSheetDialogFragment {
         }
         toggleButton.setOnClickListener(v -> showHidePanel());
         showHidePanel();
+
+        if (landType.getSelectedItemPosition() == 1) cropPanel.setVisibility(View.VISIBLE);
+        if (landType.getSelectedItemPosition() == 3) pasturePanel.setVisibility(View.VISIBLE);
     }
 
     private void showHidePanel() {
@@ -454,12 +574,12 @@ public class BsEditYieldFragment extends BottomSheetDialogFragment {
             ((BottomSheetFragmentAllField) getParentFragment()).dismiss();
         }
 
-        if (Objects.equals(yield.getState(), OsmElement.STATE_CREATED)) {
-            if (getCrops(yield).isEmpty()) {
-                App.getDelegator().removeFieldRelation(yield);
-                Toast.makeText(getContext(), "Поле удалёно", Toast.LENGTH_SHORT).show();
-            }
-        }
+//        if (Objects.equals(yield.getState(), OsmElement.STATE_CREATED)) {
+//            if (getCrops(yield).isEmpty()) {
+//                App.getDelegator().removeFieldRelation(yield);
+//                Toast.makeText(getContext(), "Поле удалёно", Toast.LENGTH_SHORT).show();
+//            }
+//        }
     }
 
     private void setRegionAndDistrict() {

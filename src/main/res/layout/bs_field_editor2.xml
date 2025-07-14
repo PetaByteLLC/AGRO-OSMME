@@ -80,7 +80,8 @@
                 android:hint="Область"
                 android:inputType="text"
                 android:textColor="@color/ag_text_color"
-                android:textColorHint="@color/ag_text_color" />
+                android:textColorHint="@color/ag_text_color"
+                android:enabled="false"/>
 
             <EditText
                 android:id="@+id/district"
@@ -91,7 +92,8 @@
                 android:hint="Район"
                 android:inputType="text"
                 android:textColor="@color/ag_text_color"
-                android:textColorHint="@color/ag_text_color" />
+                android:textColorHint="@color/ag_text_color"
+                android:enabled="false"/>
 
             <EditText
                 android:id="@+id/farmerSurName"
@@ -126,6 +128,17 @@
                 android:textColor="@color/ag_text_color"
                 android:textColorHint="@color/ag_text_color" />
 
+            <EditText
+                android:id="@+id/cadastrId"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:layout_marginTop="10dp"
+                android:background="@drawable/edittext_background"
+                android:hint="Кадастровый номер поля"
+                android:inputType="text"
+                android:textColor="@color/ag_text_color"
+                android:textColorHint="@color/ag_text_color" />
+
             <Spinner
                 android:id="@+id/landType"
                 android:layout_width="match_parent"
@@ -146,16 +159,15 @@
                 android:textColorHint="@color/ag_text_color"
                 android:choiceMode="singleChoice"/>
 
-            <EditText
-                android:id="@+id/cadastrId"
+            <Spinner
+                android:id="@+id/irrigationType"
                 android:layout_width="match_parent"
                 android:layout_height="40dp"
                 android:layout_marginTop="10dp"
                 android:background="@drawable/edittext_background"
-                android:hint="Кадастровый номер поля"
-                android:inputType="text"
                 android:textColor="@color/ag_text_color"
-                android:textColorHint="@color/ag_text_color" />
+                android:textColorHint="@color/ag_text_color"
+                android:choiceMode="singleChoice"/>
 
             <EditText
                 android:id="@+id/aggregator"
@@ -168,15 +180,53 @@
                 android:textColor="@color/ag_text_color"
                 android:textColorHint="@color/ag_text_color" />
 
-            <Spinner
-                android:id="@+id/irrigationType"
+            <EditText
+                android:id="@+id/hayfielddate"
+                android:visibility="gone"
                 android:layout_width="match_parent"
                 android:layout_height="40dp"
                 android:layout_marginTop="10dp"
                 android:background="@drawable/edittext_background"
+                android:hint="Дата укоса"
+                android:inputType="text"
                 android:textColor="@color/ag_text_color"
-                android:textColorHint="@color/ag_text_color"
-                android:choiceMode="singleChoice"/>
+                android:textColorHint="@color/ag_text_color" />
+
+            <EditText
+                android:id="@+id/hayfieldproductivity"
+                android:visibility="gone"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:layout_marginTop="10dp"
+                android:background="@drawable/edittext_background"
+                android:hint="Урожайность"
+                android:inputType="text"
+                android:textColor="@color/ag_text_color"
+                android:textColorHint="@color/ag_text_color" />
+
+            <EditText
+                android:id="@+id/pasturesproductivity"
+                android:visibility="gone"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:layout_marginTop="10dp"
+                android:background="@drawable/edittext_background"
+                android:hint="Урожайность"
+                android:inputType="text"
+                android:textColor="@color/ag_text_color"
+                android:textColorHint="@color/ag_text_color" />
+
+            <Spinner
+                android:id="@+id/pasturesvegetationtype"
+                android:visibility="gone"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:layout_marginTop="10dp"
+                android:background="@drawable/edittext_background"
+                android:hint="Тип растительности"
+                android:inputType="text"
+                android:textColor="@color/ag_text_color"
+                android:textColorHint="@color/ag_text_color" />
 
             <EditText
                 android:id="@+id/additionalInformation"
@@ -227,9 +277,11 @@
         </LinearLayout>
 
         <LinearLayout
+            android:id="@+id/cropPanel"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:visibility="gone">
 
             <TextView
                 android:layout_width="match_parent"
@@ -262,6 +314,85 @@
                 android:textAlignment="textStart"
                 android:textAllCaps="false"
                 android:textColor="#138ce7" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/pasturePanel"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingVertical="10dp"
+                android:text="Скот"
+                android:textColor="@color/black"
+                android:textSize="17dp" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="2dp"
+                android:background="#90828282" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/livestock_list"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:nestedScrollingEnabled="false"
+                tools:listitem="@layout/livestock_list_item" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:weightSum="4"
+                android:spacing="8dp">
+
+                <Spinner
+                    android:id="@+id/livestockName"
+                    android:layout_width="wrap_content"
+                    android:layout_height="40dp"
+                    android:layout_weight="2"
+                    android:background="@drawable/edittext_background"
+                    android:textColor="@color/ag_text_color"
+                    android:textColorHint="@color/ag_text_color" />
+
+                <Space
+                    android:layout_width="8dp"
+                    android:layout_height="0dp" />
+
+                <EditText
+                    android:id="@+id/livestockCount"
+                    android:layout_width="wrap_content"
+                    android:layout_height="40dp"
+                    android:layout_weight="2"
+                    android:background="@drawable/edittext_background"
+                    android:hint="Кол-во"
+                    android:inputType="number"
+                    android:textColor="@color/ag_text_color"
+                    android:textColorHint="@color/ag_text_color" />
+
+                <Space
+                    android:layout_width="8dp"
+                    android:layout_height="0dp" />
+
+                <Button
+                    android:id="@+id/livestock_add"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:layout_weight="0"
+                    android:background="#fff"
+                    android:text="+"
+                    android:textSize="31dp"
+                    android:textAlignment="center"
+                    android:textAllCaps="false"
+                    android:textColor="#138ce7" />
+
+            </LinearLayout>
 
         </LinearLayout>
 
