@@ -58,7 +58,8 @@
                 android:hint="@string/name"
                 android:inputType="text"
                 android:textColor="@color/ag_text_color"
-                android:textColorHint="@color/ag_text_color" />
+                android:textColorHint="@color/ag_text_color"
+                android:enabled="false"/>
 
             <EditText
                 android:id="@+id/area"

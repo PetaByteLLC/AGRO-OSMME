@@ -181,13 +181,11 @@ public class BottomSheetFragmentAllField extends BottomSheetDialogFragment {
 
             // Вызываем наш метод, работающий с Way
             Set<String> culturesForThisWay = getCulturesForWay(way, currentSeasonName);
-            if (culturesForThisWay.isEmpty()) {
-                continue;
-            }
-
             String effectiveCultureName;
             if (culturesForThisWay.size() == 1) {
                 effectiveCultureName = culturesForThisWay.iterator().next();
+            } else if (culturesForThisWay.isEmpty()) {
+                effectiveCultureName = "Другие";
             } else {
                 effectiveCultureName = OTHER_CULTURE;
             }
@@ -220,7 +218,7 @@ public class BottomSheetFragmentAllField extends BottomSheetDialogFragment {
             }
 
             if (!cultureListForCurrentRegion.isEmpty()) {
-                resultRegionList.add(new Region(regionName, cultureListForCurrentRegion));
+                resultRegionList.add(new Region(regionName, cultureListForCurrentRegion, null));
             }
         }
         return resultRegionList;

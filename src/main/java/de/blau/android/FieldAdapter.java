@@ -1,6 +1,8 @@
 package de.blau.android;
 
 import static de.blau.android.AgroConstants.YIELD_TAG_AREA;
+import static de.blau.android.AgroConstants.YIELD_TAG_DISTRICT;
+import static de.blau.android.AgroConstants.YIELD_TAG_REGION;
 import static de.blau.android.TagHelper.getTagValue;
 
 import android.annotation.SuppressLint;
@@ -47,7 +49,7 @@ public class FieldAdapter extends RecyclerView.Adapter<FieldAdapter.FieldViewHol
     @Override
     public void onBindViewHolder(@NonNull FieldViewHolder holder, int position) {
         Way way = fieldList.get(position);
-        holder.name.setText(getTagValue(way, Tags.KEY_NAME));
+        holder.name.setText(getTagValue(way, YIELD_TAG_REGION) + " - " + getTagValue(way, YIELD_TAG_DISTRICT));
         holder.area.setText(" - " + getTagValue(way, YIELD_TAG_AREA) + " га");
 
         if (listener != null) {

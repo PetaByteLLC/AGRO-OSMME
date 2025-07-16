@@ -253,21 +253,29 @@ public class BsEditYieldFragment extends BottomSheetDialogFragment {
                 String typeLand = TYPE_LAND_DATA[position];
                 changeUnderTypeLand(typeLand);
 
-                if (Objects.equals(typeLand, "Пашня")) {
+                if (Objects.equals(typeLand, TYPE_LAND_DATA[1])) {
                     cropPanel.setVisibility(View.VISIBLE);
+                    aggregator.setVisibility(View.VISIBLE);
+                    irrigationType.setVisibility(View.VISIBLE);
                 } else {
+                    aggregator.setVisibility(View.GONE);
+                    irrigationType.setVisibility(View.GONE);
                     cropPanel.setVisibility(View.GONE);
                 }
 
-                if (Objects.equals(typeLand, "Сенокосы")) {
+                if (Objects.equals(typeLand, TYPE_LAND_DATA[2])) {
                     hayfielddate.setVisibility(View.VISIBLE);
                     hayfieldproductivity.setVisibility(View.VISIBLE);
+                    aggregator.setVisibility(View.GONE);
+                    irrigationType.setVisibility(View.GONE);
                 } else {
+                    aggregator.setVisibility(View.VISIBLE);
+                    irrigationType.setVisibility(View.VISIBLE);
                     hayfielddate.setVisibility(View.GONE);
                     hayfieldproductivity.setVisibility(View.GONE);
                 }
 
-                if (Objects.equals(typeLand, "Пастбища")) {
+                if (Objects.equals(typeLand, TYPE_LAND_DATA[3])) {
                     pasturesproductivity.setVisibility(View.VISIBLE);
                     pasturesvegetationtype.setVisibility(View.VISIBLE);
                     pasturePanel.setVisibility(View.VISIBLE);
@@ -275,6 +283,22 @@ public class BsEditYieldFragment extends BottomSheetDialogFragment {
                     pasturesproductivity.setVisibility(View.GONE);
                     pasturesvegetationtype.setVisibility(View.GONE);
                     pasturePanel.setVisibility(View.GONE);
+                }
+
+                if (Objects.equals(typeLand, TYPE_LAND_DATA[4])) {
+                    aggregator.setVisibility(View.GONE);
+                    irrigationType.setVisibility(View.GONE);
+                } else {
+                    aggregator.setVisibility(View.VISIBLE);
+                    irrigationType.setVisibility(View.VISIBLE);
+                }
+
+                if (Objects.equals(typeLand, TYPE_LAND_DATA[5])) {
+                    aggregator.setVisibility(View.GONE);
+                    irrigationType.setVisibility(View.GONE);
+                } else {
+                    aggregator.setVisibility(View.VISIBLE);
+                    irrigationType.setVisibility(View.VISIBLE);
                 }
             }
 
@@ -430,7 +454,7 @@ public class BsEditYieldFragment extends BottomSheetDialogFragment {
 
             Map<String, String> map = new HashMap<>();
             map.put(YIELD_TAG_POSITION, getPosition());
-            map.put(Tags.KEY_NAME, name.getText().toString());
+//            map.put(Tags.KEY_NAME, name.getText().toString());
             map.put(YIELD_TAG_AREA, area.getText().toString());
             map.put(YIELD_TAG_REGION, region.getText().toString());
             map.put(YIELD_TAG_DISTRICT, district.getText().toString());
@@ -467,12 +491,18 @@ public class BsEditYieldFragment extends BottomSheetDialogFragment {
                 }
             }
 
-            if (Objects.equals(yield.getState(), OsmElement.STATE_CREATED) && Objects.equals("Пашня", map.get(YIELD_TAG_TYPE_LAND))) {
+            if (Objects.equals(yield.getState(), OsmElement.STATE_CREATED) && Objects.equals(TYPE_LAND_DATA[1], map.get(YIELD_TAG_TYPE_LAND))) {
                 if (getCrops(yield).isEmpty()) {
                     Toast.makeText(getContext(), "Добавьте хотя бы один элемент севооборота.",
                             Toast.LENGTH_SHORT).show();
                     return;
                 }
+            }
+
+            if (map.get(YIELD_TAG_REGION).isEmpty() || map.get(YIELD_TAG_DISTRICT).isEmpty()) {
+                Toast.makeText(getContext(), "Область или Район не заполнено!",
+                        Toast.LENGTH_SHORT).show();
+                return;
             }
 
             App.getDelegator().updateOsmElementTags(yield, map);
@@ -518,8 +548,10 @@ public class BsEditYieldFragment extends BottomSheetDialogFragment {
     private void yieldPanel() {
         if (!areEditTextsVisible) {
             label.setText("Создание поля");
+            name.setVisibility(View.GONE);
         } else {
             label.setText("Редактирование поля");
+            name.setVisibility(View.VISIBLE);
         }
         toggleButton.setOnClickListener(v -> showHidePanel());
         showHidePanel();
@@ -574,13 +606,15 @@ public class BsEditYieldFragment extends BottomSheetDialogFragment {
             ((BottomSheetFragmentAllField) getParentFragment()).dismiss();
         }
 
-//        if (Objects.equals(yield.getState(), OsmElement.STATE_CREATED)) {
-//            if (getCrops(yield).isEmpty()) {
-//                App.getDelegator().removeFieldRelation(yield);
-//                Toast.makeText(getContext(), "Поле удалёно", Toast.LENGTH_SHORT).show();
-//            }
-//        }
+        if (Objects.equals(yield.getState(), OsmElement.STATE_CREATED)) {
+            if (yield.getTags().isEmpty()) {
+                App.getDelegator().removeFieldRelation(yield);
+                Toast.makeText(getContext(), "Поле удалёно", Toast.LENGTH_SHORT).show();
+            }
+        }
     }
+
+
 
     private void setRegionAndDistrict() {
         if (yield == null) return;
