@@ -5,6 +5,8 @@ import static de.blau.android.AgroConstants.DATE_STRING_FORMAT;
 import android.annotation.SuppressLint;
 import android.app.DatePickerDialog;
 import android.content.Context;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.widget.EditText;
 
 import java.text.ParseException;
@@ -19,9 +21,7 @@ public class DatePiker {
 
     @SuppressLint({"DefaultLocale", "ClickableViewAccessibility"})
     public static void setDataPicker(EditText editText, Context context) {
-        AtomicBoolean opened = new AtomicBoolean(false);
-        editText.setOnTouchListener((v, me) -> {
-            if (opened.get()) return false;
+        editText.setOnClickListener(v -> {
             Calendar calendar = Calendar.getInstance();
             int year = calendar.get(Calendar.YEAR);
             int month = calendar.get(Calendar.MONTH);
@@ -34,23 +34,7 @@ public class DatePiker {
                     },
                     year, month, day);
             datePickerDialog.show();
-            opened.set(true);
-            return false;
         });
-//        editText.setOnClickListener(v -> {
-//            Calendar calendar = Calendar.getInstance();
-//            int year = calendar.get(Calendar.YEAR);
-//            int month = calendar.get(Calendar.MONTH);
-//            int day = calendar.get(Calendar.DAY_OF_MONTH);
-//
-//            DatePickerDialog datePickerDialog = new DatePickerDialog(
-//                    context,
-//                    (view1, year1, monthOfYear, dayOfMonth) -> {
-//                        editText.setText(String.format(DATE_STRING_FORMAT, year1, monthOfYear + 1, dayOfMonth));
-//                    },
-//                    year, month, day);
-//            datePickerDialog.show();
-//        });
     }
 
     public static String formatCalendarToString(Calendar calendar) {
@@ -107,5 +91,33 @@ public class DatePiker {
         String yearAsString = String.valueOf(currentYear);
         String endOfYear = currentYear + "-12-31";
         return new Season(startOfYear, yearAsString, endOfYear);
+    }
+
+    public static void setSuffix(EditText editText, String suffix) {
+        editText.addTextChangedListener(new TextWatcher() {
+            private boolean isEditing = false;
+
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                if (isEditing) return;
+                isEditing = true;
+
+                String original = s.toString().replace(suffix, "").trim();
+                editText.setText(original + suffix);
+                editText.setSelection(original.length());
+
+                isEditing = false;
+            }
+        });
     }
 }

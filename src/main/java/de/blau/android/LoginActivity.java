@@ -36,7 +36,6 @@ public class LoginActivity extends AppCompatActivity {
         usernameInput = findViewById(R.id.etUsername);
         passwordInput = findViewById(R.id.etPassword);
         Button loginButton = findViewById(R.id.btnLogin);
-        Button googleButton = findViewById(R.id.google_sign_in_button);
 
         loginButton.setOnClickListener(v -> {
             String username = usernameInput.getText().toString();
@@ -44,26 +43,6 @@ public class LoginActivity extends AppCompatActivity {
             login(username, password);
         });
 
-        googleButton.setOnClickListener(v -> oauth2());
-    }
-
-    private void oauth2() {
-        String backendAuthUrl = AgroConstants.URL + "/login/google-link/mobile";
-        CustomTabsIntent customTabsIntent = new CustomTabsIntent.Builder().build();
-        try {
-            customTabsIntent.launchUrl(LoginActivity.this, Uri.parse(backendAuthUrl));
-        } catch (ActivityNotFoundException e) {
-            Toast.makeText(LoginActivity.this, "Chrome Custom Tabs не найдены. Открываем в браузере...", Toast.LENGTH_SHORT).show();
-            try {
-                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(backendAuthUrl));
-                startActivity(browserIntent);
-                finish();
-            } catch (ActivityNotFoundException ex) {
-                Toast.makeText(LoginActivity.this, "Подходящий браузер не найден.", Toast.LENGTH_LONG).show();
-            }
-        } catch (Exception e) {
-            Toast.makeText(LoginActivity.this, "Не удалось открыть ссылку. Проверьте URL.", Toast.LENGTH_LONG).show();
-        }
     }
 
     private void login(String username, String password) {
