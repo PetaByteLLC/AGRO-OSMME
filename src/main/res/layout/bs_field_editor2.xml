@@ -189,7 +189,10 @@
                 android:layout_marginTop="10dp"
                 android:background="@drawable/edittext_background"
                 android:hint="Дата укоса"
-                android:inputType="text"
+                android:clickable="false"
+                android:cursorVisible="false"
+                android:focusable="false"
+                android:focusableInTouchMode="false"
                 android:textColor="@color/ag_text_color"
                 android:textColorHint="@color/ag_text_color" />
 
