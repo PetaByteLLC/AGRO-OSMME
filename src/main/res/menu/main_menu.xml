@@ -191,6 +191,15 @@
                 android:id="@+id/exportExcelPolygon"
                 android:title="Экспорт Excel"/>
             <item
+                android:id="@+id/exportMyGjPolygon"
+                android:title="Экспорт мои данные Geojson"/>
+            <item
+                android:id="@+id/exportMyShPolygon"
+                android:title="Экспорт мои Geopackage"/>
+            <item
+                android:id="@+id/exportMyExcelPolygon"
+                android:title="Экспорт мои Excel"/>
+            <item
                 android:id="@+id/uploadChanges"
                 android:title="Загрузка"/>
             <item

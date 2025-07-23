@@ -1929,6 +1929,20 @@ public class Main extends FullScreenAppCompatActivity
         return true;
     }
 
+    private boolean downloadLink(String link, String output) {
+        if (isConnected()) {
+            DownloadManager.Request request = new DownloadManager.Request(Uri.parse(link));
+            request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
+            request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, output);
+
+            DownloadManager downloadManager = (DownloadManager) getSystemService(Context.DOWNLOAD_SERVICE);
+            downloadManager.enqueue(request);
+        } else {
+            ScreenMessage.toastTopInfo(Main.this, "Нету подключения к интернету");
+        }
+        return true;
+    }
+
     /**
      * Creates the menu from the XML file "main_menu.xml".<br>
      * {@inheritDoc}
@@ -1985,49 +1999,18 @@ public class Main extends FullScreenAppCompatActivity
         allFieldItem.getActionView().setOnClickListener(new AllFieldListener());
 
         MenuItem exportGjPolygonItem = menu.findItem(R.id.exportGjPolygon);
-        exportGjPolygonItem.setOnMenuItemClickListener((m) -> {
-            if (isConnected()) {
-                DownloadManager.Request request = new DownloadManager.Request(Uri.parse(EXPORT_GEOJSON_URL));
-                request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
-                request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, "exported.geojson");
-
-                DownloadManager downloadManager = (DownloadManager) getSystemService(Context.DOWNLOAD_SERVICE);
-                downloadManager.enqueue(request);
-            } else {
-                ScreenMessage.toastTopInfo(Main.this, "Нету подключения к интернету");
-            }
-            return true;
-        });
-
+        exportGjPolygonItem.setOnMenuItemClickListener((m) -> downloadLink(EXPORT_GEOJSON_URL, "exported.geojson"));
         MenuItem exportShPolygonItem = menu.findItem(R.id.exportShPolygon);
-        exportShPolygonItem.setOnMenuItemClickListener((m) -> {
-            if (isConnected()) {
-                DownloadManager.Request request = new DownloadManager.Request(Uri.parse(EXPORT_ZIP_URL));
-                request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
-                request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, "exported.gpkg");
-
-                DownloadManager downloadManager = (DownloadManager) getSystemService(Context.DOWNLOAD_SERVICE);
-                downloadManager.enqueue(request);
-            } else {
-                ScreenMessage.toastTopInfo(Main.this, "Нету подключения к интернету");
-            }
-            return true;
-        });
-
+        exportShPolygonItem.setOnMenuItemClickListener((m) -> downloadLink(EXPORT_ZIP_URL, "exported.gpkg"));
         MenuItem exportExcelPolygon = menu.findItem(R.id.exportExcelPolygon);
-        exportExcelPolygon.setOnMenuItemClickListener((m) -> {
-            if (isConnected()) {
-                DownloadManager.Request request = new DownloadManager.Request(Uri.parse(EXPORT_EXCEL_URL));
-                request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
-                request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, "exported.xlsx");
+        exportExcelPolygon.setOnMenuItemClickListener((m) -> downloadLink(EXPORT_EXCEL_URL, "exported.xlsx"));
 
-                DownloadManager downloadManager = (DownloadManager) getSystemService(Context.DOWNLOAD_SERVICE);
-                downloadManager.enqueue(request);
-            } else {
-                ScreenMessage.toastTopInfo(Main.this, "Нету подключения к интернету");
-            }
-            return true;
-        });
+        MenuItem exportMyGjPolygonItem = menu.findItem(R.id.exportMyGjPolygon);
+        exportMyGjPolygonItem.setOnMenuItemClickListener((m) -> downloadLink(EXPORT_MY_GEOJSON_URL, "exported.geojson"));
+        MenuItem exportMyShPolygonItem = menu.findItem(R.id.exportMyGjPolygon);
+        exportMyShPolygonItem.setOnMenuItemClickListener((m) -> downloadLink(EXPORT_MY_ZIP_URL, "exported.gpkg"));
+        MenuItem exportMyExcelPolygon = menu.findItem(R.id.exportMyExcelPolygon);
+        exportMyExcelPolygon.setOnMenuItemClickListener((m) -> downloadLink(EXPORT_MY_EXCEL_URL, "exported.xlsx"));
 
         MenuItem uploadChangesItem = menu.findItem(R.id.uploadChanges);
         uploadChangesItem.setOnMenuItemClickListener((m) -> {

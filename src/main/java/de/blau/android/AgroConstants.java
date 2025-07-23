@@ -16,6 +16,9 @@ public class AgroConstants {
     public static final String EXPORT_GEOJSON_URL = URL + "/ws/public/fields/export?type=geojson";
     public static final String EXPORT_ZIP_URL = URL + "/ws/public/fields/export?type=geopackage";
     public static final String EXPORT_EXCEL_URL = URL + "/ws/public/fields/export?type=excel";
+    public static final String EXPORT_MY_GEOJSON_URL = URL + "/ws/public/fields/my/export?type=geojson";
+    public static final String EXPORT_MY_ZIP_URL = URL + "/ws/public/fields/my/export?type=geopackage";
+    public static final String EXPORT_MY_EXCEL_URL = URL + "/ws/public/fields/my/export?type=excel";
     // --- КОНСТАНТЫ ---
 
     public static final String YIELD_TAG_REGION = "region";
