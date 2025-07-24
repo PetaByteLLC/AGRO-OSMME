@@ -128,7 +128,6 @@ public class AppUpdater {
                 .setTitle("Доступно обновление")
                 .setMessage("Новая версия: " + updateInfo.getVersionName() + "\n\nЧто нового:\n" + updateInfo.getChangelog())
                 .setPositiveButton("Обновить", (dialog, which) -> checkPermissionsAndDownload(updateInfo))
-                .setNegativeButton("Позже", null)
                 .setCancelable(false)
                 .show();
     }
