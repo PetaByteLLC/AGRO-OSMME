@@ -2005,12 +2005,19 @@ public class Main extends FullScreenAppCompatActivity
         MenuItem exportExcelPolygon = menu.findItem(R.id.exportExcelPolygon);
         exportExcelPolygon.setOnMenuItemClickListener((m) -> downloadLink(EXPORT_EXCEL_URL, "exported.xlsx"));
 
+        if (Objects.equals(getUserRole(), ROLE_GAZR) || Objects.equals(getUserRole(), ROLE_ADMIN)) {
+            exportGjPolygonItem.setVisible(true);
+            exportShPolygonItem.setVisible(true);
+            exportExcelPolygon.setVisible(true);
+        }
+
+        String username = prefs.getAgroUsername();
         MenuItem exportMyGjPolygonItem = menu.findItem(R.id.exportMyGjPolygon);
-        exportMyGjPolygonItem.setOnMenuItemClickListener((m) -> downloadLink(EXPORT_MY_GEOJSON_URL, "exported.geojson"));
+        exportMyGjPolygonItem.setOnMenuItemClickListener((m) -> downloadLink(EXPORT_MY_GEOJSON_URL + "&userCode=" + username, "exported.geojson"));
         MenuItem exportMyShPolygonItem = menu.findItem(R.id.exportMyGjPolygon);
-        exportMyShPolygonItem.setOnMenuItemClickListener((m) -> downloadLink(EXPORT_MY_ZIP_URL, "exported.gpkg"));
+        exportMyShPolygonItem.setOnMenuItemClickListener((m) -> downloadLink(EXPORT_MY_ZIP_URL + "&userCode=" + username, "exported.gpkg"));
         MenuItem exportMyExcelPolygon = menu.findItem(R.id.exportMyExcelPolygon);
-        exportMyExcelPolygon.setOnMenuItemClickListener((m) -> downloadLink(EXPORT_MY_EXCEL_URL, "exported.xlsx"));
+        exportMyExcelPolygon.setOnMenuItemClickListener((m) -> downloadLink(EXPORT_MY_EXCEL_URL + "&userCode=" + username, "exported.xlsx"));
 
         MenuItem uploadChangesItem = menu.findItem(R.id.uploadChanges);
         uploadChangesItem.setOnMenuItemClickListener((m) -> {

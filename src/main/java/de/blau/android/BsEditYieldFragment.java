@@ -454,6 +454,12 @@ public class BsEditYieldFragment extends BottomSheetDialogFragment {
     private void saveBtnLogic() {
         saveBtn.setOnClickListener(v -> {
 
+            if (landType.getSelectedItemPosition() < 1) {
+                Toast.makeText(getContext(), "Выберите вид угодии",
+                        Toast.LENGTH_SHORT).show();
+                return;
+            }
+
             Map<String, String> map = new HashMap<>();
             map.put(YIELD_TAG_POSITION, getPosition());
 //            map.put(Tags.KEY_NAME, name.getText().toString());

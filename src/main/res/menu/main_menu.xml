@@ -183,13 +183,13 @@
             </item>
             <item
                 android:id="@+id/exportGjPolygon"
-                android:title="Экспорт Geojson"/>
+                android:title="Экспорт Geojson" android:visible="false"/>
             <item
                 android:id="@+id/exportShPolygon"
-                android:title="Экспорт Geopackage"/>
+                android:title="Экспорт Geopackage" android:visible="false"/>
             <item
                 android:id="@+id/exportExcelPolygon"
-                android:title="Экспорт Excel"/>
+                android:title="Экспорт Excel" android:visible="false"/>
             <item
                 android:id="@+id/exportMyGjPolygon"
                 android:title="Экспорт мои данные Geojson"/>
