@@ -200,12 +200,12 @@ public class Layers extends AbstractConfigurationDialog implements OnUpdateListe
             final Map map = App.getLogic().getMap();
 
             // menu items for adding layers
-            MenuItem item;
-//            MenuItem item = popup.getMenu().add(R.string.menu_layers_load_geojson);
-//            item.setOnMenuItemClickListener(unused -> {
-//                addStyleableLayerFromFile(activity, prefs, map, LayerType.GEOJSON);
-//                return false;
-//            });
+//            MenuItem item;
+            MenuItem item = popup.getMenu().add(R.string.menu_layers_load_geojson);
+            item.setOnMenuItemClickListener(unused -> {
+                addStyleableLayerFromFile(activity, prefs, map, LayerType.GEOJSON);
+                return false;
+            });
 
             item = popup.getMenu().add(R.string.menu_layers_add_backgroundlayer);
             item.setOnMenuItemClickListener(unused -> {
@@ -214,12 +214,12 @@ public class Layers extends AbstractConfigurationDialog implements OnUpdateListe
                 return true;
             });
 
-//            item = popup.getMenu().add(R.string.menu_layers_add_overlaylayer);
-//            item.setOnMenuItemClickListener(unused -> {
-//                showImagerySelectDialog(null, null, true);
-//                Tip.showDialog(activity, R.string.tip_imagery_privacy_key, R.string.tip_imagery_privacy);
-//                return true;
-//            });
+            item = popup.getMenu().add(R.string.menu_layers_add_overlaylayer);
+            item.setOnMenuItemClickListener(unused -> {
+                showImagerySelectDialog(null, null, true);
+                Tip.showDialog(activity, R.string.tip_imagery_privacy_key, R.string.tip_imagery_privacy);
+                return true;
+            });
 
 //            if (map.getTaskLayer() == null) {
 //                item = popup.getMenu().add(R.string.menu_layers_add_tasklayer);
@@ -297,11 +297,11 @@ public class Layers extends AbstractConfigurationDialog implements OnUpdateListe
 //                return false;
 //            });
 
-//            item = popup.getMenu().add(R.string.layer_add_custom_imagery);
-//            item.setOnMenuItemClickListener(unused -> {
-//                TileLayerDialog.showDialog(this, null);
-//                return true;
-//            });
+            item = popup.getMenu().add(R.string.layer_add_custom_imagery);
+            item.setOnMenuItemClickListener(unused -> {
+                TileLayerDialog.showDialog(this, null);
+                return true;
+            });
 
 //            item = popup.getMenu().add(R.string.layer_add_layer_from_mvt_style);
 //            item.setOnMenuItemClickListener(unused -> {
@@ -315,11 +315,11 @@ public class Layers extends AbstractConfigurationDialog implements OnUpdateListe
 //                return true;
 //            });
 
-//            item = popup.getMenu().add(R.string.add_imagery_from_wms_endpoint);
-//            item.setOnMenuItemClickListener(unused -> {
-//                WmsEndpointDatabaseView.showDialog(this);
-//                return true;
-//            });
+            item = popup.getMenu().add(R.string.add_imagery_from_wms_endpoint);
+            item.setOnMenuItemClickListener(unused -> {
+                WmsEndpointDatabaseView.showDialog(this);
+                return true;
+            });
 
             popup.show();
         });

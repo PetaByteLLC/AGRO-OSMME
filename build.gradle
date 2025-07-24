@@ -708,6 +708,8 @@ dependencies {
     }
     androidTestImplementation 'androidx.test.uiautomator:uiautomator:2.3.0'
     androidTestImplementation "androidx.work:work-testing:$work_version"
+
+    implementation 'com.github.javiersantos:AppUpdater:2.7'
 }
 
 int getVersionCode() {
