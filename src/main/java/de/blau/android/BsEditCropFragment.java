@@ -113,7 +113,6 @@ public class BsEditCropFragment extends BottomSheetDialogFragment {
 
         DatePiker.setDataPicker(sowingDate, getContext());
         DatePiker.setDataPicker(cleaningDate, getContext());
-        DatePiker.setSuffix(productivity, " ц/га");
 
         editValues();
 

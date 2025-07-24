@@ -175,8 +175,6 @@ public class BsEditYieldFragment extends BottomSheetDialogFragment {
         btnUploadImage = view.findViewById(R.id.btn_upload_image);
 
         DatePiker.setDataPicker(hayfielddate, getContext());
-        DatePiker.setSuffix(pasturesproductivity, " ц/га");
-        DatePiker.setSuffix(hayfieldproductivity, " ц/га");
 
         setSpinnerData();
 

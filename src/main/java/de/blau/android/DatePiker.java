@@ -91,32 +91,4 @@ public class DatePiker {
         String endOfYear = currentYear + "-12-31";
         return new Season(startOfYear, yearAsString, endOfYear);
     }
-
-    public static void setSuffix(EditText editText, String suffix) {
-        editText.addTextChangedListener(new TextWatcher() {
-            private boolean isEditing = false;
-
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-                if (isEditing) return;
-                isEditing = true;
-
-                String original = s.toString().replace(suffix, "").trim();
-                editText.setText(original + suffix);
-                editText.setSelection(original.length());
-
-                isEditing = false;
-            }
-        });
-    }
 }

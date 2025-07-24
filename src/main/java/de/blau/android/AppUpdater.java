@@ -143,7 +143,7 @@ public class AppUpdater {
                             intent.setData(Uri.parse("package:" + context.getPackageName()));
                             activity.startActivity(intent);
                         })
-                        .setNegativeButton("Отмена", null)
+                        .setCancelable(false)
                         .show();
                 return;
             }
