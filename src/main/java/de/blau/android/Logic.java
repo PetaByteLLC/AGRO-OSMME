@@ -173,7 +173,7 @@ public class Logic {
      * Minimum width of the viewBox for showing the tolerance. When the viewBox is wider, no element selection is
      * possible.
      */
-    private static final int TOLERANCE_MIN_VIEWBOX_WIDTH = 40000 * 2;
+    private static final int TOLERANCE_MIN_VIEWBOX_WIDTH = 200000 * 2;
 
     /**
      * In MODE_EDIT this value is used for the padding of the display border.

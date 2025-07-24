@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<paths>
+    <!-- Разрешаем делиться файлами из публичной папки "Загрузки" -->
+    <external-path
+        name="downloads"
+        path="Download/" />
+
+    <!-- Также можно добавить папку кэша, если будете скачивать туда -->
+    <cache-path
+        name="cache"
+        path="." />
+</paths>
