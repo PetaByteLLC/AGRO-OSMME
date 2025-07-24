@@ -1,5 +1,5 @@
 {
-  "versionCode": 1,
+  "versionCode": 3002,
   "versionName": "1.0",
   "apkUrl": "https://github.com/PetaByteLLC/AGRO-OSMME/releases/download/v1.0/AGRO-OSMME-current-debug.apk",
   "changelog": "- Исправлены ошибки\n- Добавлена новая функция X\n- Улучшена производительность"
