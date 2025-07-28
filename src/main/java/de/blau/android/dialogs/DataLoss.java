@@ -109,10 +109,10 @@ public class DataLoss extends ImmersiveDialogFragment {
     public static AppCompatDialog createDialog(@NonNull Context context, @NonNull DialogInterface.OnClickListener listener) {
         Builder builder = new AlertDialog.Builder(context);
         builder.setIcon(ThemeUtils.getResIdFromAttribute(context, R.attr.alert_dialog));
-        builder.setTitle(R.string.unsaved_data_title);
-        builder.setMessage(R.string.unsaved_data_message);
-        builder.setPositiveButton(R.string.unsaved_data_proceed, listener);
-        builder.setNegativeButton(R.string.cancel, null);
+        builder.setTitle("Вы уверены, что хотите выйти?");
+        builder.setMessage("Последние изменения не были сохранены в базе данных. Дождитесь подключения к сети интернет для сохранения данных");
+        builder.setPositiveButton("Всё равно выйти!", listener);
+        builder.setNegativeButton("Отмена", null);
         return builder.create();
     }
 

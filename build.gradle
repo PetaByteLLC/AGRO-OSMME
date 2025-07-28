@@ -708,7 +708,7 @@ dependencies {
     }
     androidTestImplementation 'androidx.test.uiautomator:uiautomator:2.3.0'
     androidTestImplementation "androidx.work:work-testing:$work_version"
-
+    implementation "androidx.work:work-runtime:2.9.0"
 }
 
 int getVersionCode() {

@@ -93,6 +93,7 @@ import androidx.core.view.MenuCompat;
 import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.work.ExistingPeriodicWorkPolicy;
 import androidx.work.PeriodicWorkRequest;
 import androidx.work.WorkManager;
 
@@ -667,6 +668,16 @@ public class Main extends FullScreenAppCompatActivity
 
         AppUpdater appUpdater = new AppUpdater(this);
         appUpdater.checkForUpdate();
+
+        PeriodicWorkRequest hourlyWorkRequest =
+                new PeriodicWorkRequest.Builder(HourlyWorker.class, 15, TimeUnit.MINUTES)
+                        .build();
+
+        WorkManager.getInstance(this).enqueueUniquePeriodicWork(
+                "HourlyTask",
+                ExistingPeriodicWorkPolicy.KEEP,
+                hourlyWorkRequest
+        );
     }
 
     public static final List<String> YEARS = new ArrayList<>();
@@ -3708,9 +3719,13 @@ public class Main extends FullScreenAppCompatActivity
      * pop up a dialog asking for confirmation and if confirmed exit
      */
     private void exit() {
-        new AlertDialog.Builder(this).setTitle(R.string.exit_title)
-                .setMessage(getTracker() != null && getTracker().isTracking() ? R.string.pause_exit_text : R.string.exit_text)
-                .setNegativeButton(R.string.no, null).setPositiveButton(R.string.yes, (dialog, which) -> {
+        String message = "Вы уверены, что хотите выйти?";
+        if (App.getLogic().hasChanges())
+            message +=  "\n\nПоследние изменения не были сохранены в базе данных.\nДождитесь подключения к сети интернет для сохранения данных.";
+
+        new AlertDialog.Builder(this).setTitle("Подтверждение выхода")
+                .setMessage(message)
+                .setNegativeButton("Остаться", null).setPositiveButton("Выйти", (dialog, which) -> {
                     // if we actually exit, stop the auto downloads, for now
                     // allow GPS tracks to carry on
                     if (getTracker() != null) {

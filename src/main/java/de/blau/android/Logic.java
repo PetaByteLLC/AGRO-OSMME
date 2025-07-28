@@ -4619,6 +4619,85 @@ public class Logic {
         }.execute();
     }
 
+    public void upload2(@NonNull UploadListener.UploadArguments arguments) {
+
+        final Server server = prefs.getServer();
+        new ExecutorTask<Void, Void, UploadResult>(executorService, uiHandler) {
+            @Override
+            protected void onPreExecute() {
+                pushComment(arguments.comment, false);
+                pushSource(arguments.source, false);
+            }
+            @Override
+            protected UploadResult doInBackground(Void params) {
+                UploadResult result = new UploadResult();
+                try {
+                    server.getCapabilities(); // update status
+                    if (!(server.apiAvailable() && server.writableDB())) {
+                        result.setError(ErrorCodes.API_OFFLINE);
+                        return result;
+                    }
+                    // set comment here if empty to avoid saving it
+                    getDelegator().uploadToServer(server,
+                            Util.isEmpty(arguments.comment) ? "Automatically generated summary" : arguments.comment, arguments.source,
+                            arguments.closeOpenChangeset, arguments.closeChangeset, arguments.extraTags, arguments.elements);
+                } catch (final OsmServerException e) {
+                    int errorCode = e.getHttpErrorCode();
+                    result.setHttpError(errorCode);
+                    result.setMessage(e.getMessageWithDescription());
+                    switch (errorCode) {
+                        case HttpURLConnection.HTTP_GONE:
+                            result.setError(ErrorCodes.ALREADY_DELETED);
+                            result.setMessage(e.getLocalizedMessage());
+                            break;
+                        case HttpURLConnection.HTTP_CONFLICT:
+                        case HttpURLConnection.HTTP_PRECON_FAILED:
+                        case HttpURLConnection.HTTP_ENTITY_TOO_LARGE:
+                            result.setError(ErrorCodes.UPLOAD_CONFLICT);
+                            result.setMessage(e.getLocalizedMessage());
+                            break;
+                        case HttpStatusCodes.HTTP_TOO_MANY_REQUESTS:
+                            result.setError(ErrorCodes.UPLOAD_LIMIT_EXCEEDED);
+                            result.setMessage(e.getMessage());
+                            break;
+                        default:
+                            mapErrorCode(errorCode, result);
+                    }
+                } catch (final SocketTimeoutException | ProtocolException e) {
+                    Log.e(DEBUG_TAG, METHOD_UPLOAD, e);
+                    result.setError(ErrorCodes.UPLOAD_INCOMPLETE);
+                    result.setMessage(e.getLocalizedMessage());
+                } catch (final IOException | NumberFormatException e) {
+                    Log.e(DEBUG_TAG, METHOD_UPLOAD, e);
+                    result.setError(ErrorCodes.UPLOAD_PROBLEM);
+                    result.setMessage(e.getLocalizedMessage());
+                } catch (final NullPointerException e) {
+                    Log.e(DEBUG_TAG, METHOD_UPLOAD, e);
+                    ACRAHelper.nocrashReport(e, e.getMessage());
+                }
+                return result;
+            }
+
+            @Override
+            protected void onPostExecute(UploadResult result) {
+                final int error = result.getError();
+                try {
+                    final StorageDelegator delegator = getDelegator();
+                    if (error == ErrorCodes.OK) {
+                        if (arguments.elements == null) {
+                            delegator.clearUndo(); // only clear on successful upload
+                        } else {
+                            delegator.clearUndo(arguments.elements);
+                        }
+                    }
+                } catch (Exception ex) {
+                    Log.e(DEBUG_TAG, "Unexpected exception in upload " + ex.getMessage());
+                    ACRAHelper.nocrashReport(ex, ex.getMessage());
+                }
+            }
+        }.execute();
+    }
+
     /**
      * Map "standard" http error codes from the API to internal codes
      * 

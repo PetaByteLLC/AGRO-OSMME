@@ -13,27 +13,31 @@ public class DownloadCompletedReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         if (intent.getAction() != null && intent.getAction().equals(DownloadManager.ACTION_DOWNLOAD_COMPLETE)) {
-            
+
             long downloadId = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1);
             if (downloadId == -1) {
                 return;
             }
 
             DownloadManager downloadManager = (DownloadManager) context.getSystemService(Context.DOWNLOAD_SERVICE);
-            
             Uri fileUri = downloadManager.getUriForDownloadedFile(downloadId);
             if (fileUri != null) {
                 DownloadManager.Query query = new DownloadManager.Query();
                 query.setFilterById(downloadId);
                 Cursor cursor = downloadManager.query(query);
-                if (cursor.moveToFirst()) {
+                if (cursor != null && cursor.moveToFirst()) {
                     int statusIndex = cursor.getColumnIndex(DownloadManager.COLUMN_STATUS);
+                    int mimeIndex = cursor.getColumnIndex(DownloadManager.COLUMN_MEDIA_TYPE);
                     int status = cursor.getInt(statusIndex);
-                    if (status == DownloadManager.STATUS_SUCCESSFUL) {
+                    String mimeType = cursor.getString(mimeIndex);
+                    if (status == DownloadManager.STATUS_SUCCESSFUL &&
+                            "application/vnd.android.package-archive".equals(mimeType)) {
                         installApk(context, fileUri);
                     }
                 }
-                cursor.close();
+                if (cursor != null) {
+                    cursor.close();
+                }
             }
         }
     }
