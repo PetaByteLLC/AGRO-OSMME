@@ -158,6 +158,7 @@ import de.blau.android.osm.Relation;
 import de.blau.android.osm.Server;
 import de.blau.android.osm.Storage;
 import de.blau.android.osm.StorageDelegator;
+import de.blau.android.osm.Tags;
 import de.blau.android.osm.UndoStorage;
 import de.blau.android.osm.ViewBox;
 import de.blau.android.osm.Way;
@@ -3932,7 +3933,15 @@ public class Main extends FullScreenAppCompatActivity
                 getClickedObjects(x, y);
                 for(OsmElement osmElement : clickedNodesAndWays) {
                     if (osmElement instanceof Way) {
-                        editorField((Way) osmElement);
+                        String name = osmElement.getTagWithKey(Tags.KEY_NAME);
+                        String typeLand = osmElement.getTagWithKey(YIELD_TAG_TYPE_LAND);
+                        new AlertDialog.Builder(Main.this)
+                                .setTitle("Поле " + (name == null ? osmElement.getOsmId() : name))
+                                .setMessage("Тип угодия: " + (typeLand == null ? "Не указано" : typeLand))
+                                .setPositiveButton("Редактировать", (a, e) -> editorField((Way) osmElement))
+                                .setNegativeButton("Посмотреть",
+                                        (a, e) -> editYield((Way) osmElement, getSupportFragmentManager(), false))
+                                .show();
                         return true;
                     }
                 }
@@ -5346,8 +5355,9 @@ public class Main extends FullScreenAppCompatActivity
             logic.hideCrosshairs();
             invalidateMap();
             triggerMenuInvalidation();
-            if (logic.getSelectedWay() != null) {
-                App.getDelegator().removeWay(logic.getSelectedWay());
+            Way selectedWay = logic.getSelectedWay();
+            if (selectedWay != null && Objects.equals(selectedWay.getState(), OsmElement.STATE_CREATED)) {
+                if (selectedWay.getTags().size() < 3) App.getDelegator().removeWay(selectedWay);
             }
             logic.deselectAll();
             logic.setLocked(true);
