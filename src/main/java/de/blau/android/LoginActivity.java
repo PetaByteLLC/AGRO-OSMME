@@ -79,7 +79,6 @@ public class LoginActivity extends AppCompatActivity {
                         Preferences prefs = App.getPreferences(this);
                         prefs.setCgiToken(responseObject.getString("data"));
                         prefs.setAgroUserRole(responseRoleObject.getString("role"));
-                        prefs.setAgroPassword(password);
                         prefs.setAgroUsername(username);
 
                         try {

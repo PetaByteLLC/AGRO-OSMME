@@ -203,9 +203,11 @@ public class BsEditYieldFragment extends BottomSheetDialogFragment {
         bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
         bottomSheetBehavior.setDraggable(false);
 
-        if (getDialog() != null) {
-            getDialog().setCancelable(false);
-            getDialog().setCanceledOnTouchOutside(false);
+        if (Objects.equals(yield.getState(), OsmElement.STATE_CREATED)) {
+            if (getDialog() != null) {
+                getDialog().setCancelable(false);
+                getDialog().setCanceledOnTouchOutside(false);
+            }
         }
     }
 

@@ -1431,8 +1431,8 @@
   <string name="undo_action_remove_node_from_way">Удаление точки из линии</string>
   <string name="undo_action_extract_segment">Извлечь сегмент</string>
   <!--ACRA-->
-  <string name="crash_dialog_text">Vespucci обнаружил серьёзный сбой при последнем запуске.\n\nПожалуйста, помогите нам, отправив отчёт об ошибке, нажав \'OK\'.\n</string>
-  <string name="crash_dialog_comment_prompt">Добавьте любую другую информацию, которая, по вашему мнению, сможет помочь, и (необязательно) имя вашей учётной записи OSM, если хотите получить ответ.\n\nСпасибо.</string>
+  <string name="crash_dialog_text">Обнаружен серьёзный сбой при последнем запуске.\n\nПожалуйста, помогите нам, отправив отчёт об ошибке, нажав \'OK\'.\n</string>
+  <string name="crash_dialog_comment_prompt">Добавьте любую другую информацию, которая, по вашему мнению, сможет помочь.\n\nСпасибо.</string>
   <string name="report_success">Отчёт отправлен.</string>
   <string name="report_failure">Не удалось отправить отчёт.</string>
   <!--Exceptions messages-->

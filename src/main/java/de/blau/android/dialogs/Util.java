@@ -16,6 +16,7 @@ import androidx.fragment.app.FragmentTransaction;
 import de.blau.android.App;
 import de.blau.android.osm.OsmElement;
 import de.blau.android.osm.StorageDelegator;
+import de.blau.android.osm.Way;
 
 public final class Util {
 
@@ -110,6 +111,9 @@ public final class Util {
                 OsmElement e = delegator.getOsmElement(elementType, osmId);
                 if (e == null) {
                     throw new IllegalStateException(elementType + " " + osmId + " not in memory");
+                }
+                if (e instanceof Way) {
+                    if (!e.isTagged() || !((Way) e).isClosed()) continue;
                 }
                 result.add(e);
             }

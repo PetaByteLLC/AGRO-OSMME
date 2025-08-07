@@ -3436,12 +3436,12 @@ public class Main extends FullScreenAppCompatActivity
         boolean hasBugChanges = !App.getTaskStorage().isEmpty() && App.getTaskStorage().hasChanges();
         if (hasDataChanges || hasBugChanges) {
             if (hasDataChanges) {
-                UploadListener.UploadArguments arguments = new UploadListener.UploadArguments("", "",
+                UploadListener.UploadArguments arguments = new UploadListener.UploadArguments("Added or changed polygons", "Mobile",
                         false, true, null, de.blau.android.dialogs.Util.getElementsFromBundle(new Bundle()));
                 logic.upload(this, arguments, () -> logic.checkForMail(this, server));
             }
             if (hasBugChanges) {
-                TransferTasks.upload(this, server, null);
+//                TransferTasks.upload(this, server, null);
             }
         } else {
             ScreenMessage.barInfo(this, R.string.toast_no_changes);
@@ -4351,6 +4351,10 @@ public class Main extends FullScreenAppCompatActivity
 
         if (logic.getState() == 1) {
             final Way lastSelectedWay = logic.getSelectedWay();
+            if(lastSelectedWay != null && !lastSelectedWay.isClosed()) {
+                ScreenMessage.toastTopInfo(Main.this, "Полигон не замкнут!");
+                return;
+            }
             finishPath(lastSelectedWay);
             showNextPanel(false);
             return;
@@ -4450,6 +4454,24 @@ public class Main extends FullScreenAppCompatActivity
         Way lastSelectedWay = logic.getSelectedWay();
         final boolean firstNode = addedNodes.isEmpty();
         Node clicked = logic.getClickedNode(x, y);
+
+        if (lastSelectedWay != null && lastSelectedWay.getNodes() != null) {
+//            if (lastSelectedWay.getFirstNode() != null && clicked != null) {
+//                if (Objects.equals(lastSelectedWay.getFirstNode().getLon(), clicked.getLon()) &&
+//                        Objects.equals(lastSelectedWay.getFirstNode().getLat(), clicked.getLat())) {
+//
+//                } else {
+                    List<Node> nodes = new ArrayList<>(lastSelectedWay.getNodes());
+                    nodes.add(clicked);
+                    if (Way.isSelfIntersecting(nodes)) {
+                        ScreenMessage.toastTopInfo(Main.this, "Самопересечение!");
+                        handleUndo();
+                        return;
+                    }
+//                }
+//            }
+        }
+
         if (appendTargetNode != null) {
             logic.performAppendAppend(this, x, y, false, snap);
             appendTargetNode = logic.getSelectedNode();
@@ -4495,11 +4517,8 @@ public class Main extends FullScreenAppCompatActivity
         }
 
         showNextPanel(!addedNodes.isEmpty());
-        if (addedNodes != null) {
-            TextView pointCounterTextView = (TextView) findViewById(R.id.pointCount);
-            pointCounterTextView.setText(addedNodes.size() + " точек");
-
-            if (!addedNodes.isEmpty()) {
+        if (addedNodes != null && (lastSelectedWay != null && Objects.equals(OsmElement.STATE_CREATED, lastSelectedWay.getState()))) {
+            if (!addedNodes.isEmpty() && !lastSelectedWay.isClosed()) {
                 ScreenMessage.toastTopWarning(this, "Добавьте следующую точку");
             }
         }
@@ -4554,7 +4573,6 @@ public class Main extends FullScreenAppCompatActivity
     private synchronized void handleUndo() {
         Logic logic = App.getLogic();
         if (addedNodes.isEmpty()) {
-            Log.e(DEBUG_TAG, "Undo called but nothing to undo");
             ScreenMessage.toastTopWarning(Main.this, "Поставьте первую точку");
             return;
         }
@@ -4617,9 +4635,7 @@ public class Main extends FullScreenAppCompatActivity
 
 //        createdWay = logic.getSelectedWay(); // will be null if way was deleted by undo
         invalidateMap();
-        if (addedNodes != null) {
-            TextView pointCounterTextView = findViewById(R.id.pointCount);
-            pointCounterTextView.setText(addedNodes.size() + " точек");
+        if (addedNodes != null  && (createdWay != null && Objects.equals(OsmElement.STATE_CREATED, createdWay.getState()))) {
             if (addedNodes.isEmpty()) {
                 ScreenMessage.toastTopWarning(Main.this, "Поставьте первую точку");
                 showNextPanel(false);
@@ -5409,16 +5425,35 @@ public class Main extends FullScreenAppCompatActivity
     private void deleteNeedlessNode() {
         Logic logic = App.getLogic();
         Objects.requireNonNull(logic);
-        Node selectedNode = logic.getSelectedNode();
+//        Node selectedNode = logic.getSelectedNode();
         Way selectedWay = logic.getSelectedWay();
-        Objects.requireNonNull(selectedWay);
-        if (selectedNode != null) {
-            App.getDelegator().removeNodeFromWay(selectedWay, selectedNode);
-            logic.setSelectedNode(null);
-            invalidateMap();
-            ScreenMessage.toastTopInfo(Main.this, "Удалено");
-        } else {
-            ScreenMessage.toastTopInfo(Main.this, "Выберите одну из точек для удаления");
-        }
+
+        new AlertDialog.Builder(this)
+                .setTitle("Вы точно хотите удалить полигон?")
+                .setPositiveButton("Удалить", (d, w) -> {
+                    App.getDelegator().removeFieldRelation(selectedWay);
+                    invalidateMap();
+                    App.getLogic().deselectAll();
+                    App.getLogic().setLocked(true);
+                    App.getLogic().setState(0);
+                    invisibleUnlockButton();
+                    invalidateOptionsMenu();
+                })
+                .setNegativeButton("Отмена", null)
+                .show();
+
+//        Objects.requireNonNull(selectedWay);
+//        if (selectedNode != null) {
+//            try {
+//                App.getDelegator().removeNodeFromWay(selectedWay, selectedNode);
+//                logic.setSelectedNode(null);
+//                invalidateMap();
+//                ScreenMessage.toastTopInfo(Main.this, "Удалено");
+//            } catch (OsmIllegalOperationException exception) {
+//                ScreenMessage.toastTopInfo(Main.this, "Точек осталось 3, не получится удалить");
+//            }
+//        } else {
+//            ScreenMessage.toastTopInfo(Main.this, "Выберите одну из точек для удаления");
+//        }
     }
 }

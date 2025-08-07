@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import org.xmlpull.v1.XmlSerializer;
 
@@ -247,6 +248,60 @@ public class Way extends StyledOsmElement implements WayInterface, BoundedObject
             return false;
         }
         return nodes.get(0).equals(nodes.get(nodes.size() - 1));
+    }
+
+    public static boolean isSelfIntersecting(List<Node> nodes) {
+        int n = nodes.size();
+        for (int i = 0; i < n - 1; i++) {
+            int[] p1 = getPoint(nodes.get(i));
+            int[] p2 = getPoint(nodes.get(i + 1));
+
+            for (int j = i + 2; j < n - 1; j++) {
+                if (i == 0 && j == n - 2) continue; // пропускаем замыкающий сегмент
+
+                int[] q1 = getPoint(nodes.get(j));
+                int[] q2 = getPoint(nodes.get(j + 1));
+
+                if (doIntersect(p1, p2, q1, q2)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private static int[] getPoint(Node node) {
+        if (node == null) return null;
+        return new int[] {node.getLat(), node.getLon()};
+    }
+
+    private static boolean doIntersect(int[] p1, int[] p2, int[] q1, int[] q2) {
+        if (Objects.isNull(p1) || Objects.isNull(p2) || Objects.isNull(q1) || Objects.isNull(q2)) return false;
+        int o1 = orientation(p1, p2, q1);
+        int o2 = orientation(p1, p2, q2);
+        int o3 = orientation(q1, q2, p1);
+        int o4 = orientation(q1, q2, p2);
+
+        if (o1 != o2 && o3 != o4) return true;
+
+        if (o1 == 0 && onSegment(p1, q1, p2)) return true;
+        if (o2 == 0 && onSegment(p1, q2, p2)) return true;
+        if (o3 == 0 && onSegment(q1, p1, q2)) return true;
+        if (o4 == 0 && onSegment(q1, p2, q2)) return true;
+
+        return false;
+    }
+
+    private static int orientation(int[] a, int[] b, int[] c) {
+        long val = (long)(b[1] - a[1]) * (c[0] - b[0]) -
+                (long)(b[0] - a[0]) * (c[1] - b[1]);
+        if (val == 0) return 0;
+        return (val > 0) ? 1 : 2;
+    }
+
+    private static boolean onSegment(int[] a, int[] b, int[] c) {
+        return b[0] <= Math.max(a[0], c[0]) && b[0] >= Math.min(a[0], c[0]) &&
+                b[1] <= Math.max(a[1], c[1]) && b[1] >= Math.min(a[1], c[1]);
     }
 
     /**

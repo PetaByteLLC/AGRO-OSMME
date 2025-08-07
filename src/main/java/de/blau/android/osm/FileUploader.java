@@ -62,13 +62,4 @@ public class FileUploader {
             }
         }
     }
-
-    public static String getBasicAuthHeader() {
-        App currentInstance = App.getCurrentInstance();
-        assert currentInstance != null;
-        String username = App.getPreferences(currentInstance).getAgroUsername();
-        String password = App.getPreferences(currentInstance).getAgroPassword();
-        String auth = username + ":" + password;
-        return "Basic " + Base64.encodeToString(auth.getBytes(), Base64.NO_WRAP);
-    }
 }

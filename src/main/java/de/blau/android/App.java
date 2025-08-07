@@ -1,5 +1,6 @@
 package de.blau.android;
 
+import static com.google.gson.internal.$Gson$Types.arrayOf;
 import static de.blau.android.contract.Constants.LOG_TAG_LEN;
 
 import java.io.BufferedOutputStream;
@@ -12,9 +13,14 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import org.acra.ACRA;
-import org.acra.annotation.AcraCore;
-import org.acra.annotation.AcraDialog;
-import org.acra.annotation.AcraHttpSender;
+import org.acra.annotation.AcraDsl;
+import org.acra.config.CoreConfigurationBuilder;
+import org.acra.config.HttpSenderConfiguration;
+import org.acra.config.HttpSenderConfigurationBuilder;
+import org.acra.config.ToastConfiguration;
+import org.acra.config.ToastConfigurationBuilder;
+import org.acra.data.StringFormat;
+import org.acra.security.TLS;
 import org.acra.sender.HttpSender;
 import org.mozilla.javascript.ImporterTopLevel;
 import org.mozilla.javascript.ScriptableObject;
@@ -34,6 +40,7 @@ import android.content.res.Resources;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.multidex.MultiDex;
@@ -70,11 +77,6 @@ import de.blau.android.validation.BaseValidator;
 import de.blau.android.validation.Validator;
 import io.michaelrocks.libphonenumber.android.PhoneNumberUtil;
 import okhttp3.OkHttpClient;
-
-@AcraCore(resReportSendSuccessToast = R.string.report_success, resReportSendFailureToast = R.string.report_failure, logcatArguments = { "-t", "500", "-v",
-        "time" })
-@AcraHttpSender(httpMethod = HttpSender.Method.POST, uri = "https://acrarium.vespucci.io/", resCertificate = R.raw.isrg_root_x1)
-@AcraDialog(resText = R.string.crash_dialog_text, resCommentPrompt = R.string.crash_dialog_comment_prompt, resTheme = R.style.Theme_AppCompat_Light_Dialog)
 
 public class App extends Application implements android.app.Application.ActivityLifecycleCallbacks {
     private static final int    TAG_LEN   = Math.min(LOG_TAG_LEN, App.class.getSimpleName().length());
@@ -218,7 +220,25 @@ public class App extends Application implements android.app.Application.Activity
 
     @Override
     public void onCreate() {
-        ACRA.init(this);
+        ACRA.init(this, new CoreConfigurationBuilder()
+                .withBuildConfigClass(BuildConfig.class)
+                .withReportFormat(StringFormat.JSON)
+                .withPluginConfigurations(
+                        new ToastConfigurationBuilder()
+                                .withText(getString(R.string.report_success))
+                                .build()
+                )
+                .withPluginConfigurations(
+                        new HttpSenderConfigurationBuilder()
+                                .withUri("https://agro.brisklyminds.com/acrarium/report")
+                                .withBasicAuthLogin("l5aUpVGgdfFrDlQa")
+                                .withBasicAuthPassword("vKnvDlpZHoJDECWB")
+                                .withHttpMethod(HttpSender.Method.POST)
+                                .withConnectionTimeout(5000)
+                                .withSocketTimeout(20000)
+                                .build()
+                )
+        );
         super.onCreate();
         registerActivityLifecycleCallbacks(this);
         setupMisc(this);

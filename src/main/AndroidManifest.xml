@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:installLocation="auto"
-    android:versionCode="3007"
+    android:versionCode="3008"
     android:versionName="@string/app_version" >
 
     <uses-sdk tools:overrideLibrary="androidx.core.splashscreen" />
@@ -310,14 +310,14 @@
             android:name=".filter.PresetFilterActivity"
             android:configChanges="orientation|screenSize|keyboardHidden|density|screenLayout|uiMode|fontScale"
             android:theme="@style/Theme.customActionBar" />
-        <activity
-            android:name="org.acra.dialog.CrashReportDialog"
-            android:excludeFromRecents="true"
-            android:finishOnTaskLaunch="true"
-            android:launchMode="singleInstance"
-            android:process=":error_report"
-            android:theme="@android:style/Theme.Dialog"
-            tools:replace="android:process" />
+<!--        <activity-->
+<!--            android:name="org.acra.dialog.CrashReportDialog"-->
+<!--            android:excludeFromRecents="true"-->
+<!--            android:finishOnTaskLaunch="true"-->
+<!--            android:launchMode="singleInstance"-->
+<!--            android:process=":error_report"-->
+<!--            android:theme="@android:style/Theme.Dialog"-->
+<!--            tools:replace="android:process" />-->
         <activity
             android:name="Feedback"
             android:theme="@style/Theme.IssueReporter" />

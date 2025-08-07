@@ -704,12 +704,12 @@ public class Map extends SurfaceView implements IMapView {
 
         final Logic logic = App.getLogic();
         boolean imageryAlignMode = logic.getMode() == Mode.MODE_ALIGN_BACKGROUND;
-        if (zoomLevel > STORAGE_BOX_LIMIT && !imageryAlignMode && (!logic.isLocked() || alwaysDrawBoundingBoxes)) {
-            de.blau.android.layer.data.MapOverlay<OsmElement> dataLayer = getDataLayer();
-            if (dataLayer != null && dataLayer.isVisible()) {
-                paintStorageBox(canvas, dataLayer.getDownloadedBoxes());
-            }
-        }
+//        if (zoomLevel > STORAGE_BOX_LIMIT && !imageryAlignMode && (!logic.isLocked() || alwaysDrawBoundingBoxes)) {
+//            de.blau.android.layer.data.MapOverlay<OsmElement> dataLayer = getDataLayer();
+//            if (dataLayer != null && dataLayer.isVisible()) {
+//                paintStorageBox(canvas, dataLayer.getDownloadedBoxes());
+//            }
+//        }
 
         paintGpsPos(canvas);
         if (showCrosshairs && logic.isInEditZoomRange()) {

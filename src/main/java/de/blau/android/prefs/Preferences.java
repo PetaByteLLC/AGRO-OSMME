@@ -2219,10 +2219,6 @@ public class Preferences {
         return (prefs.getString("agroUsername", null));
     }
 
-    public String getAgroPassword() {
-        return (prefs.getString("agroPassword", null));
-    }
-
     public String getAgroPersonName() {
         return (prefs.getString("agroPersonName", null));
     }
@@ -2253,10 +2249,6 @@ public class Preferences {
 
     public void setAgroUsername(String username) {
         prefs.edit().putString("agroUsername", (username)).commit();
-    }
-
-    public void setAgroPassword(String password) {
-        prefs.edit().putString("agroPassword", (password)).commit();
     }
 
     public void setAgroUserRole(String role) {
