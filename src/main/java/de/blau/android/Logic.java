@@ -45,7 +45,6 @@ import org.xmlpull.v1.XmlPullParserException;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
 import android.content.res.Resources;
 import android.net.Uri;
 import android.os.Handler;
@@ -59,7 +58,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.FragmentActivity;
 import de.blau.android.Selection.Ids;
 import de.blau.android.contract.HttpStatusCodes;
-import de.blau.android.contract.Urls;
 import de.blau.android.dialogs.AttachedObjectWarning;
 import de.blau.android.dialogs.ErrorAlert;
 import de.blau.android.dialogs.ForbiddenLogin;
@@ -67,7 +65,6 @@ import de.blau.android.dialogs.InvalidLogin;
 import de.blau.android.dialogs.Progress;
 import de.blau.android.dialogs.ProgressDialog;
 import de.blau.android.dialogs.UploadConflict;
-import de.blau.android.dialogs.UploadRetry;
 import de.blau.android.easyedit.EasyEditManager;
 import de.blau.android.easyedit.ElementSelectionActionModeCallback;
 import de.blau.android.exception.DataConflictException;
@@ -113,7 +110,6 @@ import de.blau.android.osm.StorageDelegator;
 import de.blau.android.osm.Tags;
 import de.blau.android.osm.UndoStorage;
 import de.blau.android.osm.UndoStorage.Checkpoint;
-import de.blau.android.osm.UserDetails;
 import de.blau.android.osm.ViewBox;
 import de.blau.android.osm.Way;
 import de.blau.android.prefs.Preferences;
@@ -4574,7 +4570,8 @@ public class Logic {
                             }
                             break;
                         case ErrorCodes.UPLOAD_INCOMPLETE:
-                            UploadRetry.showDialog(activity, result, server.getOpenChangeset(), arguments);
+//                            UploadRetry.showDialog(activity, result, server.getOpenChangeset(), arguments);
+                            ScreenMessage.toastTopWarning(activity, "Загрузка не завершен!");
                             break;
                         case ErrorCodes.INVALID_LOGIN:
                             InvalidLogin.showDialog(activity);

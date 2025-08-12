@@ -197,7 +197,9 @@ public class BsEditYieldFragment extends BottomSheetDialogFragment {
 
         coordinate(view);
 
-        setRegionAndDistrict();
+        if (Objects.nonNull(yield) && !yield.hasTagKey(YIELD_TAG_REGION) && !yield.hasTagKey(YIELD_TAG_DISTRICT)) {
+            setRegionAndDistrict();
+        }
 
         BottomSheetBehavior<View> bottomSheetBehavior = BottomSheetBehavior.from((View) view.getParent());
         bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);

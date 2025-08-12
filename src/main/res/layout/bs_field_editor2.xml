@@ -81,8 +81,7 @@
                 android:hint="Область"
                 android:inputType="text"
                 android:textColor="@color/ag_text_color"
-                android:textColorHint="@color/ag_text_color"
-                android:enabled="false"/>
+                android:textColorHint="@color/ag_text_color"/>
 
             <EditText
                 android:id="@+id/district"
@@ -93,8 +92,7 @@
                 android:hint="Район"
                 android:inputType="text"
                 android:textColor="@color/ag_text_color"
-                android:textColorHint="@color/ag_text_color"
-                android:enabled="false"/>
+                android:textColorHint="@color/ag_text_color"/>
 
             <EditText
                 android:id="@+id/farmerSurName"

@@ -3939,8 +3939,11 @@ public class Main extends FullScreenAppCompatActivity
                                 .setTitle("Поле " + (name == null ? osmElement.getOsmId() : name))
                                 .setMessage("Тип угодия: " + (typeLand == null ? "Не указано" : typeLand))
                                 .setPositiveButton("Редактировать", (a, e) -> editorField((Way) osmElement))
-                                .setNegativeButton("Посмотреть",
-                                        (a, e) -> editYield((Way) osmElement, getSupportFragmentManager(), false))
+                                .setNegativeButton("Удалить", (a, e) -> {
+                                    App.getDelegator().removeFieldRelation((Way) osmElement);
+                                    ScreenMessage.toastTopInfo(Main.this, "Поле успешно удалено");
+                                })
+                                .setNeutralButton("Посмотреть", (a, e) -> editYield((Way) osmElement, getSupportFragmentManager(), false))
                                 .show();
                         return true;
                     }
@@ -5438,6 +5441,7 @@ public class Main extends FullScreenAppCompatActivity
                     App.getLogic().setState(0);
                     invisibleUnlockButton();
                     invalidateOptionsMenu();
+                    ScreenMessage.toastTopInfo(Main.this, "Поле успешно удалено");
                 })
                 .setNegativeButton("Отмена", null)
                 .show();
