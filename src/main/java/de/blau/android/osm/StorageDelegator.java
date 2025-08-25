@@ -4796,7 +4796,8 @@ public class StorageDelegator implements Serializable, Exportable, DataStorage {
     public void removeFieldRelation(@NonNull Way currentWay) {
         try {
             lock(); // Lock the storage for thread safety
-            if (currentWay.getState() != OsmElement.STATE_DELETED) {
+            if (Objects.isNull(currentWay)) return;
+            if (!Objects.equals(currentWay.getState(), OsmElement.STATE_DELETED)) {
                 List<Node> nodesToRemove = new ArrayList<>();
                 nodesToRemove.addAll(currentWay.getNodes());
                 removeWay(currentWay); // Handles dirty flag, undo, api storage
