@@ -1,6 +1,6 @@
 {
-  "versionCode": 3010,
+  "versionCode": 3011,
   "versionName": "1.2",
   "apkUrl": "https://github.com/PetaByteLLC/AGRO-OSMME/releases/download/v1.2/AGRO-OSMME-current-debug.apk",
-  "changelog": "- Исправлены ошибки с удалением поле"
+  "changelog": "- Исправлена форма заполнения"
 }

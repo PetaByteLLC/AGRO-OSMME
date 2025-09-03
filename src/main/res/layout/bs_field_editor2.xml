@@ -72,27 +72,25 @@
                 android:textColor="@color/ag_text_color"
                 android:textColorHint="@color/ag_text_color" />
 
-            <EditText
+            <Spinner
                 android:id="@+id/region"
                 android:layout_width="match_parent"
                 android:layout_height="40dp"
                 android:layout_marginTop="10dp"
                 android:background="@drawable/edittext_background"
-                android:hint="Область"
-                android:inputType="text"
                 android:textColor="@color/ag_text_color"
-                android:textColorHint="@color/ag_text_color"/>
+                android:textColorHint="@color/ag_text_color"
+                android:choiceMode="singleChoice"/>
 
-            <EditText
+            <Spinner
                 android:id="@+id/district"
                 android:layout_width="match_parent"
                 android:layout_height="40dp"
                 android:layout_marginTop="10dp"
                 android:background="@drawable/edittext_background"
-                android:hint="Район"
-                android:inputType="text"
                 android:textColor="@color/ag_text_color"
-                android:textColorHint="@color/ag_text_color"/>
+                android:textColorHint="@color/ag_text_color"
+                android:choiceMode="singleChoice"/>
 
             <EditText
                 android:id="@+id/farmerSurName"

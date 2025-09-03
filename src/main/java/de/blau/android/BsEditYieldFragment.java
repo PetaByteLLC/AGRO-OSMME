@@ -74,13 +74,13 @@ public class BsEditYieldFragment extends BottomSheetDialogFragment {
 
     private EditText name;
     private EditText area;
-    private EditText region;
+    private Spinner region;
     private Spinner landType;
     private Spinner underLandType;
     private Spinner irrigationType;
     private Spinner livestockName;
     private EditText livestockCount;
-    private EditText district;
+    private Spinner district;
     private EditText farmerSurName;
     private EditText farmerName;
     private EditText farmerMobile;
@@ -340,6 +340,14 @@ public class BsEditYieldFragment extends BottomSheetDialogFragment {
         ArrayAdapter<String> pastureTypeAdapter = new ArrayAdapter<>(getActivity(), R.layout.agro_simple_spinner_item, PASTURE_TYPE);
         pastureTypeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         pasturesvegetationtype.setAdapter(pastureTypeAdapter);
+
+        ArrayAdapter<String> regionAdapter = new ArrayAdapter<>(getActivity(), R.layout.agro_simple_spinner_item, REGIONS);
+        regionAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        region.setAdapter(regionAdapter);
+
+        ArrayAdapter<String> districtAdapter = new ArrayAdapter<>(getActivity(), R.layout.agro_simple_spinner_item, DISTRICTS);
+        districtAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        district.setAdapter(districtAdapter);
     }
 
     private void changeUnderTypeLand(String typeLand) {
@@ -387,8 +395,8 @@ public class BsEditYieldFragment extends BottomSheetDialogFragment {
 
     private void editLogic() {
         name.setText(getTagValue(yield, Tags.KEY_NAME));
-        region.setText(getTagValue(yield, YIELD_TAG_REGION));
-        district.setText(getTagValue(yield, YIELD_TAG_DISTRICT));
+        region.setSelection(Arrays.asList(REGIONS).indexOf(getTagValue(yield, YIELD_TAG_REGION)));
+        district.setSelection(Arrays.asList(DISTRICTS).indexOf(getTagValue(yield, YIELD_TAG_DISTRICT)));
         aggregator.setText(getTagValue(yield, YIELD_TAG_AGGREGATOR));
         farmerName.setText(getTagValue(yield, YIELD_TAG_FARMER_NAME));
         farmerSurName.setText(getTagValue(yield, YIELD_TAG_FARMER_SURNAME));
@@ -466,8 +474,8 @@ public class BsEditYieldFragment extends BottomSheetDialogFragment {
             map.put(YIELD_TAG_POSITION, getPosition());
 //            map.put(Tags.KEY_NAME, name.getText().toString());
             map.put(YIELD_TAG_AREA, area.getText().toString());
-            map.put(YIELD_TAG_REGION, region.getText().toString());
-            map.put(YIELD_TAG_DISTRICT, district.getText().toString());
+            map.put(YIELD_TAG_REGION, region.getSelectedItemPosition() < 0 ? "" : region.getSelectedItem().toString());
+            map.put(YIELD_TAG_DISTRICT, district.getSelectedItemPosition() < 0 ? "" : district.getSelectedItem().toString());
             map.put(YIELD_TAG_TYPE_LAND, landType.getSelectedItemPosition() < 1 ? "" : landType.getSelectedItem().toString());
             map.put(YIELD_TAG_UNDER_TYPE_LAND, underLandType.getSelectedItemPosition() < 1 ? "" : underLandType.getSelectedItem().toString());
             map.put(YIELD_TAG_IRRIGATION_TYPE, irrigationType.getSelectedItemPosition() < 1 ? "" : irrigationType.getSelectedItem().toString());
@@ -638,8 +646,8 @@ public class BsEditYieldFragment extends BottomSheetDialogFragment {
                 LatLon location = new LatLon(centerLat, centerLon);
                 ReferenceDataManager.ReferenceFeature matchingFeature = ReferenceDataManager.findFeatureContainingPoint(location);
                 if (matchingFeature == null) return;
-                region.setText(matchingFeature.getAdm1Ky());
-                district.setText(matchingFeature.getAdm2Ky());
+                region.setSelection(Arrays.asList(REGIONS).indexOf(matchingFeature.getAdm1Ky()));
+                district.setSelection(Arrays.asList(DISTRICTS).indexOf(matchingFeature.getAdm2Ky()));
             }
         }
     }
