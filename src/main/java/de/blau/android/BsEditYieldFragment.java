@@ -472,7 +472,7 @@ public class BsEditYieldFragment extends BottomSheetDialogFragment {
 
             Map<String, String> map = new HashMap<>();
             map.put(YIELD_TAG_POSITION, getPosition());
-//            map.put(Tags.KEY_NAME, name.getText().toString());
+            map.put(Tags.KEY_SOURCE, SYSTEM_NAME);
             map.put(YIELD_TAG_AREA, area.getText().toString());
             map.put(YIELD_TAG_REGION, region.getSelectedItemPosition() < 0 ? "" : region.getSelectedItem().toString());
             map.put(YIELD_TAG_DISTRICT, district.getSelectedItemPosition() < 0 ? "" : district.getSelectedItem().toString());

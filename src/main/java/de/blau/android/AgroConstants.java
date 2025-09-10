@@ -83,6 +83,7 @@ public class AgroConstants {
     public static final String ROLE_MINISTRY = "ministry";
     public static final String ROLE_SCOUT = "scout";
     public static final String ROLE_ZEM_BALANCE = "zemBalance";
+    public static final String SYSTEM_NAME = "AGROMAP";
 
     public static double calculateArea(List<Node> nodes) {
         double area = 0.0;
