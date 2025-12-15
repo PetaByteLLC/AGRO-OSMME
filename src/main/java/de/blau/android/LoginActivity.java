@@ -1,6 +1,7 @@
 package de.blau.android;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Base64;
 import android.widget.Button;
@@ -13,9 +14,6 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.Objects;
-import java.util.concurrent.TimeUnit;
-
-import de.blau.android.osm.Server;
 import de.blau.android.prefs.Preferences;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -40,11 +38,28 @@ public class LoginActivity extends AppCompatActivity {
             login(username, password);
         });
 
+        Button loginEsiBtn = findViewById(R.id.btnEsiLogin);
+        loginEsiBtn.setOnClickListener(v -> loginEsi());
+    }
+
+    private void loginEsi() {
+        OkHttpClient client = App.getHttpClient();
+        Request request = new Request.Builder()
+                .url(AgroConstants.ESI_URL + "/link")
+                .build();
+        try  (Response response = client.newCall(request).execute()) {
+            if (response.isSuccessful() && response.body() != null) {
+                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(response.body().string()));
+                browserIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(browserIntent);
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private void login(String username, String password) {
-        OkHttpClient client = App.getHttpClient().newBuilder().connectTimeout(Server.DEFAULT_TIMEOUT, TimeUnit.MILLISECONDS)
-                .readTimeout(Server.DEFAULT_TIMEOUT, TimeUnit.MILLISECONDS).build();
+        OkHttpClient client = App.getHttpClient();
         String auth = username + ":" + password;
         String encodedAuth = "Basic " + Base64.encodeToString(auth.getBytes(), Base64.NO_WRAP);
         Request request = new Request.Builder()
@@ -101,7 +116,6 @@ public class LoginActivity extends AppCompatActivity {
             }
         }).start();
     }
-
 
     private void navigateToMain() {
         runOnUiThread(() -> {

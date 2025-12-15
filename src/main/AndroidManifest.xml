@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:installLocation="auto"
-    android:versionCode="3012"
+    android:versionCode="3013"
     android:versionName="@string/app_version" >
 
     <uses-sdk tools:overrideLibrary="androidx.core.splashscreen" />
@@ -327,20 +327,20 @@
             android:launchMode="singleTask"
             android:theme="@style/Theme.AppCompat" />
 
-<!--        <activity-->
-<!--            android:name=".AuthCallbackActivity"-->
-<!--            android:exported="true"-->
-<!--            android:launchMode="singleTask">-->
-<!--            <intent-filter>-->
-<!--                <action android:name="android.intent.action.VIEW" />-->
-<!--                <category android:name="android.intent.category.DEFAULT" />-->
-<!--                <category android:name="android.intent.category.BROWSABLE" />-->
-<!--                <data-->
-<!--                    android:scheme="agromap"-->
-<!--                    android:host="googleauth"-->
-<!--                    android:path="/callback" />-->
-<!--            </intent-filter>-->
-<!--        </activity>-->
+        <activity
+            android:name=".AuthCallbackActivity"
+            android:exported="true"
+            android:launchMode="singleTask">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data
+                    android:scheme="agroapp"
+                    android:host="auth"
+                    android:path="/callback" />
+            </intent-filter>
+        </activity>
 
         <receiver
             android:name=".util.DownloadBroadcastReceiver"

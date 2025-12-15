@@ -1534,6 +1534,8 @@
   <string name="lp_help_center">центр помощи</string>
   <string name="lp_help_center_text">Нужна помощь? Посетите наш</string>
   <string name="lp_login">Вход</string>
+  <string name="lp_or">или</string>
+  <string name="lp_esi_login">Вход через ЕСИ</string>
   <string name="lp_forgot_password">Забыли пароль?</string>
   <string name="lp_password">Пароль</string>
   <string name="lp_username">Логин</string>

@@ -9,7 +9,7 @@ import de.blau.android.osm.Way;
 
 public class AgroConstants {
 
-    public static final String BASE_URL = "https://agro.brisklyminds.com";
+    public static final String BASE_URL = "https://agromap.gov.kg";
     public static final String URL = BASE_URL + "/agroadmin";
     public static final String UPLOAD_URL = URL + "/ws/public/file/upload";
     public static final String DOWNLOAD_URL_TEMPLATE = URL + "/ws/public/file/download/%s";
@@ -19,6 +19,7 @@ public class AgroConstants {
     public static final String EXPORT_MY_GEOJSON_URL = URL + "/ws/public/fields/my/export?type=GeoJSON";
     public static final String EXPORT_MY_ZIP_URL = URL + "/ws/public/fields/my/export?type=GPKG";
     public static final String EXPORT_MY_EXCEL_URL = URL + "/ws/public/fields/my/export?type=XLSX";
+    public static final String ESI_URL = URL + "/ws/public/mob/v1/esi";
     // --- КОНСТАНТЫ ---
 
     public static final String YIELD_TAG_REGION = "region";
@@ -31,6 +32,7 @@ public class AgroConstants {
     public static final String YIELD_TAG_POSITION = "position";
     public static final String YIELD_TAG_IRRIGATION_TYPE = "irrigationType";
     public static final String YIELD_TAG_UNDER_TYPE_LAND = "underTypeLand";
+    public static final String YIELD_TAG_GARDEN_TYPE = "gardenType";
     public static final String YIELD_TAG_TYPE_LAND = "typeLand";
     public static final String YIELD_TAG_ADDITIONAL_INFORMATION = "additionalInformation";
     public static final String YIELD_TAG_AREA = "polygonArea";
@@ -55,10 +57,13 @@ public class AgroConstants {
     public static final String[] IRRIGATION_TYPE_DATA = {"Тип полива", "не поливается", "Арычный", "Капельный", "Насосы", "Каналы", "Природный полив", "Дождевые машины", "Дождевальные установки", "Комбинированные системы", "Системы умного полива"};
     public static final String[] FIELD_TAG_CATEGORY_TYPE_DATA = {"Земли сельскохозяйственного назначения", "Земли населенных пунктов", "Земли промышленности, транспорта, связи, энергетик", "Земли особо охраняемых природных территорий", "Земли лесного фонда", "Земли водного фонда", "Земли запаса"};
 
-    public static final Map<String, String[]> UNDER_TYPE_LAND_DATA = Map.of("Пашни", new String[]{"Виды пашен", "Богара", "Условно богара", "Орошаемая", "Условно орошаемая"},
+    public static final Map<String, String[]> UNDER_TYPE_LAND_DATA = Map.of(
+            "Пашни", new String[]{"Виды пашен", "Богара", "Условно богара", "Орошаемая", "Условно орошаемая"},
             "Пастбища", new String[]{"Виды пастбищ", "Зимние пастбища", "Летние пастбища", "Весенние и осенние пастбища"},
             "Многолетние насаждения", new String[]{"Виды м/н", "Сады", "Виноградники"}
     );
+
+    public static final String[] GARDER_TYPE = new String[] {"Яблоко", "Абрикос", "Слива", "Вишня", "Миндаль", "Фундук", "Тополь", "Павлония"};
 
     public static final String[] REGIONS = {"Таласская", "Иссык-Кульская", "Нарынская", "Джалал-Абадская", "Чуйская", "Ошская", "Баткенская"};
     public static final String[] DISTRICTS = {"Кочкорский","Баткенский","Кеминский","Тонский","Кара-Кульджинский","Узгенский","Токтогульский","Джеты-Огузский","Жайылский","Московский","Сузакский","Ак-Суйский","Чуйский","Иссык-Кульский","Аксыйский","Кара-Суйский","Ак-Талинский","Кара-Бууринский","Панфиловский","Ат-Башынский","Алайский","Ноокатский","Базар-Коргонский","Нарынский","Ляйлякский","Сокулукский","Аламединский","Ноокенский","Иссык-Атинский","Тюпский","Араванский","Чон-Алайский","Кадамжайский","Чаткальский","Ала-Букинский","Таласский","Джумгальский","Тогуз-Тороуский","Манасский","Бакай-Атинский"};

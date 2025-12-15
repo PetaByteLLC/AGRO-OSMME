@@ -157,6 +157,17 @@
                 android:choiceMode="singleChoice"/>
 
             <Spinner
+                android:id="@+id/garden_type_land"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:layout_marginTop="10dp"
+                android:background="@drawable/edittext_background"
+                android:textColor="@color/ag_text_color"
+                android:textColorHint="@color/ag_text_color"
+                android:choiceMode="singleChoice"
+                android:visibility="gone"/>
+
+            <Spinner
                 android:id="@+id/irrigationType"
                 android:layout_width="match_parent"
                 android:layout_height="40dp"

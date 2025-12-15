@@ -1800,6 +1800,8 @@
     <string name="lp_help_center">help center</string>
     <string name="lp_help_center_text">Need help? Visit our</string>
     <string name="lp_login">Sign in</string>
+    <string name="lp_or">or</string>
+    <string name="lp_esi_login">Sign in with ESI</string>
     <string name="lp_forgot_password">Forgot your password?</string>
     <string name="lp_password">Password</string>
     <string name="lp_username">Username</string>
