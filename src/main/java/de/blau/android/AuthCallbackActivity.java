@@ -16,8 +16,10 @@ import org.json.JSONObject;
 import java.io.IOException;
 
 import de.blau.android.prefs.Preferences;
+import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
+import okhttp3.RequestBody;
 import okhttp3.Response;
 
 public class AuthCallbackActivity extends AppCompatActivity {
@@ -60,11 +62,6 @@ public class AuthCallbackActivity extends AppCompatActivity {
                 Log.i(TAG, "Backend Token: " + backendToken);
                 tvStatus.append("Токен бэкенда: " + backendToken + "\n");
                 saveAuthData(backendToken);
-                Toast.makeText(this, "Аутентификация успешна!", Toast.LENGTH_LONG).show();
-                Intent mainAppIntent = new Intent(this, Main.class);
-                mainAppIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                startActivity(mainAppIntent);
-                finish();
             } else {
                 Log.w(TAG, "Получен deep link, но он не соответствует ожидаемой схеме/хосту.");
                 tvStatus.append("Получен неожиданный deep link.\n");
@@ -76,30 +73,39 @@ public class AuthCallbackActivity extends AppCompatActivity {
     }
 
     private void saveAuthData(String backendToken) {
-        Preferences prefs = App.getPreferences(this);
-        OkHttpClient client = App.getHttpClient();
-        Request request = new Request.Builder()
-                .url(AgroConstants.ESI_URL + "/auth?code=" + backendToken)
-                .build();
-        try  (Response response = client.newCall(request).execute()) {
-            if (response.isSuccessful() && response.body() != null) {
-                JSONObject responseObject = new JSONObject(response.body().string());
-                String accessToken = responseObject.getString("accessToken");
-                Request request2 = new Request.Builder()
-                        .url(AgroConstants.URL + "/public/mapi/auth-cgi")
-                        .header("Authorization", accessToken)
-                        .get().build();
-                try (Response response2 = client.newCall(request2).execute()) {
-                    if (!response.isSuccessful()) return;
-                    assert response2.body() != null;
-                    JSONObject responseObject2 = new JSONObject(response2.body().string());
-                    prefs.setCgiToken(responseObject2.getString("token"));
-                    prefs.setAgroUserRole(responseObject2.getString("userRole"));
-                    prefs.setAgroUsername(responseObject2.getString("username"));
+        new Thread(() -> {
+            Preferences prefs = App.getPreferences(this);
+            OkHttpClient client = App.getHttpClient();
+            Request request = new Request.Builder()
+                    .url(AgroConstants.ESI_URL + "/auth")
+                    .post(RequestBody.create(MediaType.get("application/json; charset=utf-8"), backendToken))
+                    .build();
+            try  (Response response = client.newCall(request).execute()) {
+                if (response.isSuccessful() && response.body() != null) {
+                    JSONObject responseObject = new JSONObject(response.body().string());
+                    String accessToken = responseObject.getString("accessToken");
+                    Request request2 = new Request.Builder()
+                            .url(AgroConstants.URL + "/public/mapi/auth-cgi")
+                            .header("Authorization", accessToken)
+                            .get().build();
+                    try (Response response2 = client.newCall(request2).execute()) {
+                        if (!response.isSuccessful()) return;
+                        assert response2.body() != null;
+                        JSONObject responseObject2 = new JSONObject(response2.body().string());
+                        prefs.setCgiToken(responseObject2.getString("token"));
+                        prefs.setAgroUserRole(responseObject2.getString("userRole"));
+                        prefs.setAgroUsername(responseObject2.getString("username"));
+
+                        Toast.makeText(this, "Аутентификация успешна!", Toast.LENGTH_LONG).show();
+                        Intent mainAppIntent = new Intent(this, Main.class);
+                        mainAppIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                        startActivity(mainAppIntent);
+                        finish();
+                    }
                 }
+            } catch (IOException | JSONException e) {
+                Toast.makeText(this, "Ошибка аутентификации!", Toast.LENGTH_LONG).show();
             }
-        } catch (IOException | JSONException e) {
-            throw new RuntimeException(e);
-        }
+        }).start();
     }
 }

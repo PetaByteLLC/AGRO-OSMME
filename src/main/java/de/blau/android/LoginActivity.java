@@ -43,19 +43,21 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void loginEsi() {
-        OkHttpClient client = App.getHttpClient();
-        Request request = new Request.Builder()
-                .url(AgroConstants.ESI_URL + "/link")
-                .build();
-        try  (Response response = client.newCall(request).execute()) {
-            if (response.isSuccessful() && response.body() != null) {
-                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(response.body().string()));
-                browserIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                startActivity(browserIntent);
+        new Thread(() -> {
+            OkHttpClient client = App.getHttpClient();
+            Request request = new Request.Builder()
+                    .url(AgroConstants.ESI_URL + "/link")
+                    .build();
+            try  (Response response = client.newCall(request).execute()) {
+                if (response.isSuccessful() && response.body() != null) {
+                    Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(response.body().string()));
+                    browserIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    startActivity(browserIntent);
+                }
+            } catch (IOException e) {
+                throw new RuntimeException(e);
             }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        }).start();
     }
 
     private void login(String username, String password) {
