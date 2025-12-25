@@ -4600,7 +4600,7 @@ public class Logic {
                                 return;
                             } // NOSONAR fall through
                         default:
-                            ErrorAlert.showDialog(activity, error);
+//                            ErrorAlert.showDialog(activity, error);
                         }
                         if (postUploadHandler != null) {
                             postUploadHandler.onError(null);
