@@ -53,7 +53,7 @@ public class AppUpdater {
             } catch (Exception e) {
                 e.printStackTrace();
                 activity.runOnUiThread(() ->
-                        Toast.makeText(context, "Ошибка проверки обновления: " + e.getMessage(), Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, "Ошибка проверки обновления", Toast.LENGTH_SHORT).show()
                 );
             }
         });
