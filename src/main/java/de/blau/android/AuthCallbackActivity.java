@@ -6,7 +6,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -14,6 +13,11 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import de.blau.android.prefs.Preferences;
 import okhttp3.MediaType;
@@ -61,7 +65,21 @@ public class AuthCallbackActivity extends AppCompatActivity {
                 String backendToken = data.getQueryParameter("code");
                 Log.i(TAG, "Backend Token: " + backendToken);
                 tvStatus.append("Токен бэкенда: " + backendToken + "\n");
-                saveAuthData(backendToken);
+                Future<Boolean> future = saveAuthDataCallable(backendToken);
+
+                new Thread(() -> {
+                    try {
+                        boolean success = future.get(); // ждем завершения
+                        runOnUiThread(() -> {
+                            Intent mainAppIntent = new Intent(AuthCallbackActivity.this, Main.class);
+                            mainAppIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                            startActivity(mainAppIntent);
+                            finish();
+                        });
+                    } catch (ExecutionException | InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }).start();
             } else {
                 Log.w(TAG, "Получен deep link, но он не соответствует ожидаемой схеме/хосту.");
                 tvStatus.append("Получен неожиданный deep link.\n");
@@ -72,40 +90,45 @@ public class AuthCallbackActivity extends AppCompatActivity {
         }
     }
 
-    private void saveAuthData(String backendToken) {
-        new Thread(() -> {
+    private Future<Boolean> saveAuthDataCallable(String backendToken) {
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+
+        Callable<Boolean> callable = () -> {
             Preferences prefs = App.getPreferences(this);
             OkHttpClient client = App.getHttpClient();
-            Request request = new Request.Builder()
-                    .url(AgroConstants.ESI_URL + "/auth")
-                    .post(RequestBody.create(MediaType.get("application/json; charset=utf-8"), backendToken))
-                    .build();
-            try  (Response response = client.newCall(request).execute()) {
-                if (response.isSuccessful() && response.body() != null) {
+            try {
+                Request request = new Request.Builder()
+                        .url(AgroConstants.ESI_URL + "/auth")
+                        .post(RequestBody.create(MediaType.get("application/json; charset=utf-8"), backendToken))
+                        .build();
+                try (Response response = client.newCall(request).execute()) {
+                    if (!response.isSuccessful() || response.body() == null) return false;
+
                     JSONObject responseObject = new JSONObject(response.body().string());
-                    String accessToken = responseObject.getString("accessToken");
+                    String accessToken = "Bearer " + responseObject.getString("accessToken");
+
                     Request request2 = new Request.Builder()
-                            .url(AgroConstants.URL + "/public/mapi/auth-cgi")
+                            .url(AgroConstants.URL + "/ws/public/mapi/auth-cgi")
                             .header("Authorization", accessToken)
-                            .get().build();
+                            .get()
+                            .build();
+
                     try (Response response2 = client.newCall(request2).execute()) {
-                        if (!response.isSuccessful()) return;
-                        assert response2.body() != null;
+                        if (!response2.isSuccessful() || response2.body() == null) return false;
+
                         JSONObject responseObject2 = new JSONObject(response2.body().string());
                         prefs.setCgiToken(responseObject2.getString("token"));
                         prefs.setAgroUserRole(responseObject2.getString("userRole"));
                         prefs.setAgroUsername(responseObject2.getString("username"));
-
-                        Toast.makeText(this, "Аутентификация успешна!", Toast.LENGTH_LONG).show();
-                        Intent mainAppIntent = new Intent(this, Main.class);
-                        mainAppIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                        startActivity(mainAppIntent);
-                        finish();
+                        return true;
                     }
                 }
             } catch (IOException | JSONException e) {
-                Toast.makeText(this, "Ошибка аутентификации!", Toast.LENGTH_LONG).show();
+                e.printStackTrace();
+                return false;
             }
-        }).start();
+        };
+
+        return executor.submit(callable);
     }
 }
