@@ -220,25 +220,25 @@ public class App extends Application implements android.app.Application.Activity
 
     @Override
     public void onCreate() {
-        ACRA.init(this, new CoreConfigurationBuilder()
-                .withBuildConfigClass(BuildConfig.class)
-                .withReportFormat(StringFormat.JSON)
-                .withPluginConfigurations(
-                        new ToastConfigurationBuilder()
-                                .withText(getString(R.string.report_success))
-                                .build()
-                )
-                .withPluginConfigurations(
-                        new HttpSenderConfigurationBuilder()
-                                .withUri("https://agro.brisklyminds.com/acrarium/report")
-                                .withBasicAuthLogin("l5aUpVGgdfFrDlQa")
-                                .withBasicAuthPassword("vKnvDlpZHoJDECWB")
-                                .withHttpMethod(HttpSender.Method.POST)
-                                .withConnectionTimeout(5000)
-                                .withSocketTimeout(20000)
-                                .build()
-                )
-        );
+//        ACRA.init(this, new CoreConfigurationBuilder()
+//                .withBuildConfigClass(BuildConfig.class)
+//                .withReportFormat(StringFormat.JSON)
+//                .withPluginConfigurations(
+//                        new ToastConfigurationBuilder()
+//                                .withText(getString(R.string.report_success))
+//                                .build()
+//                )
+//                .withPluginConfigurations(
+//                        new HttpSenderConfigurationBuilder()
+//                                .withUri("https://agro.brisklyminds.com/acrarium/report")
+//                                .withBasicAuthLogin("l5aUpVGgdfFrDlQa")
+//                                .withBasicAuthPassword("vKnvDlpZHoJDECWB")
+//                                .withHttpMethod(HttpSender.Method.POST)
+//                                .withConnectionTimeout(5000)
+//                                .withSocketTimeout(20000)
+//                                .build()
+//                )
+//        );
         super.onCreate();
         registerActivityLifecycleCallbacks(this);
         setupMisc(this);

@@ -492,7 +492,7 @@ public class BsEditYieldFragment extends BottomSheetDialogFragment {
             map.put(YIELD_TAG_TYPE_LAND, landType.getSelectedItemPosition() < 1 ? "" : landType.getSelectedItem().toString());
             map.put(YIELD_TAG_UNDER_TYPE_LAND, underLandType.getSelectedItemPosition() < 1 ? "" : underLandType.getSelectedItem().toString());
             map.put(YIELD_TAG_IRRIGATION_TYPE, irrigationType.getSelectedItemPosition() < 1 ? "" : irrigationType.getSelectedItem().toString());
-            map.put(YIELD_TAG_GARDEN_TYPE, gardenTypeLand.getSelectedItem().toString());
+            map.put(YIELD_TAG_GARDEN_TYPE, Objects.nonNull(gardenTypeLand) && Objects.nonNull(gardenTypeLand.getSelectedItem()) ? gardenTypeLand.getSelectedItem().toString() : "");
             map.put(YIELD_TAG_AGGREGATOR, aggregator.getText().toString());
             if (Objects.equals(main.getUserRole(), ROLE_FARMER)){
                 map.put(YIELD_TAG_FARMER_NAME, main.getPersonName());

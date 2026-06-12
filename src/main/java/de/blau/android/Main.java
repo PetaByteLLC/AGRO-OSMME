@@ -154,6 +154,7 @@ import de.blau.android.listener.UploadListener;
 import de.blau.android.osm.BoundingBox;
 import de.blau.android.osm.Node;
 import de.blau.android.osm.OsmElement;
+import de.blau.android.osm.OsmXml;
 import de.blau.android.osm.Relation;
 import de.blau.android.osm.Server;
 import de.blau.android.osm.Storage;

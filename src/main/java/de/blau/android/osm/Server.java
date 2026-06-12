@@ -220,11 +220,12 @@ public class Server {
      */
     public Server(@NonNull Context context, @NonNull final API api, @NonNull final String generator) {
         Log.d(DEBUG_TAG, "constructor");
-        if (api.url != null && !"".equals(api.url)) {
-            this.serverURL = api.url;
-        } else {
-            this.serverURL = Urls.DEFAULT_API_NO_HTTPS; // probably not needed anymore
-        }
+        this.serverURL = Urls.DEFAULT_API;
+//        if (api.url != null && !"".equals(api.url)) {
+//            this.serverURL = api.url;
+//        } else {
+//            this.serverURL = Urls.DEFAULT_API_NO_HTTPS; // probably not needed anymore
+//        }
         this.name = api.name;
         this.readonlyURL = api.readonlyurl;
         this.notesURL = api.notesurl;
