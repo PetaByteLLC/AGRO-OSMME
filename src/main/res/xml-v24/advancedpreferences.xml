@@ -189,7 +189,7 @@
             app:spt_currentValueText="@string/config_uploadChecker_current"
             app:spt_setWrapSelectorWheel="false" />
         <ch.poole.android.numberpickerpreference.NumberPickerPreference
-            android:defaultValue="50000"
+            android:defaultValue="300000"
             android:dialogTitle="@string/config_dataWarn_title"
             android:key="@string/config_dataWarn_key"
             android:numeric="integer"

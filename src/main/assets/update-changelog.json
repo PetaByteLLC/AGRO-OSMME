@@ -1,6 +1,6 @@
 {
-  "versionCode": 3016,
+  "versionCode": 3017,
   "versionName": "1.3",
   "apkUrl": "https://github.com/PetaByteLLC/AGRO-OSMME/releases/download/v1.3/AGRO-OSMME-current-debug.apk",
-  "changelog": "- Добавлено новое поле\n- Интегрирован ЕСИ"
+  "changelog": "- Добавлен 2027 сезон\n- Исправлено загрузка полигонов из сервера\n- Исправлен скачивание импорта"
 }

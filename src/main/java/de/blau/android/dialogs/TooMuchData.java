@@ -16,6 +16,7 @@ import de.blau.android.R;
 import de.blau.android.osm.ViewBox;
 import de.blau.android.util.ExecutorTask;
 import de.blau.android.util.ImmersiveDialogFragment;
+import de.blau.android.util.ScreenMessage;
 import de.blau.android.util.ThemeUtils;
 
 /**
@@ -94,33 +95,39 @@ public class TooMuchData extends ImmersiveDialogFragment {
         Builder builder = new AlertDialog.Builder(activity);
         builder.setIcon(ThemeUtils.getResIdFromAttribute(activity, R.attr.alert_dialog));
         builder.setTitle(R.string.too_much_data_title);
-        builder.setMessage(getString(R.string.too_much_data_message, nodeCount));
-        if (activity instanceof Main) {
-            builder.setPositiveButton(R.string.upload_data_now, (dialog, which) -> ((Main) activity).confirmUpload(null));
-            Logic logic = App.getLogic();
-            builder.setNegativeButton(R.string.prune_data_now,
-                    (dialog, which) -> new ExecutorTask<Void, Void, Void>(logic.getExecutorService(), logic.getHandler()) {
-                        @Override
-                        protected void onPreExecute() {
-                            Progress.showDialog(activity, Progress.PROGRESS_PRUNING);
-                        }
+        builder.setMessage(getString(R.string.too_much_data_simple_message, nodeCount));
+        Logic logic = App.getLogic();
+        // single action: drop unmodified data outside the screen, then continue the download
+        builder.setPositiveButton(R.string.too_much_data_continue, (dialog, which) -> {
+            if (activity instanceof Main && !((Main) activity).canLoadData()) {
+                // connection dropped while the dialog was open, keep everything on screen
+                ScreenMessage.toastTopWarning(activity, R.string.too_much_data_offline);
+                return;
+            }
+            new ExecutorTask<Void, Void, Void>(logic.getExecutorService(), logic.getHandler()) {
+                    @Override
+                    protected void onPreExecute() {
+                        Progress.showDialog(activity, Progress.PROGRESS_PRUNING);
+                    }
 
-                        @Override
-                        protected Void doInBackground(Void arg) {
-                            ViewBox pruneBox = new ViewBox(App.getLogic().getViewBox());
-                            pruneBox.scale(1.1);
-                            App.getDelegator().prune(pruneBox);
-                            return null;
-                        }
+                    @Override
+                    protected Void doInBackground(Void arg) {
+                        ViewBox pruneBox = new ViewBox(logic.getViewBox());
+                        pruneBox.scale(1.1);
+                        App.getDelegator().prune(pruneBox);
+                        return null;
+                    }
 
-                        @Override
-                        protected void onPostExecute(Void result) {
-                            Progress.dismissDialog(activity, Progress.PROGRESS_PRUNING);
+                    @Override
+                    protected void onPostExecute(Void result) {
+                        Progress.dismissDialog(activity, Progress.PROGRESS_PRUNING);
+                        if (activity instanceof Main && !activity.isFinishing()) {
+                            // call downloadBox directly so we don't show this dialog again in a loop
+                            logic.downloadBox(activity, logic.getViewBox().copy(), true, null);
                         }
-                    }.execute());
-        }
-
-        builder.setNeutralButton(R.string.cancel, null);
+                    }
+                }.execute();
+        });
 
         return builder.create();
     }

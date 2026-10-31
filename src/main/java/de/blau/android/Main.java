@@ -93,7 +93,9 @@ import androidx.core.view.MenuCompat;
 import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.work.Constraints;
 import androidx.work.ExistingPeriodicWorkPolicy;
+import androidx.work.NetworkType;
 import androidx.work.PeriodicWorkRequest;
 import androidx.work.WorkManager;
 
@@ -121,7 +123,6 @@ import de.blau.android.dialogs.Review;
 import de.blau.android.dialogs.ReviewAndUpload;
 import de.blau.android.dialogs.SearchForm;
 import de.blau.android.dialogs.Tip;
-import de.blau.android.dialogs.TooMuchData;
 import de.blau.android.dialogs.UndoDialog;
 import de.blau.android.dialogs.bookmarks.BookmarkEdit;
 import de.blau.android.dialogs.bookmarks.BookmarksDialog;
@@ -644,7 +645,7 @@ public class Main extends FullScreenAppCompatActivity
             finish();
         }
 
-        for (int i = 2000; i <= Calendar.getInstance().get(Calendar.YEAR); i++) {
+        for (int i = 2000; i <= Calendar.getInstance().get(Calendar.YEAR) + 1; i++) {
             YEARS.add(String.valueOf(i));
         }
 
@@ -671,15 +672,12 @@ public class Main extends FullScreenAppCompatActivity
         AppUpdater appUpdater = new AppUpdater(this);
         appUpdater.checkForUpdate();
 
-        PeriodicWorkRequest hourlyWorkRequest =
-                new PeriodicWorkRequest.Builder(HourlyWorker.class, 15, TimeUnit.MINUTES)
-                        .build();
-
-        WorkManager.getInstance(this).enqueueUniquePeriodicWork(
-                "HourlyTask",
-                ExistingPeriodicWorkPolicy.KEEP,
-                hourlyWorkRequest
-        );
+        // upload changes and keep data below the limit every 15 minutes, only when online
+        Constraints onlineOnly = new Constraints.Builder().setRequiredNetworkType(NetworkType.CONNECTED).build();
+        PeriodicWorkRequest hourlyWorkRequest = new PeriodicWorkRequest.Builder(HourlyWorker.class, 15, TimeUnit.MINUTES)
+                .setConstraints(onlineOnly).build();
+        // UPDATE so already installed apps get the new constraint
+        WorkManager.getInstance(this).enqueueUniquePeriodicWork("HourlyTask", ExistingPeriodicWorkPolicy.UPDATE, hourlyWorkRequest);
     }
 
     public static final List<String> YEARS = new ArrayList<>();
@@ -1927,12 +1925,8 @@ public class Main extends FullScreenAppCompatActivity
 
     private boolean downloadLink(String link, String output) {
         if (isConnected()) {
-            DownloadManager.Request request = new DownloadManager.Request(Uri.parse(link));
-            request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
-            request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, output);
-
-            DownloadManager downloadManager = (DownloadManager) getSystemService(Context.DOWNLOAD_SERVICE);
-            downloadManager.enqueue(request);
+            // not DownloadManager: its ~20 s read timeout is too short for exports the server builds for minutes
+            ExportDownloader.download(this, link, output);
         } else {
             ScreenMessage.toastTopInfo(Main.this, "Нету подключения к интернету");
         }
@@ -2010,7 +2004,7 @@ public class Main extends FullScreenAppCompatActivity
         String username = prefs.getAgroUsername();
         MenuItem exportMyGjPolygonItem = menu.findItem(R.id.exportMyGjPolygon);
         exportMyGjPolygonItem.setOnMenuItemClickListener((m) -> downloadLink(EXPORT_MY_GEOJSON_URL + "&userCode=" + username, "exported.geojson"));
-        MenuItem exportMyShPolygonItem = menu.findItem(R.id.exportMyGjPolygon);
+        MenuItem exportMyShPolygonItem = menu.findItem(R.id.exportMyShPolygon);
         exportMyShPolygonItem.setOnMenuItemClickListener((m) -> downloadLink(EXPORT_MY_ZIP_URL + "&userCode=" + username, "exported.gpkg"));
         MenuItem exportMyExcelPolygon = menu.findItem(R.id.exportMyExcelPolygon);
         exportMyExcelPolygon.setOnMenuItemClickListener((m) -> downloadLink(EXPORT_MY_EXCEL_URL + "&userCode=" + username, "exported.xlsx"));
@@ -3408,10 +3402,50 @@ public class Main extends FullScreenAppCompatActivity
         }
         int nodeCount = App.getDelegator().getCurrentStorage().getNodeCount();
         if (add && nodeCount >= prefs.getDataWarnLimit()) {
-            TooMuchData.showDialog(this, nodeCount);
+            if (!canLoadData()) {
+                // don't free memory offline, hidden areas couldn't be loaded again
+                ScreenMessage.toastTopWarning(this, R.string.too_much_data_offline);
+                return;
+            }
+            freeMemoryAndDownload();
             return;
         }
         App.getLogic().downloadBox(this, map.getViewBox().copy(), add, null);
+    }
+
+    /**
+     * Silently hide unchanged data outside the screen, then continue downloading
+     *
+     * Modified and selected elements are always kept, hidden areas can be loaded again
+     */
+    private void freeMemoryAndDownload() {
+        final Logic logic = App.getLogic();
+        new ExecutorTask<Void, Void, Void>(logic.getExecutorService(), logic.getHandler()) {
+            @Override
+            protected Void doInBackground(Void arg) {
+                ViewBox pruneBox = new ViewBox(logic.getViewBox());
+                pruneBox.scale(1.1);
+                App.getDelegator().prune(pruneBox);
+                return null;
+            }
+
+            @Override
+            protected void onPostExecute(Void result) {
+                if (!isFinishing()) {
+                    // call downloadBox directly so a still large node count can't loop back here
+                    logic.downloadBox(Main.this, map.getViewBox().copy(), true, null);
+                }
+            }
+        }.execute();
+    }
+
+    /**
+     * Check if OSM data can be loaded right now
+     *
+     * @return true if we are online or have an offline data source
+     */
+    public boolean canLoadData() {
+        return isConnected() || prefs.getServer().hasMapSplitSource();
     }
 
     /**

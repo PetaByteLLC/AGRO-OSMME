@@ -110,7 +110,7 @@
   <string name="progress_oauth">Загружаю вашу учётную запись на openstreetmap.org для авторизации через OAuth...</string>
   <string name="progress_building_imagery_database">Подготовка базы снимков...</string>
   <string name="progress_query_oam">Выполняется запрос к OAM...</string>
-  <string name="progress_pruning">Очистка...</string>
+  <string name="progress_pruning">Освобождаем память…</string>
   <string name="progress_migration">Перемещение...</string>
   <!--Confirm upload dialog-->
   <string name="changes_deleted">\"%1$s\" удалено</string>
@@ -263,10 +263,13 @@
   <string name="file_size">Размер</string>
   <string name="file_size_kB">%1$d КБ</string>
   <!--Too much data dialog-->
-  <string name="too_much_data_title">Загруженно слишком много данных!</string>
+  <string name="too_much_data_title">Освобождаем память</string>
   <string name="too_much_data_message">Вы загрузили %1$d точек и превысили лимит, указанный в настройках. Это приведет к замедлению работы и, возможно, к проблемам при сохранениии данных.</string>
   <string name="upload_data_now">Передача изменений</string>
   <string name="prune_data_now">Очистить данные</string>
+  <string name="too_much_data_simple_message">На карте открыто много участков (%1$d точек), телефону становится тяжело. Приложение уберёт с экрана загруженные участки, которые сейчас не видны, — их можно загрузить снова в любой момент.\n\nВсё, что вы нарисовали и изменили, останется на месте.</string>
+  <string name="too_much_data_continue">Продолжить</string>
+  <string name="too_much_data_offline">Нет интернета — новые участки можно будет загрузить, когда появится связь.</string>
   <!--Delete custom preset dialog-->
   <string name="delete_custom_preset_title">Удалить свою заготовку?</string>
   <!--Duplicate route segment dialog-->

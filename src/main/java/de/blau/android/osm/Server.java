@@ -522,7 +522,7 @@ public class Server {
         assert context != null;
         String username = App.getPreferences(context).getAgroUsername();
         if (username == null) throw new NullPointerException("Not logged in system!");
-        URL url = new URL(AgroConstants.URL + "/ws/public/api/map?bbox=" + box.toApiString() + "&username=" + username + "&logintype=AGROMAP");
+        URL url = new URL(AgroConstants.URL + "/ws/public/api/agromap/map?bbox=" + box.toApiString() + "&username=" + username + "&logintype=AGROMAP");
         return openConnection(context, url, timeout, timeout);
     }
 

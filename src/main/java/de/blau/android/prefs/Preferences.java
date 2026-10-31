@@ -141,6 +141,9 @@ public class Preferences {
     private final int         uploadWarnLimit;
     private final int         uploadCheckerInterval;
     private final int         dataWarnLimit;
+
+    private static final int    DEFAULT_DATA_WARN_LIMIT = 300000;
+    private static final String DATA_WARN_MIGRATED_KEY  = "dataWarnLimitMigrated";
     private boolean           useBarometricHeight;
     private final boolean     useUrlForFeedback;
     private final int         beepVolume;
@@ -335,7 +338,7 @@ public class Preferences {
 
         uploadCheckerInterval = getIntPref(R.string.config_uploadChecker_key, 6);
 
-        dataWarnLimit = getIntPref(R.string.config_dataWarn_key, 50000);
+        dataWarnLimit = migrateDataWarnLimit();
 
         useBarometricHeight = prefs.getBoolean(r.getString(R.string.config_useBarometricHeight_key), false);
 
@@ -2136,6 +2139,24 @@ public class Preferences {
      * @param def default value
      * @return the stored preference or the default if none found
      */
+    /**
+     * Get the "too much data" node limit, raising an old lower stored value to the new default once
+     *
+     * @return the node limit
+     */
+    private int migrateDataWarnLimit() {
+        int limit = getIntPref(R.string.config_dataWarn_key, DEFAULT_DATA_WARN_LIMIT);
+        if (!prefs.getBoolean(DATA_WARN_MIGRATED_KEY, false)) {
+            SharedPreferences.Editor editor = prefs.edit();
+            if (limit < DEFAULT_DATA_WARN_LIMIT) {
+                limit = DEFAULT_DATA_WARN_LIMIT;
+                editor.putInt(r.getString(R.string.config_dataWarn_key), limit);
+            }
+            editor.putBoolean(DATA_WARN_MIGRATED_KEY, true).apply();
+        }
+        return limit;
+    }
+
     int getIntPref(int keyResId, int def) {
         String key = r.getString(keyResId);
         try {
@@ -2256,7 +2277,7 @@ public class Preferences {
     }
 
     public String getSelectedSeason() {
-        return prefs.getString(KEY_SEASON, YEARS.get(YEARS.size() - 1));
+        return prefs.getString(KEY_SEASON, YEARS.get(YEARS.size() - 2));
     }
 
     public void selectSeason(String selectedSeason) {
